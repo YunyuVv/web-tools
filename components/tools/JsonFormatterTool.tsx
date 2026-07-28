@@ -325,22 +325,7 @@ export function JsonFormatterTool({
         </div>
       )}
 
-      {/* 外部接管工具栏时仍需显示统计信息 */}
-      {hideToolbar && parsedValue && (
-        <div className="mb-3 flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <Layers className="h-3 w-3" />
-            <span className="font-mono">{stats.nodes}</span>
-            <span>节点</span>
-          </span>
-          <span className="text-border">·</span>
-          <span className="font-mono">{stats.depth}</span>
-          <span className="-ml-3">层</span>
-          <span className="text-border">·</span>
-          <span className="font-mono">{stats.size}</span>
-          <span className="-ml-3">字符</span>
-        </div>
-      )}
+      {/* 外部接管工具栏时统计信息移入 shell 内部，此处不再显示 */}
 
       {/* ── 工作区 ── */}
       <div className={noShell ? 'relative' : 'json-formatter-shell json-tool-shell relative overflow-hidden rounded-[14px]'}>
@@ -358,6 +343,22 @@ export function JsonFormatterTool({
         >
           {/* 左侧输入面板（带实时高亮叠加）*/}
           <div className="json-tool-pane flex flex-col min-w-0 min-h-[560px] overflow-hidden">
+            {/* 统计信息内嵌在 pane 顶部 */}
+            {parsedValue && (
+              <div className="flex items-center gap-3 border-b border-border/20 px-5 py-2 text-xs text-muted-foreground/70">
+                <span className="inline-flex items-center gap-1">
+                  <Layers className="h-3 w-3" />
+                  <span className="font-mono">{stats.nodes}</span>
+                  <span>节点</span>
+                </span>
+                <span className="text-border/50">·</span>
+                <span className="font-mono">{stats.depth}</span>
+                <span>层</span>
+                <span className="text-border/50">·</span>
+                <span className="font-mono">{stats.size}</span>
+                <span>字符</span>
+              </div>
+            )}
             <div className="relative flex-1 min-h-[520px]">
               {/* 高亮层 (pre) - 绝对定位在后，不可交互 */}
               <pre
