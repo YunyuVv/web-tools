@@ -336,12 +336,12 @@
 .json-token-null   { color: #8a68bc; }
 .json-token-symbol { color: #64748b; }
 
-.dark .json-token-key    { color: #d9a4af; }
-.dark .json-token-string { color: #a7d3b2; }
-.dark .json-token-number { color: #8cc9cf; }
-.dark .json-token-bool   { color: #b9aedb; }
-.dark .json-token-null   { color: #c9b0dd; }
-.dark .json-token-symbol { color: #aeb8c6; }
+.dark .json-token-key    { color: #a5b4fc; }
+.dark .json-token-string { color: #6ee7b7; }
+.dark .json-token-number { color: #7dd3fc; }
+.dark .json-token-bool   { color: #c4b5fd; }
+.dark .json-token-null   { color: #94a3b8; }
+.dark .json-token-symbol { color: #64748b; }
 
 /* JSON 工具栏按钮 */
 .json-toolbar-btn {
@@ -369,21 +369,32 @@
   backdrop-filter: blur(4px);
 }
 .dark .json-tool-shell {
-  border-color: rgb(99 102 241 / 0.22);
-  background: linear-gradient(160deg, rgba(17,24,39,0.97) 0%, rgba(7,9,22,0.99) 100%);
+  border-color: rgb(99 102 241 / 0.35);
+  background: linear-gradient(160deg, rgba(15,22,44,0.98) 0%, rgba(8,12,28,1) 100%);
   box-shadow:
-    0 0 0 1px rgba(99,102,241,0.07) inset,
-    0 0 60px -10px rgba(99,102,241,0.22),
-    0 28px 72px -20px rgba(0,0,0,0.88);
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 1px 0 rgba(99,102,241,0.15) inset,
+    0 0 70px -8px rgba(99,102,241,0.30),
+    0 28px 72px -20px rgba(0,0,0,0.90);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
+}
+
+/* Workbench 内嵌工具栏 header 栏 */
+.json-tool-header {
+  background: linear-gradient(180deg, rgba(248,250,252,0.96), rgba(241,245,249,0.88));
+  border-bottom: 1px solid rgb(165 180 252 / 0.25);
+}
+.dark .json-tool-header {
+  background: linear-gradient(180deg, rgba(22,32,60,0.98), rgba(16,24,48,0.94));
+  border-bottom: 1px solid rgb(99 102 241 / 0.22);
 }
 
 .json-tool-pane {
   background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(248,250,252,0.96));
 }
 .dark .json-tool-pane {
-  background: linear-gradient(180deg, rgba(17,24,39,0.42), rgba(7,9,22,0.28));
+  background: linear-gradient(180deg, rgba(14,20,40,0.50), rgba(8,12,26,0.36));
 }
 
 .json-tool-divider {
@@ -397,7 +408,7 @@
   background: radial-gradient(ellipse 85% 50% at 50% 0%, rgba(99,102,241,0.09), rgba(56,189,248,0.05) 42%, transparent 68%);
 }
 .dark .json-tool-glow {
-  background: radial-gradient(ellipse 95% 60% at 50% 0%, rgba(99,102,241,0.22), rgba(56,189,248,0.10) 42%, transparent 70%);
+  background: radial-gradient(ellipse 100% 65% at 50% 0%, rgba(99,102,241,0.32), rgba(56,189,248,0.12) 45%, transparent 72%);
 }
 
 /* Inspector 格式化行视图背景 */

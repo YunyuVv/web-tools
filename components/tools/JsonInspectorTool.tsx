@@ -35,6 +35,8 @@ interface Props {
   onSearchTextChange?: (s: string) => void
   /** 是否隐藏内部工具栏（外部页面级工具栏接管时使用） */
   hideToolbar?: boolean
+  /** 由父级提供外壳时设为 true，跳过自身的 json-tool-shell 包裹层 */
+  noShell?: boolean
   /** 外部调用：清空内容 */
   onClearRef?: React.MutableRefObject<(() => void) | null>
 }
@@ -74,6 +76,7 @@ export function JsonInspectorTool({
   searchText: searchTextProp = '',
   onSearchTextChange,
   hideToolbar = false,
+  noShell = false,
   onClearRef,
 }: Props) {
   // ── 内部状态 ──
@@ -389,9 +392,11 @@ export function JsonInspectorTool({
       )}
 
       {/* ── 主工作区 ── */}
-      <div className="json-inspector-shell json-tool-shell relative overflow-hidden rounded-[30px]">
-        {/* 顶部光晕 */}
-        <div className="json-tool-glow pointer-events-none absolute inset-x-0 top-0 h-16 opacity-70" />
+      <div className={noShell ? 'relative' : 'json-inspector-shell json-tool-shell relative overflow-hidden rounded-[14px]'}>
+        {/* 顶部光晕（仅自身提供外壳时渲染）*/}
+        {!noShell && (
+          <div className="json-tool-glow pointer-events-none absolute inset-x-0 top-0 h-16 opacity-70" />
+        )}
 
         <div className="relative grid gap-0 lg:grid-cols-[minmax(0,1.08fr)_1px_minmax(320px,0.92fr)]">
           {/* ── 左侧结构区 ── */}

@@ -90,6 +90,8 @@ interface Props {
   hideToolbar?: boolean
   /** 父组件通过此 ref 调用内部方法 */
   actionRef?: React.MutableRefObject<FormatterActionRef | null>
+  /** 由父级提供外壳时设为 true，跳过自身的 json-tool-shell 包裹层 */
+  noShell?: boolean
 }
 
 /**
@@ -103,6 +105,7 @@ export function JsonFormatterTool({
   onLayoutModeChange,
   hideToolbar = false,
   actionRef,
+  noShell = false,
 }: Props) {
   // ── 核心状态 ──
   const [text, setText]           = useState(sharedValue ?? '')
@@ -340,10 +343,11 @@ export function JsonFormatterTool({
       )}
 
       {/* ── 工作区 ── */}
-      <div className="json-formatter-shell json-tool-shell relative overflow-hidden rounded-[30px]">
-        {/* 顶部光晕 */}
-        <div className="json-tool-glow pointer-events-none absolute inset-x-0 top-0 h-16 opacity-70" />
-
+      <div className={noShell ? 'relative' : 'json-formatter-shell json-tool-shell relative overflow-hidden rounded-[14px]'}>
+        {/* 顶部光晕（仅自身提供外壳时渲染）*/}
+        {!noShell && (
+          <div className="json-tool-glow pointer-events-none absolute inset-x-0 top-0 h-16 opacity-70" />
+        )}
         {/* 布局网格 */}
         <div
           className={`relative grid items-stretch ${
@@ -368,7 +372,7 @@ export function JsonFormatterTool({
                 value={text}
                 onChange={e => updateText(e.target.value)}
                 onScroll={syncScroll}
-                className="json-editor-textarea relative z-10 h-full min-h-[520px] w-full resize-none overflow-auto border-0 bg-transparent px-5 py-4 font-mono text-sm leading-[1.85] focus:outline-none caret-slate-800 dark:caret-slate-100 placeholder:text-slate-400/90 dark:placeholder:text-slate-500/80"
+                className="json-editor-textarea relative z-10 h-full min-h-[520px] w-full resize-none overflow-auto border-0 bg-transparent px-5 py-4 font-mono text-sm leading-[1.85] focus:outline-none caret-slate-800 dark:caret-slate-100 placeholder:text-slate-400/90 dark:placeholder:text-slate-500"
                 placeholder='在此粘贴或输入 JSON，例如 {"name":"devtoolbox"}'
                 spellCheck={false}
               />
