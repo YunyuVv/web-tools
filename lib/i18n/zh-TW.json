@@ -1,0 +1,62 @@
+{
+  "common": {
+    "copy": "複製",
+    "copied": "已複製！",
+    "clear": "清除",
+    "download": "下載",
+    "paste": "貼上",
+    "format": "格式化",
+    "validate": "驗證",
+    "minify": "壓縮",
+    "input": "輸入",
+    "output": "輸出",
+    "error": "錯誤",
+    "valid": "合法",
+    "invalid": "非法",
+    "search_tools": "搜尋工具...",
+    "all_tools": "全部工具",
+    "categories": "分類"
+  },
+  "nav": {
+    "home": "首頁",
+    "tools": "工具",
+    "about": "關於"
+  },
+  "home": {
+    "title": "開發者工具箱",
+    "subtitle": "快速、免費的線上開發工具，無需安裝。",
+    "search_placeholder": "搜尋 50+ 個工具..."
+  },
+  "tools": {
+    "json-formatter": {
+      "title": "JSON 格式化",
+      "description": "線上格式化、驗證和壓縮 JSON",
+      "seo_description": "免費線上 JSON 格式化工具，支援語法高亮、錯誤檢測、格式化和壓縮。",
+      "input_placeholder": "在此貼上 JSON...",
+      "indent_label": "縮排"
+    },
+    "json-to-csv": { "title": "JSON 轉 CSV", "description": "將 JSON 陣列轉換為 CSV 格式" },
+    "base64": { "title": "Base64 編解碼", "description": "Base64 字串編碼與解碼" },
+    "url-encode": { "title": "URL 編解碼", "description": "URL 元件編碼與解碼" },
+    "html-entities": { "title": "HTML 實體轉換", "description": "HTML 實體編碼與解碼" },
+    "hash-generator": { "title": "雜湊生成器", "description": "生成 MD5、SHA1、SHA256 雜湊值" },
+    "uuid-generator": { "title": "UUID 生成器", "description": "生成隨機 UUID v4 識別碼" },
+    "password-generator": { "title": "密碼生成器", "description": "生成高強度隨機密碼" },
+    "regex-tester": { "title": "正規表達式測試", "description": "即時測試正規表達式" },
+    "timestamp": { "title": "時間戳轉換", "description": "Unix 時間戳與日期互轉" },
+    "cron-parser": { "title": "Cron 解析器", "description": "解析並視覺化 Cron 表達式" },
+    "css-gradient": { "title": "CSS 漸層", "description": "視覺化建立 CSS 漸層樣式" },
+    "box-shadow": { "title": "Box Shadow", "description": "視覺化 CSS 陰影建立工具" },
+    "color-converter": { "title": "色彩轉換", "description": "HEX、RGB、HSL、OKLCH 互轉" },
+    "contrast-checker": { "title": "對比度檢測", "description": "檢查 WCAG 色彩對比度" },
+    "lorem-ipsum": { "title": "Lorem Ipsum", "description": "生成佔位文字" },
+    "word-counter": { "title": "字數統計", "description": "統計單字、字元和句子數" },
+    "markdown-preview": { "title": "Markdown 預覽", "description": "即時撰寫與預覽 Markdown" },
+    "ip-lookup": { "title": "IP 查詢", "description": "查詢 IP 地理位置資訊" },
+    "user-agent": { "title": "User Agent 解析", "description": "解析瀏覽器 User Agent 字串" }
+  },
+  "footer": {
+    "tagline": "免費線上開發者工具",
+    "rights": "保留所有權利"
+  }
+}

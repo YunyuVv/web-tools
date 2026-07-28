@@ -1,0 +1,62 @@
+{
+  "common": {
+    "copy": "Copy",
+    "copied": "Copied!",
+    "clear": "Clear",
+    "download": "Download",
+    "paste": "Paste",
+    "format": "Format",
+    "validate": "Validate",
+    "minify": "Minify",
+    "input": "Input",
+    "output": "Output",
+    "error": "Error",
+    "valid": "Valid",
+    "invalid": "Invalid",
+    "search_tools": "Search tools...",
+    "all_tools": "All Tools",
+    "categories": "Categories"
+  },
+  "nav": {
+    "home": "Home",
+    "tools": "Tools",
+    "about": "About"
+  },
+  "home": {
+    "title": "Developer Tools",
+    "subtitle": "Fast, free, and online developer utilities. No installation required.",
+    "search_placeholder": "Search 50+ tools..."
+  },
+  "tools": {
+    "json-formatter": {
+      "title": "JSON Formatter",
+      "description": "Format, validate and minify JSON online",
+      "seo_description": "Free online JSON formatter and validator. Format, beautify, validate and minify JSON with syntax highlighting and error detection.",
+      "input_placeholder": "Paste your JSON here...",
+      "indent_label": "Indent"
+    },
+    "json-to-csv": { "title": "JSON to CSV", "description": "Convert JSON arrays to CSV format" },
+    "base64": { "title": "Base64 Encode / Decode", "description": "Encode or decode Base64 strings" },
+    "url-encode": { "title": "URL Encode / Decode", "description": "Encode and decode URL components" },
+    "html-entities": { "title": "HTML Entities", "description": "Encode and decode HTML entities" },
+    "hash-generator": { "title": "Hash Generator", "description": "Generate MD5, SHA1, SHA256 hashes" },
+    "uuid-generator": { "title": "UUID Generator", "description": "Generate random UUID v4 identifiers" },
+    "password-generator": { "title": "Password Generator", "description": "Generate strong random passwords" },
+    "regex-tester": { "title": "Regex Tester", "description": "Test regular expressions with live results" },
+    "timestamp": { "title": "Timestamp Converter", "description": "Convert Unix timestamps to dates" },
+    "cron-parser": { "title": "Cron Parser", "description": "Parse and visualize cron expressions" },
+    "css-gradient": { "title": "CSS Gradient", "description": "Build and preview CSS gradient rules" },
+    "box-shadow": { "title": "Box Shadow", "description": "Visual CSS box-shadow builder" },
+    "color-converter": { "title": "Color Converter", "description": "Convert between HEX, RGB, HSL, OKLCH" },
+    "contrast-checker": { "title": "Contrast Checker", "description": "Check WCAG color contrast ratios" },
+    "lorem-ipsum": { "title": "Lorem Ipsum", "description": "Generate placeholder lorem ipsum text" },
+    "word-counter": { "title": "Word Counter", "description": "Count words, characters and sentences" },
+    "markdown-preview": { "title": "Markdown Preview", "description": "Write and preview Markdown in real time" },
+    "ip-lookup": { "title": "IP Lookup", "description": "Look up IP address geolocation info" },
+    "user-agent": { "title": "User Agent Parser", "description": "Parse browser user agent strings" }
+  },
+  "footer": {
+    "tagline": "Free online developer tools",
+    "rights": "All rights reserved"
+  }
+}

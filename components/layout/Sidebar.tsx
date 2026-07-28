@@ -1,0 +1,301 @@
+'use client'
+
+/**
+ * 这个组件的作用：渲染 macOS 风格的浮动侧边栏，包含工具导航菜单、主题切换和展开/收起动画。
+ * 移植自参考项目 ideaflow-web-tool/app/components/Tools/Sidebar.vue。
+ */
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useTheme } from 'next-themes'
+import { ChevronRight, ChevronLeft, Menu, Sun, Moon, Monitor, ChevronDown } from 'lucide-react'
+import { useSidebar } from './SidebarContext'
+import { CategoryIcon } from '@/components/home/CategoryIcon'
+import { CATEGORY_CONFIG, TOOLS, getAllToolsByCategory, type ToolCategory } from '@/lib/tools-registry'
+
+/** 工具 slug 到英文显示名称的映射 */
+const TOOL_DISPLAY_NAMES: Record<string, string> = {
+  'json-formatter': 'JSON Formatter',
+  'json-to-csv': 'JSON to CSV',
+  'base64': 'Base64',
+  'url-encode': 'URL Encode / Decode',
+  'html-entities': 'HTML Entities',
+  'hash-generator': 'Hash Generator',
+  'uuid-generator': 'UUID Generator',
+  'password-generator': 'Password Generator',
+  'regex-tester': 'Regex Tester',
+  'timestamp': 'Timestamp Converter',
+  'cron-parser': 'Cron Parser',
+  'css-gradient': 'CSS Gradient',
+  'box-shadow': 'Box Shadow',
+  'color-converter': 'Color Converter',
+  'contrast-checker': 'Contrast Checker',
+  'lorem-ipsum': 'Lorem Ipsum',
+  'word-counter': 'Word Counter',
+  'markdown-preview': 'Markdown Preview',
+  'ip-lookup': 'IP Lookup',
+  'user-agent': 'User Agent Parser',
+}
+
+/**
+ * 这个函数的作用：根据当前 URL 路径推断语言前缀，用于拼接工具页 URL。
+ */
+function getBasePath(pathname: string): string {
+  if (pathname.startsWith('/zh-CN')) return '/zh-CN'
+  if (pathname.startsWith('/zh-TW')) return '/zh-TW'
+  return ''
+}
+
+/**
+ * 这个函数的作用：根据当前路径和 basePath 推断激活的工具分类 key。
+ */
+function getActiveCategoryFromPath(pathname: string, basePath: string): ToolCategory | null {
+  const toolsPath = `${basePath}/tools/`
+  if (!pathname.startsWith(toolsPath)) return null
+  const slug = pathname.slice(toolsPath.length).replace(/\/$/, '')
+  const tool = TOOLS.find(t => t.slug === slug)
+  return tool?.category ?? null
+}
+
+// ─── 子组件：单个工具条目 ────────────────────────────────────────────
+
+interface NavItemProps {
+  title: string
+  href?: string
+  isActive: boolean
+}
+
+/**
+ * 这个组件的作用：渲染侧边栏中单个工具的导航条目，区分已上线（可点击）和开发中（不可点击）两种状态。
+ */
+function NavItem({ title, href, isActive }: NavItemProps) {
+  if (!href) {
+    return (
+      <div className="flex h-7 items-center gap-2 rounded-lg px-2.5 text-[13px] text-muted-foreground/40 cursor-default select-none">
+        <span className="truncate">{title}</span>
+        <span className="ml-auto text-[10px] font-medium tracking-wide opacity-60">SOON</span>
+      </div>
+    )
+  }
+
+  return (
+    <Link
+      href={href}
+      className={[
+        'flex h-7 items-center gap-2 rounded-lg px-2.5 text-[13px] transition-colors duration-150',
+        isActive
+          ? 'bg-primary/10 text-primary font-semibold'
+          : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+      ].join(' ')}
+    >
+      <span className="truncate">{title}</span>
+    </Link>
+  )
+}
+
+// ─── 子组件：分类分组 ───────────────────────────────────────────────
+
+interface NavGroupProps {
+  category: ToolCategory
+  defaultExpanded?: boolean
+  activeToolSlug?: string
+  basePath: string
+}
+
+/**
+ * 这个组件的作用：渲染侧边栏中一个工具分类的可折叠导航组，包含分类图标、标签和子工具列表。
+ */
+function NavGroup({ category, defaultExpanded = false, activeToolSlug, basePath }: NavGroupProps) {
+  const config = CATEGORY_CONFIG[category]
+  const allByCategory = getAllToolsByCategory()
+  const tools = allByCategory.get(category) ?? []
+  const [expanded, setExpanded] = useState(defaultExpanded)
+
+  return (
+    <div className="select-none">
+      {/* 分类标题行 */}
+      <button
+        onClick={() => setExpanded(prev => !prev)}
+        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[13px] font-medium transition-colors hover:bg-muted/40 cursor-pointer"
+      >
+        <CategoryIcon
+          name={config.icon}
+          className={`h-3.5 w-3.5 shrink-0 transition-colors ${expanded ? config.textClass : 'text-muted-foreground'}`}
+        />
+        <span className={`transition-colors ${expanded ? 'text-foreground' : 'text-muted-foreground'}`}>
+          {config.label}
+        </span>
+        <ChevronRight
+          className={`ml-auto h-3 w-3 text-muted-foreground/50 transition-transform duration-200 ${expanded ? 'rotate-90' : 'rotate-0'}`}
+        />
+      </button>
+
+      {/* 工具列表 */}
+      {expanded && (
+        <div className="mt-0.5 ml-2 pl-2 border-l border-border/50 space-y-0.5">
+          {tools.map(tool => {
+            const href = tool.enabled ? `${basePath}/tools/${tool.slug}/` : undefined
+            return (
+              <NavItem
+                key={tool.slug}
+                title={TOOL_DISPLAY_NAMES[tool.slug] ?? tool.slug}
+                href={href}
+                isActive={tool.slug === activeToolSlug}
+              />
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── 子组件：主题切换 ───────────────────────────────────────────────
+
+/**
+ * 这个组件的作用：在侧边栏底部渲染亮色/暗色/跟随系统三态主题切换按钮组。
+ */
+function ThemeSwitch() {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
+  if (!mounted) return null
+
+  const options = [
+    { key: 'light', icon: Sun,     label: 'Light'  },
+    { key: 'system', icon: Monitor, label: 'System' },
+    { key: 'dark',  icon: Moon,    label: 'Dark'   },
+  ]
+
+  return (
+    <div className="flex items-center gap-1 rounded-lg bg-muted/50 p-0.5">
+      {options.map(({ key, icon: Icon, label }) => (
+        <button
+          key={key}
+          title={label}
+          onClick={() => setTheme(key)}
+          className={[
+            'flex h-6 w-6 items-center justify-center rounded-md transition-all duration-150 cursor-pointer',
+            theme === key
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground',
+          ].join(' ')}
+          aria-label={label}
+        >
+          <Icon className="h-3 w-3" />
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// ─── 主组件 ─────────────────────────────────────────────────────────
+
+/**
+ * 这个组件的作用：浮动侧边栏主体，包含品牌标题、工具导航菜单和主题切换，支持展开/收起过渡动画和移动端遮罩。
+ */
+export function Sidebar() {
+  const { isCollapsed, toggle, collapse } = useSidebar()
+  const pathname = usePathname()
+  const basePath = getBasePath(pathname)
+  const activeCategory = getActiveCategoryFromPath(pathname, basePath)
+  const activeSlug = (() => {
+    const toolsPath = `${basePath}/tools/`
+    if (pathname.startsWith(toolsPath)) {
+      return pathname.slice(toolsPath.length).replace(/\/$/, '')
+    }
+    return ''
+  })()
+
+  const categories = Object.keys(CATEGORY_CONFIG) as ToolCategory[]
+
+  return (
+    <>
+      {/* 移动端遮罩层 */}
+      <div
+        className={[
+          'fixed inset-0 z-40 bg-black/8 backdrop-blur-[1px] lg:hidden',
+          'transition-opacity duration-200 ease-out',
+          isCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
+        ].join(' ')}
+        onClick={toggle}
+        aria-hidden
+      />
+
+      {/* 侧边栏主体 */}
+      <aside
+        className={[
+          'sidebar-shell',
+          'fixed left-3 top-3 bottom-3 z-50',
+          'w-[calc(82%-0.75rem)] max-w-[304px] lg:w-[268px]',
+          'rounded-[26px]',
+          'bg-background/80 backdrop-blur-2xl supports-[backdrop-filter]:bg-background/62',
+          isCollapsed ? 'sidebar-shell--collapsed' : 'sidebar-shell--expanded',
+        ].join(' ')}
+        aria-label="工具导航"
+      >
+        {/* 顶部标题区 */}
+        <div className="flex h-14 items-center justify-between px-4">
+          <Link href={`${basePath}/`} className="inline-flex items-center gap-3 text-foreground">
+            {/* macOS 红绿灯 */}
+            <span className="flex items-center gap-[7px]" aria-hidden>
+              <span className="w-3 h-3 rounded-full bg-[#ff5f57] block" />
+              <span className="w-3 h-3 rounded-full bg-[#febc2e] block" />
+              <span className="w-3 h-3 rounded-full bg-[#28c840] block" />
+            </span>
+            <span className="text-sm font-semibold tracking-wide text-foreground/90">
+              DevToolBox
+            </span>
+          </Link>
+          <button
+            onClick={toggle}
+            className="grid h-8 w-8 cursor-pointer place-items-center rounded-lg text-muted-foreground/75 transition-colors hover:bg-muted/60 hover:text-foreground"
+            aria-label="收起侧边栏"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* 导航内容区 */}
+        <nav
+          className="sidebar-scroll-area h-[calc(100%-6.5rem)] overflow-y-auto px-3 pb-3 pt-1 space-y-0.5"
+          aria-label="工具列表"
+        >
+          {categories.map(category => (
+            <NavGroup
+              key={category}
+              category={category}
+              defaultExpanded={category === activeCategory}
+              activeToolSlug={activeSlug}
+              basePath={basePath}
+            />
+          ))}
+        </nav>
+
+        {/* 底部主题切换区 */}
+        <div className="flex h-12 items-center justify-end px-3">
+          <ThemeSwitch />
+        </div>
+      </aside>
+
+      {/* 收起状态下的展开按钮 */}
+      <button
+        onClick={toggle}
+        className={[
+          'fixed left-4 top-4 z-50',
+          'grid h-10 w-10 place-items-center rounded-xl',
+          'border border-border/80 bg-background/92 text-foreground',
+          'shadow-[0_8px_18px_oklch(0.56_0.21_262_/_0.08)]',
+          'backdrop-blur-md transition-all duration-200 ease-out',
+          'hover:bg-muted cursor-pointer',
+          isCollapsed ? 'opacity-100 scale-100' : 'pointer-events-none opacity-0 scale-95',
+        ].join(' ')}
+        aria-label="展开侧边栏"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+    </>
+  )
+}

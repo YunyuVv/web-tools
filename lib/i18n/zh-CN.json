@@ -1,0 +1,62 @@
+{
+  "common": {
+    "copy": "复制",
+    "copied": "已复制！",
+    "clear": "清空",
+    "download": "下载",
+    "paste": "粘贴",
+    "format": "格式化",
+    "validate": "验证",
+    "minify": "压缩",
+    "input": "输入",
+    "output": "输出",
+    "error": "错误",
+    "valid": "合法",
+    "invalid": "非法",
+    "search_tools": "搜索工具...",
+    "all_tools": "全部工具",
+    "categories": "分类"
+  },
+  "nav": {
+    "home": "首页",
+    "tools": "工具",
+    "about": "关于"
+  },
+  "home": {
+    "title": "开发者工具箱",
+    "subtitle": "快速、免费的在线开发工具，无需安装。",
+    "search_placeholder": "搜索 50+ 个工具..."
+  },
+  "tools": {
+    "json-formatter": {
+      "title": "JSON 格式化",
+      "description": "在线格式化、验证和压缩 JSON",
+      "seo_description": "免费在线 JSON 格式化工具，支持语法高亮、错误检测、格式化和压缩。",
+      "input_placeholder": "在此粘贴 JSON...",
+      "indent_label": "缩进"
+    },
+    "json-to-csv": { "title": "JSON 转 CSV", "description": "将 JSON 数组转换为 CSV 格式" },
+    "base64": { "title": "Base64 编解码", "description": "Base64 字符串编码与解码" },
+    "url-encode": { "title": "URL 编解码", "description": "URL 组件编码与解码" },
+    "html-entities": { "title": "HTML 实体转换", "description": "HTML 实体编码与解码" },
+    "hash-generator": { "title": "哈希生成器", "description": "生成 MD5、SHA1、SHA256 哈希值" },
+    "uuid-generator": { "title": "UUID 生成器", "description": "生成随机 UUID v4 标识符" },
+    "password-generator": { "title": "密码生成器", "description": "生成高强度随机密码" },
+    "regex-tester": { "title": "正则测试器", "description": "实时测试正则表达式" },
+    "timestamp": { "title": "时间戳转换", "description": "Unix 时间戳与日期互转" },
+    "cron-parser": { "title": "Cron 解析器", "description": "解析并可视化 Cron 表达式" },
+    "css-gradient": { "title": "CSS 渐变", "description": "可视化构建 CSS 渐变样式" },
+    "box-shadow": { "title": "Box Shadow", "description": "可视化 CSS 阴影构建器" },
+    "color-converter": { "title": "颜色转换", "description": "HEX、RGB、HSL、OKLCH 互转" },
+    "contrast-checker": { "title": "对比度检测", "description": "检查 WCAG 颜色对比度" },
+    "lorem-ipsum": { "title": "Lorem Ipsum", "description": "生成占位文本" },
+    "word-counter": { "title": "字数统计", "description": "统计单词、字符和句子数" },
+    "markdown-preview": { "title": "Markdown 预览", "description": "实时写作与预览 Markdown" },
+    "ip-lookup": { "title": "IP 查询", "description": "查询 IP 地理位置信息" },
+    "user-agent": { "title": "User Agent 解析", "description": "解析浏览器 User Agent 字符串" }
+  },
+  "footer": {
+    "tagline": "免费在线开发者工具",
+    "rights": "保留所有权利"
+  }
+}

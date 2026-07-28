@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DevToolBox · UI 设计规范</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Design Tokens ── */
+  :root {
+    --bg:           #ffffff;
+    --bg-card:      #ffffff;
+    --bg-muted:     #f7f7f8;
+    --bg-accent:    #f0f0fc;
+    --fg:           #1a1a20;
+    --fg-muted:     #71717a;
+    --primary:      oklch(0.56 0.21 262);
+    --primary-hex:  #5b5bd6;
+    --primary-fg:   #ffffff;
+    --border:       #e5e5e5;
+    --destructive:  oklch(0.577 0.245 27.325);
+    --radius:       10px;
+    --shadow-sm:    0 1px 3px rgba(0,0,0,.08);
+    --shadow-md:    0 4px 12px rgba(0,0,0,.1);
+    --font-sans:    'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono:    'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+    /* 品牌色阶 */
+    --indigo-50:  #eef2ff;
+    --indigo-100: #e0e7ff;
+    --indigo-200: #c7d2fe;
+    --indigo-300: #a5b4fc;
+    --indigo-400: #818cf8;
+    --indigo-500: #6366f1;
+    --indigo-600: #4f46e5;
+    --indigo-700: #4338ca;
+    --indigo-800: #3730a3;
+    --indigo-900: #312e81;
+  }
+  [data-theme="dark"] {
+    --bg:           #0d0d14;
+    --bg-card:      #161622;
+    --bg-muted:     #1e1e2e;
+    --bg-accent:    #1e1e35;
+    --fg:           #f5f5fa;
+    --fg-muted:     #a1a1aa;
+    --primary:      oklch(0.72 0.17 262);
+    --primary-hex:  #9090e8;
+    --primary-fg:   #0d0d14;
+    --border:       rgba(255,255,255,.1);
+    --shadow-sm:    0 1px 3px rgba(0,0,0,.3);
+    --shadow-md:    0 4px 12px rgba(0,0,0,.4);
+    --indigo-50:  #1e1e40;
+    --indigo-100: #252550;
+    --indigo-200: #2e2e70;
+    --indigo-300: #4040a0;
+    --indigo-400: #6060cc;
+    --indigo-500: #8080e0;
+    --indigo-600: #9090e8;
+    --indigo-700: #a8a8f0;
+    --indigo-800: #c0c0f6;
+    --indigo-900: #d8d8fc;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 15px;
+    line-height: 1.6;
+    transition: background .2s, color .2s;
+  }
+
+  /* ── Layout ── */
+  .page { max-width: 960px; margin: 0 auto; padding: 48px 24px 96px; }
+  .section { margin-top: 64px; }
+  .section + .section { border-top: 1px solid var(--border); padding-top: 64px; }
+
+  /* ── Header ── */
+  .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 48px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-logo {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--primary); display: grid; place-items: center;
+    font-size: 18px; font-weight: 700; color: var(--primary-fg);
+  }
+  .brand-name { font-size: 22px; font-weight: 700; letter-spacing: -.4px; }
+  .brand-sub { font-size: 13px; color: var(--fg-muted); margin-top: 2px; }
+
+  /* ── Theme Toggle ── */
+  .theme-btn {
+    cursor: pointer; border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--fg); padding: 6px 14px; border-radius: 8px; font-size: 13px;
+    display: flex; align-items: center; gap: 6px; transition: border-color .15s;
+  }
+  .theme-btn:hover { border-color: var(--primary); }
+
+  /* ── Section Title ── */
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .section-desc { color: var(--fg-muted); font-size: 14px; margin-bottom: 28px; }
+
+  /* ── Color Palette ── */
+  .color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+  .color-card {
+    border-radius: var(--radius); overflow: hidden;
+    border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+  }
+  .color-swatch { height: 72px; }
+  .color-info { padding: 10px 12px; background: var(--bg-card); }
+  .color-name { font-size: 13px; font-weight: 600; }
+  .color-value { font-size: 11px; color: var(--fg-muted); font-family: var(--font-mono); margin-top: 2px; }
+
+  /* 品牌色阶 */
+  .scale-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-top: 8px; }
+  .scale-item { border-radius: 6px; overflow: hidden; }
+  .scale-swatch { height: 40px; }
+  .scale-label { font-size: 10px; color: var(--fg-muted); text-align: center; padding: 3px 0; }
+
+  /* ── Typography ── */
+  .type-row {
+    display: flex; align-items: baseline; gap: 20px;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+  }
+  .type-row:last-child { border-bottom: none; }
+  .type-meta { width: 140px; flex-shrink: 0; }
+  .type-label { font-size: 12px; color: var(--fg-muted); font-family: var(--font-mono); }
+  .type-size  { font-size: 12px; color: var(--fg-muted); }
+  .type-sample { flex: 1; }
+
+  /* ── Spacing ── */
+  .spacing-grid { display: flex; flex-direction: column; gap: 10px; }
+  .spacing-row { display: flex; align-items: center; gap: 16px; }
+  .spacing-bar { background: var(--primary); border-radius: 3px; height: 20px; opacity: .85; }
+  .spacing-label { font-family: var(--font-mono); font-size: 12px; color: var(--fg-muted); width: 40px; }
+  .spacing-px { font-size: 12px; color: var(--fg-muted); }
+
+  /* ── Radius ── */
+  .radius-grid { display: flex; gap: 16px; flex-wrap: wrap; }
+  .radius-item { text-align: center; }
+  .radius-box {
+    width: 64px; height: 64px; background: var(--primary); opacity: .85; margin-bottom: 8px;
+  }
+  .radius-label { font-size: 12px; color: var(--fg-muted); font-family: var(--font-mono); }
+
+  /* ── Buttons ── */
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; border-radius: 8px; font-size: 14px; font-weight: 500;
+    cursor: pointer; border: none; transition: opacity .15s, box-shadow .15s;
+  }
+  .btn:hover { opacity: .9; }
+  .btn-primary   { background: var(--primary); color: var(--primary-fg); }
+  .btn-secondary { background: var(--bg-muted); color: var(--fg); border: 1px solid var(--border); }
+  .btn-outline   { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+  .btn-ghost     { background: transparent; color: var(--fg); }
+  .btn-ghost:hover { background: var(--bg-muted); }
+  .btn-destructive { background: oklch(0.577 0.245 27.325); color: #fff; }
+  .btn-sm { padding: 4px 10px; font-size: 13px; border-radius: 6px; }
+  .btn-lg { padding: 10px 22px; font-size: 15px; border-radius: 10px; }
+
+  /* ── Badge ── */
+  .badge {
+    display: inline-flex; align-items: center; padding: 2px 8px;
+    border-radius: 20px; font-size: 12px; font-weight: 500;
+  }
+  .badge-primary { background: var(--indigo-100); color: var(--indigo-700); }
+  .badge-muted   { background: var(--bg-muted); color: var(--fg-muted); border: 1px solid var(--border); }
+  .badge-destructive { background: oklch(0.577 0.245 27.325 / .12); color: oklch(0.577 0.245 27.325); }
+  [data-theme="dark"] .badge-primary { background: var(--indigo-200); color: var(--indigo-800); }
+
+  /* ── Cards ── */
+  .card-demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+  .demo-card {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; background: var(--bg-card); box-shadow: var(--shadow-sm);
+    transition: border-color .2s;
+  }
+  .demo-card:hover { border-color: var(--primary); }
+  .demo-card-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .demo-card-desc  { font-size: 12px; color: var(--fg-muted); }
+
+  /* SpotlightCard demo */
+  .spotlight-demo {
+    position: relative; overflow: hidden;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; background: var(--bg-card);
+    --mouse-x: 50%; --mouse-y: 50%;
+    --spotlight-color: rgba(99,102,241,.18);
+    cursor: pointer;
+  }
+  .spotlight-demo::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle 120px at var(--mouse-x) var(--mouse-y), var(--spotlight-color), transparent 80%);
+    opacity: 0; transition: opacity .4s ease; pointer-events: none; z-index: 0;
+  }
+  .spotlight-demo:hover::before { opacity: 1; }
+  .spotlight-demo > * { position: relative; z-index: 1; }
+
+  /* ── Input ── */
+  .input-demo {
+    width: 100%; padding: 8px 12px; border: 1px solid var(--border);
+    border-radius: 8px; background: var(--bg); color: var(--fg);
+    font-size: 14px; font-family: var(--font-sans);
+    transition: border-color .15s, box-shadow .15s;
+    outline: none;
+  }
+  .input-demo:focus { border-color: var(--primary); box-shadow: 0 0 0 3px oklch(0.56 0.21 262 / .2); }
+  .input-mono {
+    font-family: var(--font-mono); background: var(--bg-muted);
+  }
+  .input-error { border-color: oklch(0.577 0.245 27.325); }
+
+  /* ── Motion ── */
+  .motion-row { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+  .motion-box {
+    width: 48px; height: 48px; border-radius: 10px; background: var(--primary);
+    display: grid; place-items: center; color: #fff; font-size: 11px; font-weight: 600;
+    cursor: pointer; user-select: none;
+  }
+  .motion-box.hover-scale { transition: transform .15s ease; }
+  .motion-box.hover-scale:hover { transform: scale(1.08); }
+  .motion-box.hover-lift { transition: transform .2s ease, box-shadow .2s ease; }
+  .motion-box.hover-lift:hover { transform: translateY(-3px); box-shadow: 0 8px 20px oklch(0.56 0.21 262 / .35); }
+  .motion-label { font-size: 12px; color: var(--fg-muted); margin-top: 6px; text-align: center; }
+  .motion-item { display: flex; flex-direction: column; align-items: center; }
+
+  /* ── Icon ── */
+  .icon-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .icon-box {
+    width: 44px; height: 44px; border: 1px solid var(--border);
+    border-radius: 10px; display: grid; place-items: center;
+    background: var(--bg-card); transition: border-color .15s;
+  }
+  .icon-box:hover { border-color: var(--primary); }
+  .icon-label { font-size: 11px; color: var(--fg-muted); }
+  svg { display: block; }
+
+  /* ── Code block ── */
+  pre {
+    background: var(--bg-muted); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; overflow-x: auto;
+    font-family: var(--font-mono); font-size: 13px; line-height: 1.7;
+    color: var(--fg);
+  }
+  code { font-family: var(--font-mono); font-size: .9em; }
+
+  /* ── Breakpoints ── */
+  .bp-grid { display: flex; flex-direction: column; gap: 12px; }
+  .bp-row { display: flex; align-items: center; gap: 16px; }
+  .bp-bar-wrap { flex: 1; height: 8px; background: var(--bg-muted); border-radius: 4px; overflow: hidden; }
+  .bp-bar { height: 100%; background: var(--primary); border-radius: 4px; opacity: .7; }
+  .bp-name { font-family: var(--font-mono); font-size: 13px; width: 36px; }
+  .bp-val  { font-size: 13px; color: var(--fg-muted); width: 60px; }
+
+  /* ── Footer ── */
+  .doc-footer { margin-top: 80px; border-top: 1px solid var(--border); padding-top: 24px; text-align: center; color: var(--fg-muted); font-size: 13px; }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+  /* ── Tag ── */
+  .tag { display: inline-block; font-family: var(--font-mono); font-size: 12px; background: var(--bg-muted); color: var(--fg-muted); padding: 2px 7px; border-radius: 5px; border: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="brand">
+      <div class="brand-logo">D</div>
+      <div>
+        <div class="brand-name">DevToolBox</div>
+        <div class="brand-sub">UI 设计规范 v1.0 · 2026</div>
+      </div>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()">
+      <span id="theme-icon">🌙</span>
+      <span id="theme-label">深色模式</span>
+    </button>
+  </header>
+
+  <!-- 1. 色彩系统 -->
+  <section class="section">
+    <h2>色彩系统</h2>
+    <p class="section-desc">基于 OKLCH 色彩空间，感知均匀，明暗模式下对比度一致。</p>
+
+    <!-- 核心色 -->
+    <h3 style="font-size:14px;font-weight:600;color:var(--fg-muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:16px;">核心色</h3>
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--primary)"></div>
+        <div class="color-info">
+          <div class="color-name">Primary</div>
+          <div class="color-value">oklch(0.56 0.21 262)</div>
+          <div class="color-value" style="margin-top:2px">#6366f1 · Indigo</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--primary-fg);border-bottom:1px solid var(--border)"></div>
+        <div class="color-info">
+          <div class="color-name">Primary Foreground</div>
+          <div class="color-value">oklch(0.99 0 0)</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--bg);border-bottom:1px solid var(--border)"></div>
+        <div class="color-info">
+          <div class="color-name">Background</div>
+          <div class="color-value">L · oklch(1 0 0)</div>
+          <div class="color-value">D · oklch(0.11 0.005 262)</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--bg-card);border-bottom:1px solid var(--border)"></div>
+        <div class="color-info">
+          <div class="color-name">Card</div>
+          <div class="color-value">L · oklch(1 0 0)</div>
+          <div class="color-value">D · oklch(0.16 0.005 262)</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--bg-muted)"></div>
+        <div class="color-info">
+          <div class="color-name">Muted</div>
+          <div class="color-value">L · oklch(0.97 0 0)</div>
+          <div class="color-value">D · oklch(0.22 0.005 262)</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--fg)"></div>
+        <div class="color-info">
+          <div class="color-name">Foreground</div>
+          <div class="color-value">L · oklch(0.14 0 0)</div>
+          <div class="color-value">D · oklch(0.97 0 0)</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:var(--fg-muted)"></div>
+        <div class="color-info">
+          <div class="color-name">Muted Foreground</div>
+          <div class="color-value">L · oklch(0.52 0 0)</div>
+          <div class="color-value">D · oklch(0.65 0 0)</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:oklch(0.577 0.245 27.325)"></div>
+        <div class="color-info">
+          <div class="color-name">Destructive</div>
+          <div class="color-value">oklch(0.577 0.245 27.325)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 靛蓝色阶 -->
+    <h3 style="font-size:14px;font-weight:600;color:var(--fg-muted);letter-spacing:.05em;text-transform:uppercase;margin:28px 0 16px;">靛蓝品牌色阶</h3>
+    <div class="scale-grid">
+      <div class="scale-item"><div class="scale-swatch" style="background:var(--indigo-50)"></div><div class="scale-label">50</div></div>
+      <div class="scale-item"><div class="scale-swatch" style="background:var(--indigo-100)"></div><div class="scale-label">100</div></div>
+      <div class="scale-item"><div class="scale-swatch" style="background:var(--indigo-200)"></div><div class="scale-label">200</div></div>
+      <div class="scale-item"><div class="scale-swatch" style="background:var(--indigo-300)"></div><div class="scale-label">300</div></div>
+      <div class="scale-item"><div class="scale-swatch" style="background:var(--indigo-400)"></div><div class="scale-label">400</div></div>
+      <div class="scale-item"><div class="scale-swatch" style="background:var(--indigo-500)"></div><div class="scale-label">500</div></div>
+      <div class="scale-item"><div class="scale-swatch" style="background:var(--indigo-600)"></div><div class="scale-label">600 ★</div></div>
+      <div class="scale-item"><div class="scale-swatch" style="background:var(--indigo-700)"></div><div class="scale-label">700</div></div>
+      <div class="scale-item"><div class="scale-swatch" style="background:var(--indigo-800)"></div><div class="scale-label">800</div></div>
+      <div class="scale-item"><div class="scale-swatch" style="background:var(--indigo-900)"></div><div class="scale-label">900</div></div>
+    </div>
+    <p style="font-size:12px;color:var(--fg-muted);margin-top:8px;">★ 亮色模式主色对应约 600 级</p>
+
+    <!-- 使用原则 -->
+    <div style="margin-top:24px;padding:16px 20px;background:var(--bg-accent);border-radius:var(--radius);border-left:3px solid var(--primary)">
+      <div style="font-size:14px;font-weight:600;margin-bottom:8px;">使用原则</div>
+      <ul style="font-size:13px;color:var(--fg-muted);padding-left:16px;display:flex;flex-direction:column;gap:4px;">
+        <li>主色只用于<strong style="color:var(--fg)">交互元素</strong>：按钮、焦点环、链接激活态、选中边框</li>
+        <li>不做大面积主色背景；装饰性区块用 <code>bg-accent</code></li>
+        <li>暗色模式背景含极低饱和度靛蓝色相，区别于纯黑</li>
+        <li>全站只有一个品牌主色，语义色（红）仅用于错误反馈</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 2. 字体排版 -->
+  <section class="section">
+    <h2>字体排版</h2>
+    <p class="section-desc">正文使用 Geist Sans（无衬线变量字体）；代码区强制使用 Geist Mono。</p>
+
+    <div style="margin-bottom:24px;display:flex;gap:12px;flex-wrap:wrap;">
+      <div style="padding:12px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);flex:1;min-width:180px;">
+        <div style="font-size:11px;color:var(--fg-muted);margin-bottom:4px;">正文 / UI</div>
+        <div style="font-size:18px;font-weight:600;">Geist Sans</div>
+        <div style="font-size:12px;color:var(--fg-muted);margin-top:2px;">回退：system-ui, sans-serif</div>
+      </div>
+      <div style="padding:12px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);flex:1;min-width:180px;">
+        <div style="font-size:11px;color:var(--fg-muted);margin-bottom:4px;">代码 / 工具区</div>
+        <div style="font-size:18px;font-weight:600;font-family:var(--font-mono);">Geist Mono</div>
+        <div style="font-size:12px;color:var(--fg-muted);margin-top:2px;">回退：ui-monospace, monospace</div>
+      </div>
+    </div>
+
+    <!-- 字号比例 -->
+    <div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-label">text-4xl</div><div class="type-size">36px · bold</div></div>
+        <div class="type-sample" style="font-size:36px;font-weight:700;line-height:1.2;">Hero 大标题</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-label">text-2xl</div><div class="type-size">24px · semibold</div></div>
+        <div class="type-sample" style="font-size:24px;font-weight:600;">工具页面标题</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-label">text-lg</div><div class="type-size">18px · semibold</div></div>
+        <div class="type-sample" style="font-size:18px;font-weight:600;">分区标题 Section</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-label">text-base</div><div class="type-size">16px · normal</div></div>
+        <div class="type-sample" style="font-size:16px;">正文描述文字，工具介绍，帮助说明内容。</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-label">text-sm</div><div class="type-size">14px · medium</div></div>
+        <div class="type-sample" style="font-size:14px;font-weight:500;">卡片标题 / 按钮文字 / 工具栏</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-label">text-xs</div><div class="type-size">12px · normal</div></div>
+        <div class="type-sample" style="font-size:12px;color:var(--fg-muted);">次要说明、标签、占位文字、版权信息</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><div class="type-label">mono · sm</div><div class="type-size">14px · mono</div></div>
+        <div class="type-sample" style="font-size:14px;font-family:var(--font-mono);">{"key": "value", "number": 42}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 间距 & 圆角 -->
+  <section class="section">
+    <h2>间距 & 圆角</h2>
+    <p class="section-desc">基准 1 unit = 4px（Tailwind spacing scale）</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;flex-wrap:wrap;">
+      <!-- 间距 -->
+      <div>
+        <h3 style="font-size:14px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px;">间距比例</h3>
+        <div class="spacing-grid">
+          <div class="spacing-row"><div class="spacing-label">p-1</div><div class="spacing-bar" style="width:16px"></div><div class="spacing-px">4px</div></div>
+          <div class="spacing-row"><div class="spacing-label">p-2</div><div class="spacing-bar" style="width:32px"></div><div class="spacing-px">8px</div></div>
+          <div class="spacing-row"><div class="spacing-label">p-3</div><div class="spacing-bar" style="width:48px"></div><div class="spacing-px">12px</div></div>
+          <div class="spacing-row"><div class="spacing-label">p-4</div><div class="spacing-bar" style="width:64px"></div><div class="spacing-px">16px · 卡片内边距</div></div>
+          <div class="spacing-row"><div class="spacing-label">p-6</div><div class="spacing-bar" style="width:96px"></div><div class="spacing-px">24px · 区块间距</div></div>
+          <div class="spacing-row"><div class="spacing-label">p-8</div><div class="spacing-bar" style="width:128px"></div><div class="spacing-px">32px</div></div>
+          <div class="spacing-row"><div class="spacing-label">p-12</div><div class="spacing-bar" style="width:192px"></div><div class="spacing-px">48px · 页面顶留白</div></div>
+        </div>
+      </div>
+      <!-- 圆角 -->
+      <div>
+        <h3 style="font-size:14px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px;">圆角比例</h3>
+        <div class="radius-grid">
+          <div class="radius-item">
+            <div class="radius-box" style="border-radius:6px"></div>
+            <div class="radius-label">sm · 6px</div>
+            <div style="font-size:11px;color:var(--fg-muted);margin-top:2px;">标签/小按钮</div>
+          </div>
+          <div class="radius-item">
+            <div class="radius-box" style="border-radius:8px"></div>
+            <div class="radius-label">md · 8px</div>
+            <div style="font-size:11px;color:var(--fg-muted);margin-top:2px;">输入框/下拉</div>
+          </div>
+          <div class="radius-item">
+            <div class="radius-box" style="border-radius:10px"></div>
+            <div class="radius-label">lg · 10px</div>
+            <div style="font-size:11px;color:var(--fg-muted);margin-top:2px;">卡片/弹层</div>
+          </div>
+          <div class="radius-item">
+            <div class="radius-box" style="border-radius:14px"></div>
+            <div class="radius-label">xl · 14px</div>
+            <div style="font-size:11px;color:var(--fg-muted);margin-top:2px;">大卡片/模态</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 组件 -->
+  <section class="section">
+    <h2>组件规范</h2>
+    <p class="section-desc">基于 shadcn/ui，所有组件样式均通过 CSS 变量响应主题切换。</p>
+
+    <!-- Buttons -->
+    <h3 style="font-size:14px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">按钮</h3>
+    <div class="btn-row">
+      <button class="btn btn-primary">主要操作</button>
+      <button class="btn btn-outline">次要操作</button>
+      <button class="btn btn-ghost">幽灵按钮</button>
+      <button class="btn btn-destructive">危险操作</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary btn-sm">小号 sm</button>
+      <button class="btn btn-primary">默认 default</button>
+      <button class="btn btn-primary btn-lg">大号 lg</button>
+    </div>
+    <div style="font-size:12px;color:var(--fg-muted);margin-top:8px;padding:10px 14px;background:var(--bg-muted);border-radius:8px;">
+      工具栏操作用 <code>sm + ghost/outline</code>；页面主 CTA 用 <code>default + primary</code>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Badges -->
+    <h3 style="font-size:14px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">标签 Badge</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <span class="badge badge-primary">JSON</span>
+      <span class="badge badge-muted">工具 · 1</span>
+      <span class="badge badge-destructive">错误</span>
+      <span class="badge badge-primary">格式化</span>
+      <span class="badge badge-muted">编码</span>
+      <span class="badge badge-muted">加密</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Cards -->
+    <h3 style="font-size:14px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">工具卡片（SpotlightCard）</h3>
+    <div class="card-demo-grid">
+      <div class="spotlight-demo"
+           onmousemove="handleSpot(event,this)"
+           onmouseleave="resetSpot(this)">
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px;">JSON Formatter</div>
+        <div style="font-size:12px;color:var(--fg-muted);">格式化、验证和压缩 JSON</div>
+        <div style="margin-top:12px;"><span class="badge badge-primary">JSON</span></div>
+      </div>
+      <div class="spotlight-demo"
+           onmousemove="handleSpot(event,this)"
+           onmouseleave="resetSpot(this)">
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px;">Base64 Encoder</div>
+        <div style="font-size:12px;color:var(--fg-muted);">Base64 编解码工具</div>
+        <div style="margin-top:12px;"><span class="badge badge-muted">编码</span></div>
+      </div>
+      <div class="spotlight-demo"
+           onmousemove="handleSpot(event,this)"
+           onmouseleave="resetSpot(this)">
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px;">UUID Generator</div>
+        <div style="font-size:12px;color:var(--fg-muted);">生成 UUID v4 标识符</div>
+        <div style="margin-top:12px;"><span class="badge badge-muted">生成器</span></div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--fg-muted);margin-top:10px;">↑ 鼠标悬停查看 SpotlightCard 光晕效果</div>
+
+    <div class="divider"></div>
+
+    <!-- Input -->
+    <h3 style="font-size:14px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">输入框</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:480px;">
+      <input class="input-demo" placeholder="普通输入框（点击查看焦点环）" />
+      <input class="input-demo input-mono" placeholder='{"key": "value"}  ← 代码输入框' />
+      <input class="input-demo input-error" value="无效 JSON 格式" />
+      <div style="font-size:12px;color:oklch(0.577 0.245 27.325);">✕ 语法错误：Unexpected token</div>
+    </div>
+  </section>
+
+  <!-- 5. 动效 -->
+  <section class="section">
+    <h2>动效规范</h2>
+    <p class="section-desc">功能优先，短促克制。进场动画不循环，交互反馈 ≤ 200ms。</p>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border);">
+            <th style="text-align:left;padding:10px 12px;color:var(--fg-muted);font-weight:600;">场景</th>
+            <th style="text-align:left;padding:10px 12px;color:var(--fg-muted);font-weight:600;">时长</th>
+            <th style="text-align:left;padding:10px 12px;color:var(--fg-muted);font-weight:600;">缓动</th>
+            <th style="text-align:left;padding:10px 12px;color:var(--fg-muted);font-weight:600;">备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px 12px;">hover 颜色变化</td>
+            <td style="padding:10px 12px;font-family:var(--font-mono);">150ms</td>
+            <td style="padding:10px 12px;font-family:var(--font-mono);">ease</td>
+            <td style="padding:10px 12px;color:var(--fg-muted);">按钮、链接、卡片边框</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px 12px;">下拉菜单展开</td>
+            <td style="padding:10px 12px;font-family:var(--font-mono);">150ms</td>
+            <td style="padding:10px 12px;font-family:var(--font-mono);">ease-out</td>
+            <td style="padding:10px 12px;color:var(--fg-muted);">Select、Popover</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px 12px;">主题切换</td>
+            <td style="padding:10px 12px;font-family:var(--font-mono);">即时</td>
+            <td style="padding:10px 12px;">—</td>
+            <td style="padding:10px 12px;color:var(--fg-muted);">disableTransitionOnChange</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px 12px;">SpotlightCard 光晕</td>
+            <td style="padding:10px 12px;font-family:var(--font-mono);">400ms</td>
+            <td style="padding:10px 12px;font-family:var(--font-mono);">ease</td>
+            <td style="padding:10px 12px;color:var(--fg-muted);">opacity 淡入淡出</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px 12px;">SplitText 单字入场</td>
+            <td style="padding:10px 12px;font-family:var(--font-mono);">700ms</td>
+            <td style="padding:10px 12px;font-family:var(--font-mono);">ease</td>
+            <td style="padding:10px 12px;color:var(--fg-muted);">字间延迟 80ms，只触发一次</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;">焦点环</td>
+            <td style="padding:10px 12px;font-family:var(--font-mono);">即时</td>
+            <td style="padding:10px 12px;">—</td>
+            <td style="padding:10px 12px;color:var(--fg-muted);">ring = primary，不做动画</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:24px;">
+      <h3 style="font-size:14px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px;">交互动效示例（鼠标悬停）</h3>
+      <div class="motion-row">
+        <div class="motion-item">
+          <div class="motion-box hover-scale">Sc</div>
+          <div class="motion-label">scale 1.08<br/>150ms ease</div>
+        </div>
+        <div class="motion-item">
+          <div class="motion-box hover-lift">↑</div>
+          <div class="motion-label">lift -3px<br/>200ms + shadow</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 图标 -->
+  <section class="section">
+    <h2>图标规范</h2>
+    <p class="section-desc">使用 Lucide React（随 shadcn/ui 安装）。不引入第二套图标库。</p>
+
+    <div class="icon-grid">
+      <div class="icon-item">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+        <div class="icon-label">Search</div>
+      </div>
+      <div class="icon-item">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="icon-label">Copy</div>
+      </div>
+      <div class="icon-item">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="icon-label">Check</div>
+      </div>
+      <div class="icon-item">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+        <div class="icon-label">X</div>
+      </div>
+      <div class="icon-item">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </div>
+        <div class="icon-label">Sun</div>
+      </div>
+      <div class="icon-item">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </div>
+        <div class="icon-label">Moon</div>
+      </div>
+      <div class="icon-item">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="icon-label">Monitor</div>
+      </div>
+      <div class="icon-item">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </div>
+        <div class="icon-label">More</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--bg-muted);border-radius:8px;font-size:13px;">
+      尺寸规范：<code>h-4 w-4</code>（16px，UI 内嵌）&nbsp;·&nbsp; <code>h-5 w-5</code>（20px，功能入口）&nbsp;·&nbsp; 颜色继承文字色，不单独设置
+    </div>
+  </section>
+
+  <!-- 7. 响应式 -->
+  <section class="section">
+    <h2>响应式断点</h2>
+    <p class="section-desc">移动优先（Mobile First），基于 Tailwind 默认断点。</p>
+    <div class="bp-grid">
+      <div class="bp-row"><div class="bp-name">base</div><div class="bp-val">0px+</div><div class="bp-bar-wrap"><div class="bp-bar" style="width:5%"></div></div><div style="font-size:12px;color:var(--fg-muted);">单列布局，卡片 1-2 列</div></div>
+      <div class="bp-row"><div class="bp-name">sm</div><div class="bp-val">640px+</div><div class="bp-bar-wrap"><div class="bp-bar" style="width:25%"></div></div><div style="font-size:12px;color:var(--fg-muted);">卡片 3 列</div></div>
+      <div class="bp-row"><div class="bp-name">md</div><div class="bp-val">768px+</div><div class="bp-bar-wrap"><div class="bp-bar" style="width:40%"></div></div><div style="font-size:12px;color:var(--fg-muted);">卡片 4 列，工具页双栏</div></div>
+      <div class="bp-row"><div class="bp-name">lg</div><div class="bp-val">1024px+</div><div class="bp-bar-wrap"><div class="bp-bar" style="width:65%"></div></div><div style="font-size:12px;color:var(--fg-muted);">卡片 5 列</div></div>
+      <div class="bp-row"><div class="bp-name">xl</div><div class="bp-val">1280px+</div><div class="bp-bar-wrap"><div class="bp-bar" style="width:100%"></div></div><div style="font-size:12px;color:var(--fg-muted);">max-w-7xl 锁定内容宽度</div></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    DevToolBox Design System · 规范版本 v1.0 · 更新于 2026 年<br/>
+    <span style="margin-top:4px;display:block;">CSS 变量定义在 <code>app/globals.css</code> · 组件库基于 shadcn/ui + Tailwind CSS 4</span>
+  </div>
+
+</div>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-icon').textContent  = isDark ? '🌙' : '☀️';
+    document.getElementById('theme-label').textContent = isDark ? '深色模式' : '亮色模式';
+  }
+
+  function handleSpot(e, el) {
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--mouse-x', (e.clientX - r.left) + 'px');
+    el.style.setProperty('--mouse-y', (e.clientY - r.top) + 'px');
+  }
+  function resetSpot(el) {
+    el.style.setProperty('--mouse-x', '50%');
+    el.style.setProperty('--mouse-y', '50%');
+  }
+
+  // 跟随系统默认主题
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.getElementById('theme-icon').textContent  = '☀️';
+    document.getElementById('theme-label').textContent = '亮色模式';
+  }
+</script>
+
+</body>
+</html>

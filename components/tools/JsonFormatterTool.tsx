@@ -1,0 +1,419 @@
+'use client'
+
+/**
+ * 这个组件的作用：JSON 格式化与预览工作台，支持实时语法高亮、单栏/双栏布局、格式化/压缩/校验等操作。
+ * 移植自参考项目 ideaflow-web-tool/app/components/Tools/json/JsonFormatterWorkbench.vue。
+ * 支持独立使用（内置工具栏）和嵌入 JsonWorkbench（外部工具栏接管）两种模式。
+ * 采用 textarea + pre 叠加技术实现可编辑区域的实时语法高亮。
+ */
+
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
+import { useTheme } from 'next-themes'
+import {
+  AlignLeft, Minimize2, ShieldCheck, Copy, FileCode2,
+  Columns2, Square, Layers,
+} from 'lucide-react'
+import {
+  parseOrderedJson,
+  formatOrderedJson,
+  renderJsonHtml,
+  flattenJsonNodes,
+  createJsonSample,
+  OrderedJsonParseError,
+  type OrderedJsonValue,
+} from '@/lib/json-tools'
+
+type LayoutMode = 'single' | 'split'
+type StatusTone = 'success' | 'error' | 'info' | null
+
+interface StatusState {
+  tone: StatusTone
+  message: string
+  line?: number
+  col?: number
+}
+
+// ─── 工具栏图标按钮子组件 ────────────────────────────────────────────
+
+interface IconBtnProps {
+  onClick: () => void
+  title: string
+  active?: boolean
+  children: React.ReactNode
+}
+
+/**
+ * 这个组件的作用：工具栏中的图标按钮，支持激活态样式切换。
+ */
+function IconBtn({ onClick, title, active, children }: IconBtnProps) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      aria-label={title}
+      className={[
+        'json-toolbar-btn h-9 w-9 grid place-items-center rounded-xl border transition-all duration-150 cursor-pointer',
+        active
+          ? 'border-primary bg-primary text-white shadow-sm'
+          : 'border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground',
+      ].join(' ')}
+    >
+      {children}
+    </button>
+  )
+}
+
+// ─── 主组件 ─────────────────────────────────────────────────────────
+
+interface Messages {
+  common?: Record<string, string>
+  tools?: Record<string, Record<string, string>>
+}
+
+/** 外部工具栏接管时，父组件通过此 ref 调用格式化工作台内的方法 */
+export interface FormatterActionRef {
+  insertSample: () => void
+  formatJson: () => void
+  minifyJson: () => void
+  validateJson: () => void
+  copyContent: () => void
+}
+
+interface Props {
+  messages?: Messages
+  /** 外部共享 JSON 文本（受控） */
+  sharedValue?: string
+  onSharedValueChange?: (v: string) => void
+  /** 外部控制布局模式 */
+  layoutMode?: LayoutMode
+  onLayoutModeChange?: (m: LayoutMode) => void
+  /** 是否隐藏内置工具栏（由父级 JsonWorkbench 接管时为 true） */
+  hideToolbar?: boolean
+  /** 父组件通过此 ref 调用内部方法 */
+  actionRef?: React.MutableRefObject<FormatterActionRef | null>
+}
+
+/**
+ * 这个组件的作用：JSON 格式化工作台，包含工具栏、状态栏和编辑/预览双栏区域。
+ */
+export function JsonFormatterTool({
+  messages,
+  sharedValue,
+  onSharedValueChange,
+  layoutMode: layoutModeProp,
+  onLayoutModeChange,
+  hideToolbar = false,
+  actionRef,
+}: Props) {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
+
+  // ── 核心状态 ──
+  const [text, setText]           = useState(sharedValue ?? '')
+  const [outputText, setOutput]   = useState('')
+  const [parsedValue, setParsed]  = useState<OrderedJsonValue | null>(null)
+  const [layoutMode, setLayout]   = useState<LayoutMode>(layoutModeProp ?? 'single')
+  const [status, setStatus]       = useState<StatusState>({ tone: null, message: '' })
+
+  const textareaRef  = useRef<HTMLTextAreaElement>(null)
+  const highlightRef = useRef<HTMLPreElement>(null)
+
+  // ── 同步外部 sharedValue ──
+  useEffect(() => {
+    if (sharedValue !== undefined && sharedValue !== text) {
+      setText(sharedValue)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sharedValue])
+
+  // ── 同步外部 layoutMode ──
+  useEffect(() => {
+    if (layoutModeProp !== undefined && layoutModeProp !== layoutMode) {
+      setLayout(layoutModeProp)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layoutModeProp])
+
+  // ── 同步滚动：让高亮层与 textarea 保持一致 ──
+  const syncScroll = useCallback(() => {
+    if (textareaRef.current && highlightRef.current) {
+      highlightRef.current.scrollTop  = textareaRef.current.scrollTop
+      highlightRef.current.scrollLeft = textareaRef.current.scrollLeft
+    }
+  }, [])
+
+  // ── 实时预览（防抖 180ms）──
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!text.trim()) {
+        setOutput('')
+        setParsed(null)
+        return
+      }
+      try {
+        const ordered = parseOrderedJson(text)
+        setParsed(ordered)
+        setOutput(formatOrderedJson(text, true))
+      } catch {
+        setParsed(null)
+        setOutput(text)
+      }
+    }, 180)
+    return () => clearTimeout(timer)
+  }, [text])
+
+  // ── 错误状态处理 ──
+  const setError = useCallback((e: unknown) => {
+    if (e instanceof OrderedJsonParseError) {
+      setStatus({ tone: 'error', message: e.message, line: e.issue.line, col: e.issue.column })
+    } else {
+      setStatus({ tone: 'error', message: e instanceof Error ? e.message : String(e) })
+    }
+  }, [])
+
+  // ── 内部 text 变化时通知父级 ──
+  const updateText = useCallback((newText: string) => {
+    setText(newText)
+    onSharedValueChange?.(newText)
+  }, [onSharedValueChange])
+
+  // ── 工具栏动作 ──
+
+  /** 格式化：单栏模式回写输入区，双栏模式写到输出区 */
+  const handleFormat = useCallback(() => {
+    try {
+      const formatted = formatOrderedJson(text, true)
+      setParsed(parseOrderedJson(formatted))
+      if (layoutMode === 'single') updateText(formatted)
+      setOutput(formatted)
+      setStatus({ tone: 'success', message: '已格式化' })
+    } catch (e) { setError(e) }
+  }, [text, layoutMode, updateText, setError])
+
+  /** 压缩：同上 */
+  const handleMinify = useCallback(() => {
+    try {
+      const minified = formatOrderedJson(text, false)
+      setParsed(parseOrderedJson(minified))
+      if (layoutMode === 'single') updateText(minified)
+      setOutput(minified)
+      setStatus({ tone: 'success', message: '已压缩' })
+    } catch (e) { setError(e) }
+  }, [text, layoutMode, updateText, setError])
+
+  /** 校验：仅检查合法性，不修改内容 */
+  const handleValidate = useCallback(() => {
+    try {
+      parseOrderedJson(text)
+      setStatus({ tone: 'success', message: 'JSON 校验通过 ✓' })
+    } catch (e) { setError(e) }
+  }, [text, setError])
+
+  /** 填充示例 */
+  const handleSample = useCallback(() => {
+    updateText(createJsonSample())
+    setStatus({ tone: 'info', message: '已填充示例 JSON' })
+  }, [updateText])
+
+  /** 复制：单栏复制当前输入，双栏优先复制输出 */
+  const handleCopy = useCallback(async () => {
+    const content = layoutMode === 'single' ? text : (outputText || text)
+    if (!content.trim()) return
+    try {
+      await navigator.clipboard.writeText(content)
+      setStatus({ tone: 'success', message: '已复制到剪贴板' })
+    } catch { setStatus({ tone: 'error', message: '复制失败，请手动复制' }) }
+  }, [text, outputText, layoutMode])
+
+  // ── 暴露方法给父组件 ──
+  useEffect(() => {
+    if (actionRef) {
+      actionRef.current = {
+        insertSample: handleSample,
+        formatJson: handleFormat,
+        minifyJson: handleMinify,
+        validateJson: handleValidate,
+        copyContent: handleCopy,
+      }
+    }
+  }, [actionRef, handleSample, handleFormat, handleMinify, handleValidate, handleCopy])
+
+  // ── 布局模式变化时通知父级 ──
+  const handleSetLayout = useCallback((m: LayoutMode) => {
+    setLayout(m)
+    onLayoutModeChange?.(m)
+  }, [onLayoutModeChange])
+
+  // ── 统计信息 ──
+  const stats = useMemo(() => {
+    if (!parsedValue) return { nodes: 0, depth: 0, size: text.length }
+    const getDepth = (v: OrderedJsonValue, d = 0): number => {
+      if (v.kind === 'object') return v.value.reduce((m, p) => Math.max(m, getDepth(p.value, d + 1)), d)
+      if (v.kind === 'array') return v.value.reduce((m, p) => Math.max(m, getDepth(p, d + 1)), d)
+      return d
+    }
+    return {
+      nodes: flattenJsonNodes(parsedValue).length,
+      depth: getDepth(parsedValue),
+      size: text.length,
+    }
+  }, [parsedValue, text])
+
+  // ── 语法高亮 HTML ──
+  const editableHtml = useMemo(() => renderJsonHtml(text || ' '), [text])
+  const outputHtml   = useMemo(() => renderJsonHtml(outputText || ' '), [outputText])
+
+  // ── 暗黑/亮色主题样式 ──
+  const shellCls = isDark
+    ? 'border border-slate-700/45 bg-[linear-gradient(180deg,rgba(12,19,36,0.92),rgba(4,9,20,0.98))] shadow-[0_22px_54px_-38px_rgba(0,0,0,0.84)] backdrop-blur-xl'
+    : 'border border-slate-200/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(248,250,252,0.98))] shadow-[0_18px_42px_-34px_rgba(148,163,184,0.18)] backdrop-blur-xl'
+
+  const paneCls = isDark
+    ? 'bg-[linear-gradient(180deg,rgba(13,21,38,0.46),rgba(4,9,20,0.3))]'
+    : 'bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(248,250,252,0.88))]'
+
+  const dividerCls = isDark ? 'bg-slate-700/42' : 'bg-slate-200/75'
+
+  const glowCls = isDark
+    ? 'bg-[radial-gradient(circle_at_top,rgba(125,183,240,0.08),transparent_58%)]'
+    : 'bg-[radial-gradient(circle_at_top,rgba(125,183,240,0.09),transparent_52%)]'
+
+  const caretCls = isDark ? 'caret-slate-100 placeholder:text-slate-500' : 'caret-slate-800 placeholder:text-slate-400'
+
+  return (
+    <div className="json-formatter-workbench">
+      {/* ── 内置工具栏（外部接管时隐藏）── */}
+      {!hideToolbar && (
+        <div className="flex flex-col gap-3 pb-4 border-b border-border/60 mb-4">
+          {/* 第一行：布局切换 + 操作按钮 */}
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            {/* 布局切换 */}
+            <div className="flex items-center gap-1.5">
+              <IconBtn active={layoutMode === 'single'} title="单栏模式" onClick={() => handleSetLayout('single')}>
+                <Square className="h-4 w-4" />
+              </IconBtn>
+              <IconBtn active={layoutMode === 'split'} title="双栏对照" onClick={() => handleSetLayout('split')}>
+                <Columns2 className="h-4 w-4" />
+              </IconBtn>
+            </div>
+
+            {/* 操作按钮 */}
+            <div className="flex items-center gap-1.5">
+              <IconBtn onClick={handleSample}   title="加载示例"><FileCode2  className="h-4 w-4" /></IconBtn>
+              <IconBtn onClick={handleFormat}   title="格式化"><AlignLeft   className="h-4 w-4" /></IconBtn>
+              <IconBtn onClick={handleMinify}   title="压缩"><Minimize2     className="h-4 w-4" /></IconBtn>
+              <IconBtn onClick={handleValidate} title="校验"><ShieldCheck   className="h-4 w-4" /></IconBtn>
+              <IconBtn onClick={handleCopy}     title={layoutMode === 'single' ? '复制内容' : '复制输出'}>
+                <Copy className="h-4 w-4" />
+              </IconBtn>
+            </div>
+          </div>
+
+          {/* 第二行：统计信息 */}
+          {parsedValue && (
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <Layers className="h-3 w-3" />
+                <span className="font-mono">{stats.nodes}</span>
+                <span>节点</span>
+              </span>
+              <span className="text-border">·</span>
+              <span className="font-mono">{stats.depth}</span>
+              <span className="-ml-3">层</span>
+              <span className="text-border">·</span>
+              <span className="font-mono">{stats.size}</span>
+              <span className="-ml-3">字符</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 状态栏 ── */}
+      {status.tone === 'error' && status.message && (
+        <div className="mb-3 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive font-mono">
+          {status.message}
+          {status.line !== undefined && (
+            <span className="ml-2 opacity-70">行 {status.line}：{status.col}</span>
+          )}
+        </div>
+      )}
+      {status.tone === 'success' && status.message && (
+        <div className="mb-3 rounded-lg border border-green-500/20 bg-green-500/5 px-3 py-2 text-xs text-green-600 dark:text-green-400">
+          {status.message}
+        </div>
+      )}
+
+      {/* 外部接管工具栏时仍需显示统计信息 */}
+      {hideToolbar && parsedValue && (
+        <div className="mb-3 flex items-center gap-4 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <Layers className="h-3 w-3" />
+            <span className="font-mono">{stats.nodes}</span>
+            <span>节点</span>
+          </span>
+          <span className="text-border">·</span>
+          <span className="font-mono">{stats.depth}</span>
+          <span className="-ml-3">层</span>
+          <span className="text-border">·</span>
+          <span className="font-mono">{stats.size}</span>
+          <span className="-ml-3">字符</span>
+        </div>
+      )}
+
+      {/* ── 工作区 ── */}
+      <div className={`json-formatter-shell relative overflow-hidden rounded-[30px] ${shellCls}`}>
+        {/* 顶部光晕 */}
+        <div className={`pointer-events-none absolute inset-x-0 top-0 h-16 opacity-70 ${glowCls}`} />
+
+        {/* 布局网格 */}
+        <div
+          className={`relative grid items-stretch ${
+            layoutMode === 'split'
+              ? 'lg:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)]'
+              : 'grid-cols-1'
+          }`}
+        >
+          {/* 左侧输入面板（带实时高亮叠加）*/}
+          <div className={`flex flex-col min-w-0 min-h-[560px] overflow-hidden ${paneCls}`}>
+            <div className="relative flex-1 min-h-[520px]">
+              {/* 高亮层 (pre) - 绝对定位在后，不可交互 */}
+              <pre
+                ref={highlightRef}
+                className="json-highlight-layer pointer-events-none absolute inset-0 overflow-auto whitespace-pre-wrap break-words px-5 py-4 font-mono text-sm leading-[1.85]"
+                dangerouslySetInnerHTML={{ __html: editableHtml }}
+                aria-hidden
+              />
+              {/* 编辑层 (textarea) - 透明文字，仅光标可见 */}
+              <textarea
+                ref={textareaRef}
+                value={text}
+                onChange={e => updateText(e.target.value)}
+                onScroll={syncScroll}
+                className={`json-editor-textarea relative z-10 h-full min-h-[520px] w-full resize-none overflow-auto border-0 bg-transparent px-5 py-4 font-mono text-sm leading-[1.85] focus:outline-none ${caretCls}`}
+                placeholder='在此粘贴或输入 JSON，例如 {"name":"devtoolbox"}'
+                spellCheck={false}
+              />
+            </div>
+          </div>
+
+          {/* 中间分隔线（双栏模式）*/}
+          {layoutMode === 'split' && (
+            <div className={`hidden h-auto w-px lg:block opacity-90 ${dividerCls}`} />
+          )}
+
+          {/* 右侧输出面板（双栏模式）*/}
+          {layoutMode === 'split' && (
+            <div className={`flex flex-col min-w-0 min-h-[560px] overflow-hidden ${paneCls}`}>
+              <div className="relative flex-1 overflow-auto px-5 py-4">
+                <pre
+                  className="json-highlight-layer relative min-h-[520px] whitespace-pre-wrap break-words font-mono text-sm leading-[1.85]"
+                  dangerouslySetInnerHTML={{ __html: outputHtml }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
