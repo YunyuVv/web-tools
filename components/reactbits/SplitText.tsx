@@ -44,10 +44,12 @@ export function SplitText({
   }, [])
 
   const units = splitType === 'words' ? text.split(' ') : text.split('')
+  // 强制转型为 ElementType，避免 TypeScript 将 Tag 推断为 SVG 元素类型时产生 ref 不兼容错误
+  const TagComp = Tag as React.ElementType
 
   return (
-    <Tag
-      ref={ref as React.Ref<HTMLElement>}
+    <TagComp
+      ref={ref}
       className={cn('inline', className)}
       aria-label={text}
     >
@@ -67,6 +69,6 @@ export function SplitText({
           {splitType === 'words' && i < units.length - 1 ? ' ' : ''}
         </span>
       ))}
-    </Tag>
+    </TagComp>
   )
 }
