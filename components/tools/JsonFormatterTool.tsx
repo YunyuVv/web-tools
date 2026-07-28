@@ -8,7 +8,6 @@
  */
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
-import { useTheme } from 'next-themes'
 import {
   AlignLeft, Minimize2, ShieldCheck, Copy, FileCode2,
   Columns2, Square, Layers,
@@ -105,9 +104,6 @@ export function JsonFormatterTool({
   hideToolbar = false,
   actionRef,
 }: Props) {
-  const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
-
   // ── 核心状态 ──
   const [text, setText]           = useState(sharedValue ?? '')
   const [outputText, setOutput]   = useState('')
@@ -263,23 +259,6 @@ export function JsonFormatterTool({
   const editableHtml = useMemo(() => renderJsonHtml(text || ' '), [text])
   const outputHtml   = useMemo(() => renderJsonHtml(outputText || ' '), [outputText])
 
-  // ── 暗黑/亮色主题样式 ──
-  const shellCls = isDark
-    ? 'border border-slate-700/45 bg-[linear-gradient(180deg,rgba(12,19,36,0.92),rgba(4,9,20,0.98))] shadow-[0_22px_54px_-38px_rgba(0,0,0,0.84)] backdrop-blur-xl'
-    : 'border border-slate-200/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(248,250,252,0.98))] shadow-[0_18px_42px_-34px_rgba(148,163,184,0.18)] backdrop-blur-xl'
-
-  const paneCls = isDark
-    ? 'bg-[linear-gradient(180deg,rgba(13,21,38,0.46),rgba(4,9,20,0.3))]'
-    : 'bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(248,250,252,0.88))]'
-
-  const dividerCls = isDark ? 'bg-slate-700/42' : 'bg-slate-200/75'
-
-  const glowCls = isDark
-    ? 'bg-[radial-gradient(circle_at_top,rgba(125,183,240,0.08),transparent_58%)]'
-    : 'bg-[radial-gradient(circle_at_top,rgba(125,183,240,0.09),transparent_52%)]'
-
-  const caretCls = isDark ? 'caret-slate-100 placeholder:text-slate-500' : 'caret-slate-800 placeholder:text-slate-400'
-
   return (
     <div className="json-formatter-workbench">
       {/* ── 内置工具栏（外部接管时隐藏）── */}
@@ -361,9 +340,9 @@ export function JsonFormatterTool({
       )}
 
       {/* ── 工作区 ── */}
-      <div className={`json-formatter-shell relative overflow-hidden rounded-[30px] ${shellCls}`}>
+      <div className="json-formatter-shell json-tool-shell relative overflow-hidden rounded-[30px]">
         {/* 顶部光晕 */}
-        <div className={`pointer-events-none absolute inset-x-0 top-0 h-16 opacity-70 ${glowCls}`} />
+        <div className="json-tool-glow pointer-events-none absolute inset-x-0 top-0 h-16 opacity-70" />
 
         {/* 布局网格 */}
         <div
@@ -374,7 +353,7 @@ export function JsonFormatterTool({
           }`}
         >
           {/* 左侧输入面板（带实时高亮叠加）*/}
-          <div className={`flex flex-col min-w-0 min-h-[560px] overflow-hidden ${paneCls}`}>
+          <div className="json-tool-pane flex flex-col min-w-0 min-h-[560px] overflow-hidden">
             <div className="relative flex-1 min-h-[520px]">
               {/* 高亮层 (pre) - 绝对定位在后，不可交互 */}
               <pre
@@ -389,7 +368,7 @@ export function JsonFormatterTool({
                 value={text}
                 onChange={e => updateText(e.target.value)}
                 onScroll={syncScroll}
-                className={`json-editor-textarea relative z-10 h-full min-h-[520px] w-full resize-none overflow-auto border-0 bg-transparent px-5 py-4 font-mono text-sm leading-[1.85] focus:outline-none ${caretCls}`}
+                className="json-editor-textarea relative z-10 h-full min-h-[520px] w-full resize-none overflow-auto border-0 bg-transparent px-5 py-4 font-mono text-sm leading-[1.85] focus:outline-none caret-slate-800 dark:caret-slate-100 placeholder:text-slate-400/90 dark:placeholder:text-slate-500/80"
                 placeholder='在此粘贴或输入 JSON，例如 {"name":"devtoolbox"}'
                 spellCheck={false}
               />
@@ -398,12 +377,12 @@ export function JsonFormatterTool({
 
           {/* 中间分隔线（双栏模式）*/}
           {layoutMode === 'split' && (
-            <div className={`hidden h-auto w-px lg:block opacity-90 ${dividerCls}`} />
+            <div className="json-tool-divider hidden h-auto w-px lg:block opacity-90" />
           )}
 
           {/* 右侧输出面板（双栏模式）*/}
           {layoutMode === 'split' && (
-            <div className={`flex flex-col min-w-0 min-h-[560px] overflow-hidden ${paneCls}`}>
+            <div className="json-tool-pane flex flex-col min-w-0 min-h-[560px] overflow-hidden">
               <div className="relative flex-1 overflow-auto px-5 py-4">
                 <pre
                   className="json-highlight-layer relative min-h-[520px] whitespace-pre-wrap break-words font-mono text-sm leading-[1.85]"

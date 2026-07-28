@@ -7,7 +7,6 @@
  */
 
 import { useState, useEffect, useRef, useMemo, useCallback, type ChangeEvent } from 'react'
-import { useTheme } from 'next-themes'
 import { Search, ChevronDown, ChevronRight, Minus, Plus } from 'lucide-react'
 import {
   parseOrderedJson,
@@ -77,9 +76,6 @@ export function JsonInspectorTool({
   hideToolbar = false,
   onClearRef,
 }: Props) {
-  const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
-
   // ── 内部状态 ──
   const [editorText, setEditorText] = useState(value)
   const [layoutMode, setLayoutMode] = useState<'tree' | 'formatted'>(layoutModeProp)
@@ -322,45 +318,7 @@ export function JsonInspectorTool({
   // ── 格式化行高亮 HTML ──
   const renderLineHtml = useCallback((text: string) => renderJsonHtml(text), [])
 
-  // ── 主题相关样式 ──
-  const shellCls = isDark
-    ? 'border border-slate-700/45 bg-[linear-gradient(180deg,rgba(12,19,36,0.92),rgba(4,9,20,0.98))] shadow-[0_22px_54px_-38px_rgba(0,0,0,0.84)] backdrop-blur-xl'
-    : 'border border-slate-200/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(248,250,252,0.98))] shadow-[0_18px_42px_-34px_rgba(148,163,184,0.18)] backdrop-blur-xl'
-
-  const paneCls = isDark
-    ? 'bg-[linear-gradient(180deg,rgba(13,21,38,0.46),rgba(4,9,20,0.28))]'
-    : 'bg-[linear-gradient(180deg,rgba(255,255,255,0.7),rgba(248,250,252,0.9))]'
-
-  const dividerCls = isDark ? 'bg-slate-700/42' : 'bg-slate-200/75'
-
-  const glowCls = isDark
-    ? 'bg-[radial-gradient(circle_at_top,rgba(125,183,240,0.1),transparent_58%)]'
-    : 'bg-[radial-gradient(circle_at_top,rgba(125,183,240,0.09),transparent_52%)]'
-
-  const formattedContainerCls = isDark
-    ? 'bg-[linear-gradient(180deg,rgba(15,23,42,0.2),rgba(2,6,23,0.08))]'
-    : 'bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(248,250,252,0.9))]'
-
-  const formattedRowHoverCls = isDark ? 'hover:bg-white/[0.04]' : 'hover:bg-slate-100/85'
-  const formattedSelectedCls = isDark ? 'bg-sky-400/10' : 'bg-sky-100/85'
-  const formattedLineNumberCls = isDark ? 'text-slate-500' : 'text-slate-400/90'
-  const formattedLineThemeCls = isDark ? 'formatted-line-dark text-slate-100' : 'formatted-line-light text-slate-800'
-
-  const treeRowHoverCls = isDark ? 'hover:bg-slate-400/5' : 'hover:bg-slate-100/75'
-  const treeRowSelectedCls = isDark
-    ? 'bg-[linear-gradient(180deg,rgba(56,189,248,0.08),rgba(37,99,235,0.06))]'
-    : 'bg-sky-100/80'
-
-  const detailCodeCls = isDark
-    ? 'bg-[linear-gradient(180deg,rgba(7,12,24,0.92),rgba(5,10,20,0.98))] text-slate-100 border border-slate-700/40 shadow-[inset_0_1px_0_rgba(148,163,184,0.08)]'
-    : 'bg-slate-50/92 text-slate-800 border border-slate-200/80'
-
-  const editorInputCls = isDark
-    ? 'text-transparent caret-slate-100 placeholder:text-slate-500'
-    : 'text-transparent caret-slate-900 placeholder:text-slate-400'
-
-  const editorHighlightCls = isDark ? 'formatted-line-dark text-slate-100' : 'formatted-line-light text-slate-800'
-
+  // ── 主题相关样式（已迁移到 globals.css，消除 hydration mismatch）──
   const statusCls = isError ? 'border-rose-300 text-rose-700' : 'border-border text-muted-foreground'
 
   return (
@@ -431,19 +389,19 @@ export function JsonInspectorTool({
       )}
 
       {/* ── 主工作区 ── */}
-      <div className={`json-inspector-shell relative overflow-hidden rounded-[30px] ${shellCls}`}>
+      <div className="json-inspector-shell json-tool-shell relative overflow-hidden rounded-[30px]">
         {/* 顶部光晕 */}
-        <div className={`pointer-events-none absolute inset-x-0 top-0 h-16 opacity-70 ${glowCls}`} />
+        <div className="json-tool-glow pointer-events-none absolute inset-x-0 top-0 h-16 opacity-70" />
 
         <div className="relative grid gap-0 lg:grid-cols-[minmax(0,1.08fr)_1px_minmax(320px,0.92fr)]">
           {/* ── 左侧结构区 ── */}
-          <div className={`min-w-0 overflow-hidden backdrop-blur-[12px] ${paneCls}`}>
+          <div className="json-tool-pane min-w-0 overflow-hidden backdrop-blur-[12px]">
             {!hasRenderableContent ? (
               /* 输入态：textarea + pre 叠加 */
               <div className="relative min-h-[620px]">
                 <pre
                   ref={editorHighlightRef}
-                  className={`json-highlight-layer pointer-events-none absolute inset-0 overflow-auto whitespace-pre-wrap break-words px-4 py-4 font-mono text-sm leading-[1.85] md:px-5 ${editorHighlightCls}`}
+                  className={`json-highlight-layer pointer-events-none absolute inset-0 overflow-auto whitespace-pre-wrap break-words px-4 py-4 font-mono text-sm leading-[1.85] md:px-5 text-slate-800 dark:text-slate-100`}
                   dangerouslySetInnerHTML={{ __html: editableHtml }}
                   aria-hidden
                 />
@@ -452,7 +410,7 @@ export function JsonInspectorTool({
                   value={editorText}
                   onChange={handleEditorChange}
                   onScroll={syncEditorScroll}
-                  className={`json-editor-textarea relative z-10 h-full min-h-[620px] w-full resize-none overflow-auto border-0 bg-transparent px-4 py-4 font-mono text-sm leading-[1.85] focus:outline-none md:px-5 ${editorInputCls}`}
+                  className={`json-editor-textarea relative z-10 h-full min-h-[620px] w-full resize-none overflow-auto border-0 bg-transparent px-4 py-4 font-mono text-sm leading-[1.85] focus:outline-none md:px-5 text-transparent caret-slate-900 dark:caret-slate-100 placeholder:text-slate-400/90 dark:placeholder:text-slate-500/80`}
                   placeholder='请输入合法 JSON，例如 {"name":"devtoolbox"}'
                   spellCheck={false}
                 />
@@ -465,8 +423,8 @@ export function JsonInspectorTool({
                     {visibleTreeRows.map(row => (
                       <div
                         key={row.path}
-                        className={`flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left transition border-b border-border/30 last:border-0 ${
-                          selectedPath === row.path ? treeRowSelectedCls : treeRowHoverCls
+                        className={`flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left transition border-b border-border/30 last:border-0 json-inspector-row ${
+                          selectedPath === row.path ? 'json-inspector-row-selected' : ''
                         }`}
                         onClick={() => selectPath(row.path, treeRowMap)}
                       >
@@ -505,26 +463,26 @@ export function JsonInspectorTool({
                   </div>
                 ) : (
                   /* 格式化行视图 */
-                  <div className={`max-h-[620px] overflow-auto py-2 ${formattedContainerCls}`}>
+                  <div className={`max-h-[620px] overflow-auto py-2 json-inspector-formatted-bg`}>
                     {filteredFormattedLines.map(line => (
                       <button
                         key={line.number}
-                        className={`flex w-full items-start gap-3 px-3 py-1.5 text-left transition ${formattedRowHoverCls} ${
-                          selectedLineNumber === line.number ? formattedSelectedCls : ''
+                        className={`flex w-full items-start gap-3 px-3 py-1.5 text-left transition json-inspector-row ${
+                          selectedLineNumber === line.number ? 'json-inspector-row-selected' : ''
                         }`}
                         onClick={() => selectFormattedLine(line)}
                       >
-                        <span className={`w-10 shrink-0 pt-1 text-right font-mono text-xs ${formattedLineNumberCls}`}>
+                        <span className="w-10 shrink-0 pt-1 text-right font-mono text-xs text-slate-400/90 dark:text-slate-500">
                           {line.number}
                         </span>
                         <span
-                          className={`min-w-0 flex-1 overflow-hidden whitespace-pre-wrap break-words font-mono text-sm leading-[1.85] ${formattedLineThemeCls}`}
+                          className="min-w-0 flex-1 overflow-hidden whitespace-pre-wrap break-words font-mono text-sm leading-[1.85] text-slate-800 dark:text-slate-100"
                           dangerouslySetInnerHTML={{ __html: renderLineHtml(line.text) }}
                         />
                       </button>
                     ))}
                     {filteredFormattedLines.length === 0 && (
-                      <div className={`px-5 py-10 text-center text-sm ${formattedLineNumberCls}`}>无结果</div>
+                      <div className="px-5 py-10 text-center text-sm text-slate-400/90 dark:text-slate-500">无结果</div>
                     )}
                   </div>
                 )}
@@ -533,10 +491,10 @@ export function JsonInspectorTool({
           </div>
 
           {/* ── 中间分隔线 ── */}
-          <div className={`hidden h-auto w-px lg:block opacity-90 ${dividerCls}`} />
+          <div className="json-tool-divider hidden h-auto w-px lg:block opacity-90" />
 
           {/* ── 右侧详情区 ── */}
-          <div className={`min-w-0 overflow-hidden backdrop-blur-[12px] ${paneCls}`}>
+          <div className="json-tool-pane min-w-0 overflow-hidden backdrop-blur-[12px]">
             {selectedNode ? (
               <div className="max-h-[620px] overflow-auto px-4 py-4 md:px-5">
                 {/* Path + 类型 */}
@@ -667,7 +625,7 @@ export function JsonInspectorTool({
                 {selectedDetail?.kind === 'base64' && (
                   <div className="border-b border-border/50 py-4">
                     <DetailLabel>Base64 解码</DetailLabel>
-                    <pre className={`mt-2.5 overflow-auto whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-3 font-mono text-xs leading-[1.75] backdrop-blur-[10px] ${detailCodeCls}`}>
+                    <pre className="mt-2.5 overflow-auto whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-3 font-mono text-xs leading-[1.75] backdrop-blur-[10px] json-inspector-detail-code">
                       {selectedDetail.decoded}
                     </pre>
                   </div>
@@ -676,7 +634,7 @@ export function JsonInspectorTool({
                 {selectedDetail?.kind === 'plain' && (
                   <div className="border-b border-border/50 py-4">
                     <DetailLabel>Value</DetailLabel>
-                    <pre className={`mt-2.5 overflow-auto whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-3 font-mono text-xs leading-[1.75] backdrop-blur-[10px] ${detailCodeCls}`}>
+                    <pre className="mt-2.5 overflow-auto whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-3 font-mono text-xs leading-[1.75] backdrop-blur-[10px] json-inspector-detail-code">
                       {selectedDetail.text}
                     </pre>
                   </div>
@@ -685,7 +643,7 @@ export function JsonInspectorTool({
                 {/* Raw JSON */}
                 <div className="pt-4">
                   <DetailLabel>Raw JSON</DetailLabel>
-                  <pre className={`mt-2.5 overflow-auto whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-3 font-mono text-xs leading-[1.75] backdrop-blur-[10px] ${detailCodeCls}`}>
+                  <pre className="mt-2.5 overflow-auto whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-3 font-mono text-xs leading-[1.75] backdrop-blur-[10px] json-inspector-detail-code">
                     {selectedRawJson}
                   </pre>
                 </div>
