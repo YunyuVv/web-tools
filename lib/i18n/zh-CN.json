@@ -37,7 +37,7 @@
     },
     "json-to-csv": { "title": "JSON 转 CSV", "description": "将 JSON 数组转换为 CSV 格式" },
     "base64": { "title": "Base64 编解码", "description": "Base64 字符串编码与解码" },
-    "url-encode": { "title": "URL 编解码", "description": "URL 组件编码与解码" },
+    "url-encode": { "title": "URL 编解码", "description": "URL 组件编码与解码", "seo_description": "免费在线 URL 编码解码工具，支持 encodeURIComponent 编码和百分号解码，实时转换。" },
     "html-entities": { "title": "HTML 实体转换", "description": "HTML 实体编码与解码" },
     "hash-generator": { "title": "哈希生成器", "description": "生成 MD5、SHA1、SHA256 哈希值" },
     "uuid-generator": { "title": "UUID 生成器", "description": "生成随机 UUID v4 标识符" },

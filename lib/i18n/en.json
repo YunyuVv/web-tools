@@ -37,7 +37,7 @@
     },
     "json-to-csv": { "title": "JSON to CSV", "description": "Convert JSON arrays to CSV format" },
     "base64": { "title": "Base64 Encode / Decode", "description": "Encode or decode Base64 strings" },
-    "url-encode": { "title": "URL Encode / Decode", "description": "Encode and decode URL components" },
+    "url-encode": { "title": "URL Encode / Decode", "description": "Encode and decode URL components", "seo_description": "Free online URL encoder and decoder. Encode special characters with encodeURIComponent or decode percent-encoded strings instantly." },
     "html-entities": { "title": "HTML Entities", "description": "Encode and decode HTML entities" },
     "hash-generator": { "title": "Hash Generator", "description": "Generate MD5, SHA1, SHA256 hashes" },
     "uuid-generator": { "title": "UUID Generator", "description": "Generate random UUID v4 identifiers" },

@@ -9,6 +9,12 @@ import { getMessages } from '@/lib/i18n'
 import { TOOLS } from '@/lib/tools-registry'
 import { ToolPageShell } from '@/components/layout/ToolPageShell'
 import { JsonWorkbench } from '@/components/tools/JsonWorkbench'
+import { Base64Tool } from '@/components/tools/Base64Tool'
+import { UrlEncodeTool } from '@/components/tools/UrlEncodeTool'
+import { UuidGeneratorTool } from '@/components/tools/UuidGeneratorTool'
+import { HashGeneratorTool } from '@/components/tools/HashGeneratorTool'
+import { TimestampTool } from '@/components/tools/TimestampTool'
+import { WordCounterTool } from '@/components/tools/WordCounterTool'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -45,9 +51,13 @@ export default async function EnToolPage({ params }: Props) {
       title={tm.title ?? slug}
       description={tm.description ?? ''}
     >
-      {slug === 'json-formatter' && (
-        <JsonWorkbench messages={messages as any} />
-      )}
+      {slug === 'json-formatter'  && <JsonWorkbench messages={messages as any} />}
+      {slug === 'base64'          && <Base64Tool />}
+      {slug === 'url-encode'      && <UrlEncodeTool />}
+      {slug === 'uuid-generator'  && <UuidGeneratorTool />}
+      {slug === 'hash-generator'  && <HashGeneratorTool />}
+      {slug === 'timestamp'       && <TimestampTool />}
+      {slug === 'word-counter'    && <WordCounterTool />}
 
       {/* SEO 说明区 */}
       {tm.seo_description && (
