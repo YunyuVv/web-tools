@@ -6,17 +6,19 @@
  */
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
-import { ChevronRight, ChevronLeft, Menu, Sun, Moon, Monitor, ChevronDown } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Menu, Sun, Moon, Monitor } from 'lucide-react'
 import { useSidebar } from './SidebarContext'
 import { CategoryIcon } from '@/components/home/CategoryIcon'
 import { CATEGORY_CONFIG, TOOLS, getAllToolsByCategory, type ToolCategory } from '@/lib/tools-registry'
+import { PREFIXED_LOCALES, type Locale } from '@/lib/i18n'
 
 /** 工具 slug 到英文显示名称的映射 */
 const TOOL_DISPLAY_NAMES: Record<string, string> = {
   'json-formatter': 'JSON Formatter',
+  'json-inspector': 'JSON Inspector',
   'json-to-csv': 'JSON to CSV',
   'base64': 'Base64',
   'url-encode': 'URL Encode / Decode',
@@ -191,6 +193,63 @@ function ThemeSwitch() {
   )
 }
 
+// ─── 子组件：语言切换 ───────────────────────────────────────────────
+
+const LOCALE_RE = new RegExp(`^/(${PREFIXED_LOCALES.join('|')})(\/|$)`)
+
+const LANG_OPTIONS: { locale: Locale; label: string }[] = [
+  { locale: 'en',    label: 'EN' },
+  { locale: 'zh-CN', label: '简' },
+  { locale: 'zh-TW', label: '繁' },
+]
+
+/**
+ * 这个组件的作用：在侧边栏底部渲染紧凑语言切换按钮组，点击后跳转到对应语言路径。
+ */
+function LangSwitch() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
+  if (!mounted) return null
+
+  /** 从当前 pathname 推断激活语言 */
+  const currentLocale: Locale = pathname.startsWith('/zh-TW')
+    ? 'zh-TW'
+    : pathname.startsWith('/zh-CN')
+      ? 'zh-CN'
+      : 'en'
+
+  const switchLocale = (locale: Locale) => {
+    if (locale === currentLocale) return
+    localStorage.setItem('NEXT_LOCALE', locale)
+    const cleanPath = pathname.replace(LOCALE_RE, '/') || '/'
+    router.push(locale === 'en' ? cleanPath : `/${locale}${cleanPath}`)
+  }
+
+  return (
+    <div className="flex items-center gap-1 rounded-lg bg-muted/50 p-0.5">
+      {LANG_OPTIONS.map(({ locale, label }) => (
+        <button
+          key={locale}
+          title={locale}
+          onClick={() => switchLocale(locale)}
+          className={[
+            'flex h-6 min-w-[1.5rem] px-1 items-center justify-center rounded-md text-[11px] font-medium tracking-wide transition-all duration-150 cursor-pointer',
+            currentLocale === locale
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground',
+          ].join(' ')}
+          aria-label={locale}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 // ─── 主组件 ─────────────────────────────────────────────────────────
 
 /**
@@ -274,8 +333,9 @@ export function Sidebar() {
           ))}
         </nav>
 
-        {/* 底部主题切换区 */}
-        <div className="flex h-12 items-center justify-end px-3">
+        {/* 底部工具区 */}
+        <div className="flex h-12 items-center justify-between px-3">
+          <LangSwitch />
           <ThemeSwitch />
         </div>
       </aside>
