@@ -35,6 +35,11 @@
       "input_placeholder": "Paste your JSON here...",
       "indent_label": "Indent"
     },
+    "json-inspector": {
+      "title": "JSON Inspector",
+      "description": "Explore JSON structure with tree view and node details",
+      "seo_description": "Free online JSON inspector. Browse JSON structure in tree or formatted view, click any node to see its path, type and raw value."
+    },
     "json-to-csv": { "title": "JSON to CSV", "description": "Convert JSON arrays to CSV format" },
     "base64": { "title": "Base64 Encode / Decode", "description": "Encode or decode Base64 strings" },
     "url-encode": { "title": "URL Encode / Decode", "description": "Encode and decode URL components", "seo_description": "Free online URL encoder and decoder. Encode special characters with encodeURIComponent or decode percent-encoded strings instantly." },

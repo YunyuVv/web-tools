@@ -8,7 +8,8 @@ import type { Metadata } from 'next'
 import { PREFIXED_LOCALES, getMessages, type Locale } from '@/lib/i18n'
 import { TOOLS } from '@/lib/tools-registry'
 import { ToolPageShell } from '@/components/layout/ToolPageShell'
-import { JsonWorkbench } from '@/components/tools/JsonWorkbench'
+import { JsonFormatterTool } from '@/components/tools/JsonFormatterTool'
+import { JsonInspectorTool } from '@/components/tools/JsonInspectorTool'
 import { Base64Tool } from '@/components/tools/Base64Tool'
 import { UrlEncodeTool } from '@/components/tools/UrlEncodeTool'
 import { UuidGeneratorTool } from '@/components/tools/UuidGeneratorTool'
@@ -52,7 +53,8 @@ export default async function ToolPage({ params }: Props) {
       title={tm.title ?? slug}
       description={tm.description ?? ''}
     >
-      {slug === 'json-formatter'  && <JsonWorkbench messages={messages as any} />}
+      {slug === 'json-formatter'  && <JsonFormatterTool />}
+      {slug === 'json-inspector'  && <JsonInspectorTool />}
       {slug === 'base64'          && <Base64Tool />}
       {slug === 'url-encode'      && <UrlEncodeTool />}
       {slug === 'uuid-generator'  && <UuidGeneratorTool />}

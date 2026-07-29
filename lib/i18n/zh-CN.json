@@ -35,6 +35,11 @@
       "input_placeholder": "在此粘贴 JSON...",
       "indent_label": "缩进"
     },
+    "json-inspector": {
+      "title": "JSON 结构浏览器",
+      "description": "树视图浏览 JSON 结构，点击节点查看详情",
+      "seo_description": "免费在线 JSON 结构浏览工具，支持树视图与格式化行视图切换，点击任意节点查看路径、类型和原始值。"
+    },
     "json-to-csv": { "title": "JSON 转 CSV", "description": "将 JSON 数组转换为 CSV 格式" },
     "base64": { "title": "Base64 编解码", "description": "Base64 字符串编码与解码" },
     "url-encode": { "title": "URL 编解码", "description": "URL 组件编码与解码", "seo_description": "免费在线 URL 编码解码工具，支持 encodeURIComponent 编码和百分号解码，实时转换。" },

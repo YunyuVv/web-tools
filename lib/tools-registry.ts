@@ -49,6 +49,7 @@ export const CATEGORY_LABELS: Record<ToolCategory, string> = Object.fromEntries(
 
 export const TOOLS: Tool[] = [
   { slug: 'json-formatter',     category: 'json',     i18nKey: 'json-formatter',     enabled: true,  icon: 'FileCode2'    },
+  { slug: 'json-inspector',     category: 'json',     i18nKey: 'json-inspector',     enabled: true,  icon: 'Search'       },
   { slug: 'json-to-csv',        category: 'json',     i18nKey: 'json-to-csv',        enabled: false, icon: 'Table2'       },
   { slug: 'base64',             category: 'encoding', i18nKey: 'base64',             enabled: true,  icon: 'FileText'     },
   { slug: 'url-encode',         category: 'encoding', i18nKey: 'url-encode',         enabled: true,  icon: 'Link'         },
