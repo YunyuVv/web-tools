@@ -25,7 +25,11 @@
   "home": {
     "title": "Developer Tools",
     "subtitle": "Fast, free, and online developer utilities. No installation required.",
-    "search_placeholder": "Search 50+ tools..."
+    "search_placeholder": "Search tools…",
+    "search_hint": "Type to search JSON, Base64, URL encoder, timestamp & more",
+    "search_results_count": "{count} tools found",
+    "search_empty_title": "No matching tools found",
+    "search_empty_hint": "Try a different keyword?"
   },
   "tools": {
     "json-formatter": {

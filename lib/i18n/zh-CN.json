@@ -25,7 +25,11 @@
   "home": {
     "title": "开发者工具箱",
     "subtitle": "快速、免费的在线开发工具，无需安装。",
-    "search_placeholder": "搜索 50+ 个工具..."
+    "search_placeholder": "搜索工具…",
+    "search_hint": "输入关键词查找 JSON、Base64、URL 编码、时间戳等工具",
+    "search_results_count": "找到 {count} 个匹配工具",
+    "search_empty_title": "没有找到匹配的工具",
+    "search_empty_hint": "试试其他关键词？"
   },
   "tools": {
     "json-formatter": {

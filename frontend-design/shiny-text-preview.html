@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ShinyText 预览</title>
+<style>
+  :root {
+    --primary: oklch(0.55 0.13 187);
+    --foreground: oklch(0.21 0.02 265);
+    --muted: oklch(0.55 0.02 265);
+    --bg: oklch(0.98 0.005 265);
+  }
+  .dark {
+    --primary: oklch(0.70 0.12 187);
+    --foreground: oklch(0.96 0.01 265);
+    --muted: oklch(0.70 0.02 265);
+    --bg: oklch(0.18 0.02 265);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--foreground);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+  }
+  .pane { padding: 56px 40px; }
+  .pane.dark { background: oklch(0.18 0.02 265); color: oklch(0.96 0.01 265); }
+  .pane.light { background: oklch(0.98 0.005 265); }
+  .label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 28px; }
+  h1 { font-size: 52px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 36px; line-height: 1.1; }
+
+  /* ── ShinyText（与 globals.css 一致）── */
+  .shiny-text {
+    --shiny-base: color-mix(in oklch, var(--foreground) 85%, var(--primary));
+    --shiny-shine: oklch(0.50 0.16 187);
+    background: linear-gradient(115deg, var(--shiny-base) 40%, var(--shiny-shine) 47%, var(--shiny-shine) 53%, var(--shiny-base) 60%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    display: inline-block;
+    animation: shiny-sweep var(--shiny-speed, 3s) linear infinite;
+  }
+  .dark .shiny-text {
+    --shiny-base: color-mix(in oklch, var(--foreground) 72%, transparent);
+    --shiny-shine: var(--primary);
+  }
+  @keyframes shiny-sweep {
+    0% { background-position: 100% center; }
+    100% { background-position: -100% center; }
+  }
+  @media (prefers-reduced-motion: reduce) { .shiny-text { animation: none; } }
+
+  .old {
+    background: linear-gradient(135deg, oklch(0.55 0.13 187), oklch(0.65 0.18 200));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    display: inline-block;
+  }
+  .sub { font-size: 16px; color: var(--muted); }
+  .row { margin-bottom: 40px; }
+  .row .tag { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .controls { grid-column: 1 / -1; padding: 20px 40px; border-top: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent); display: flex; gap: 16px; align-items: center; }
+  button { font: inherit; padding: 8px 16px; border-radius: 8px; border: 1px solid color-mix(in oklch, var(--foreground) 20%, transparent); background: transparent; color: inherit; cursor: pointer; }
+</style>
+</head>
+<body>
+  <div class="pane light">
+    <div class="label">Light Theme</div>
+    <div class="row"><div class="tag">新 · ShinyText（扫光，青绿）</div><h1><span class="shiny-text">开发者工具箱</span></h1></div>
+    <div class="row"><div class="tag">旧 · text-gradient（静态）</div><h1><span class="old">开发者工具箱</span></h1></div>
+    <div class="sub">Developer Tools — Fast, free, online utilities.</div>
+  </div>
+  <div class="pane dark">
+    <div class="label">Dark Theme</div>
+    <div class="row"><div class="tag">新 · ShinyText（扫光，青绿）</div><h1><span class="shiny-text">开发者工具箱</span></h1></div>
+    <div class="row"><div class="tag">旧 · text-gradient（静态）</div><h1><span class="old">开发者工具箱</span></h1></div>
+    <div class="sub">Developer Tools — Fast, free, online utilities.</div>
+  </div>
+  <div class="controls">
+    <button onclick="document.body.classList.toggle('dark')">切换 浅色 / 深色</button>
+    <span class="sub">扫光会持续从左向右掠过标题；降低系统动效偏好时自动停止。</span>
+  </div>
+</body>
+</html>

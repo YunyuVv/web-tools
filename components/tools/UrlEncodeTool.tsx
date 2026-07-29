@@ -9,6 +9,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { ArrowLeftRight, Copy, Trash2, Check } from 'lucide-react'
+import { SlidingSegmented } from '@/components/ui/SlidingSegmented'
 
 /** 转换模式：encode = 编码，decode = 解码 */
 type Mode = 'encode' | 'decode'
@@ -88,35 +89,19 @@ export function UrlEncodeTool() {
   }, [output])
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       {/* ── 顶部工具栏 ── */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {/* 模式切换 */}
-        <div className="flex items-center rounded-xl border border-border/60 overflow-hidden">
-          <button
-            onClick={() => handleModeSwitch('encode')}
-            className={[
-              'px-4 py-2 text-sm font-medium transition cursor-pointer',
-              mode === 'encode'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
-            ].join(' ')}
-          >
-            编码
-          </button>
-          <div className="w-px h-5 bg-border/60" />
-          <button
-            onClick={() => handleModeSwitch('decode')}
-            className={[
-              'px-4 py-2 text-sm font-medium transition cursor-pointer',
-              mode === 'decode'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
-            ].join(' ')}
-          >
-            解码
-          </button>
-        </div>
+      <div className="flex items-center gap-3 flex-wrap">
+        {/* 模式切换：滑动玻璃分段控件 */}
+        <SlidingSegmented
+          ariaLabel="编码或解码模式"
+          value={mode}
+          onChange={handleModeSwitch}
+          options={[
+            { value: 'encode', label: '编码' },
+            { value: 'decode', label: '解码' },
+          ]}
+        />
 
         <div className="flex-1" />
 
@@ -125,7 +110,7 @@ export function UrlEncodeTool() {
           onClick={handleSwap}
           disabled={!output}
           title="将输出内容交换到输入框"
-          className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 px-3 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ArrowLeftRight className="h-4 w-4" />
           <span>交换</span>
@@ -136,7 +121,7 @@ export function UrlEncodeTool() {
           onClick={handleClear}
           disabled={!input}
           title="清空输入"
-          className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 px-3 py-2 text-sm text-muted-foreground transition hover:border-destructive/40 hover:text-destructive cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-destructive/40 hover:text-destructive cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Trash2 className="h-4 w-4" />
           <span>清空</span>
@@ -145,18 +130,22 @@ export function UrlEncodeTool() {
 
       {/* ── 错误提示 ── */}
       {error && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive font-mono">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-2.5 text-xs text-destructive font-mono">
           {error}
         </div>
       )}
 
       {/* ── 双栏工作区 ── */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
         {/* 左侧：输入区 */}
-        <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
-          <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
-            <span>{mode === 'encode' ? '待编码文本' : '待解码文本'}</span>
-            <span className="font-mono">{input.length} 字符</span>
+        <div className="group rounded-2xl border border-border/60 bg-card overflow-hidden transition-colors focus-within:border-primary/40">
+          <div className="flex items-center justify-between border-b border-border/40 bg-muted/20 px-5 py-3 text-xs">
+            <span className="font-medium text-muted-foreground">
+              {mode === 'encode' ? '待编码文本' : '待解码文本'}
+            </span>
+            <span className="rounded-md bg-background/70 px-2 py-0.5 font-mono tabular-nums text-muted-foreground">
+              {input.length} 字符
+            </span>
           </div>
           <textarea
             value={input}
@@ -167,19 +156,21 @@ export function UrlEncodeTool() {
                 : '在此粘贴或输入需要解码的 URL 编码文本…'
             }
             spellCheck={false}
-            className="w-full resize-none border-0 bg-transparent px-4 py-3 font-mono text-sm focus:outline-none placeholder:text-muted-foreground/60 min-h-[320px]"
+            className="w-full resize-none border-0 bg-transparent px-5 py-4 font-mono text-sm leading-7 focus:outline-none placeholder:text-muted-foreground/60 min-h-[360px]"
           />
         </div>
 
         {/* 右侧：输出区 */}
-        <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
-          <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
-            <span>{mode === 'encode' ? '编码结果' : '解码结果'}</span>
+        <div className="group rounded-2xl border border-border/60 bg-card overflow-hidden transition-colors focus-within:border-primary/40">
+          <div className="flex items-center justify-between border-b border-border/40 bg-muted/20 px-5 py-3 text-xs">
+            <span className="font-medium text-muted-foreground">
+              {mode === 'encode' ? '编码结果' : '解码结果'}
+            </span>
             <button
               onClick={handleCopy}
               disabled={!output}
               title="复制结果"
-              className="inline-flex items-center gap-1 rounded-lg border border-border/60 px-2 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {copied ? (
                 <>
@@ -199,7 +190,7 @@ export function UrlEncodeTool() {
             readOnly
             placeholder={error ? '转换出错，请检查输入' : '转换结果将显示在此处…'}
             spellCheck={false}
-            className="w-full resize-none border-0 bg-transparent px-4 py-3 font-mono text-sm focus:outline-none placeholder:text-muted-foreground/60 min-h-[320px] select-all"
+            className="w-full resize-none border-0 bg-transparent px-5 py-4 font-mono text-sm leading-7 focus:outline-none placeholder:text-muted-foreground/60 min-h-[360px] select-all"
           />
         </div>
       </div>

@@ -11,125 +11,134 @@ interface HomeSearchProps {
   locale: string
   basePath: string
   tools?: Record<string, { title?: string; description?: string }>
+  home?: {
+    search_placeholder?: string
+    search_hint?: string
+    search_results_count?: string
+    search_empty_title?: string
+    search_empty_hint?: string
+  }
+  sidebar?: { soon?: string }
 }
 
-/** 搜索结果中的单个工具行（极简） */
+/** 搜索结果中的单个工具行 */
 function SearchResultRow({
   tool,
   title,
   href,
+  soonLabel,
 }: {
   tool: Tool
   title: string
   href: string | null
+  soonLabel: string
 }) {
   const config = CATEGORY_CONFIG[tool.category]
 
   if (tool.enabled && href) {
     return (
-      <Link href={href} className="group flex items-center gap-3 px-3 py-2.5 rounded-xl
-        border border-transparent hover:border-border/60 hover:bg-muted/50 transition-all duration-150">
-        <CategoryIcon name={tool.icon} className="h-4 w-4 flex-shrink-0" style={{ color: config.colorVar }} />
-        <span className="flex-1 text-sm font-medium truncate group-hover:text-primary transition-colors">
-          {title}
-        </span>
-        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+      <Link href={href} className="group flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-muted/60 active:bg-muted/80 transition-colors duration-150">
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ background: `color-mix(in oklch, ${config.colorVar} 12%, transparent)` }}
+        >
+          <CategoryIcon name={tool.icon} className="h-[17px] w-[17px]" style={{ color: config.colorVar }} />
+        </div>
+        <span className="flex-1 text-sm font-medium truncate group-hover:text-primary transition-colors">{title}</span>
+        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 group-hover:opacity-100 opacity-0 transition-all flex-shrink-0" />
       </Link>
     )
   }
 
-  // SOON 状态
   return (
-    <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl opacity-50">
-      <CategoryIcon name={tool.icon} className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+    <div className="flex items-center gap-3.5 px-4 py-3 rounded-xl opacity-40 pointer-events-none">
+      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-muted">
+        <CategoryIcon name={tool.icon} className="h-[17px] w-[17px] text-muted-foreground" />
+      </div>
       <span className="flex-1 text-sm font-medium text-muted-foreground truncate">{title}</span>
-      <span className="text-[10px] text-muted-foreground flex-shrink-0">SOON</span>
+      <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/50 flex-shrink-0">{soonLabel}</span>
     </div>
   )
 }
 
-export function HomeSearch({ locale, basePath, tools }: HomeSearchProps) {
+export function HomeSearch({ locale, basePath, tools, home, sidebar }: HomeSearchProps) {
   const [query, setQuery] = useState('')
 
   const results = useMemo(() => {
     if (!query.trim()) return []
-
     const q = query.toLowerCase().trim()
-    return TOOLS.filter(tool => {
-      const title = tools?.[tool.i18nKey]?.title ?? tool.slug
-      const desc = tools?.[tool.i18nKey]?.description ?? ''
-      const catLabel = CATEGORY_CONFIG[tool.category].label
-      return (
-        title.toLowerCase().includes(q) ||
-        desc.toLowerCase().includes(q) ||
-        tool.slug.toLowerCase().includes(q) ||
-        catLabel.toLowerCase().includes(q)
-      )
-    }).sort((a, b) => {
-      // 已上线工具优先
-      if (a.enabled !== b.enabled) return a.enabled ? -1 : 1
-      return 0
-    })
+    const matched: Tool[] = []
+    for (const tool of TOOLS) {
+      const t = tools?.[tool.i18nKey]?.title ?? tool.slug
+      const d = tools?.[tool.i18nKey]?.description ?? ''
+      const c = CATEGORY_CONFIG[tool.category].label
+      if (t.toLowerCase().includes(q) || d.toLowerCase().includes(q) || tool.slug.toLowerCase().includes(q) || c.toLowerCase().includes(q)) {
+        matched.push(tool)
+      }
+    }
+    matched.sort((a, b) => (a.enabled === b.enabled ? 0 : a.enabled ? -1 : 1))
+    return matched
   }, [query, tools])
 
   const hasQuery = query.trim().length > 0
   const liveCount = results.filter(r => r.enabled).length
 
+  // i18n fallbacks
+  const placeholder = home?.search_placeholder ?? '搜索工具…'
+  const hint = home?.search_hint ?? '输入关键词查找工具'
+  const resultsCountTpl = home?.search_results_count ?? '{count} tools found'
+  const emptyTitle = home?.search_empty_title ?? '没有找到匹配的工具'
+  const emptyHint = home?.search_empty_hint ?? '试试其他关键词？'
+  const soonLabel = sidebar?.soon ?? 'SOON'
+
+  const resultsText = resultsCountTpl.replace('{count}', String(liveCount))
+
   return (
     <div className="w-full max-w-xl mx-auto relative">
-      {/* ── 搜索框（居中，位置固定）── */}
-      <div className="relative w-full group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
+      {/* 搜索框 */}
+      <div className="relative w-full group/search">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-muted-foreground/50 group-focus-within/search:text-primary transition-colors duration-200 pointer-events-none" />
         <input
           type="text"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="搜索工具…"
-          className="w-full h-14 pl-12 pr-4 rounded-2xl border bg-background/80 backdrop-blur-md text-base
-            placeholder:text-muted-foreground/60
-            focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50
-            shadow-lg shadow-black/5 transition-all duration-200"
+          placeholder={placeholder}
+          className="w-full h-[52px] pl-12 pr-5 rounded-2xl border border-border/60 bg-background/90 backdrop-blur-md text-[15px]
+            placeholder:text-muted-foreground/40
+            focus:outline-none focus:border-primary/50 focus:bg-background focus:shadow-[0_0_0_3px_color-mix(in_oklch,var(--primary)_8%,transparent)]
+            shadow-[0_2px_12px_rgba(0,0,0,0.06)] focus:shadow-[0_4px_20px_rgba(0,0,0,0.08),0_0_0_3px_color-mix(in_oklch,var(--primary)_8%,transparent)]
+            transition-all duration-200"
           autoFocus
         />
-        {/* 底部发光线 */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent
-          group-focus-within:w-3/4 transition-all duration-500" />
       </div>
 
-      {/* ── 提示（无搜索时，不占位）── */}
-      {!hasQuery && (
-        <p className="mt-4 text-center text-xs text-muted-foreground/60">
-          输入关键词查找 JSON、Base64、URL 编码、时间戳等工具
-        </p>
-      )}
+      {/* 提示（始终占位，搜索时透明） */}
+      <p className={`mt-3.5 text-center text-xs leading-relaxed transition-opacity duration-150 ${hasQuery ? 'opacity-0' : 'text-muted-foreground/45'}`}>
+        {hint}
+      </p>
 
-      {/* ── 搜索结果（绝对定位，不影响搜索框位置）── */}
+      {/* 搜索结果（绝对定位浮层） */}
       {hasQuery && (
-        <div className="absolute top-[calc(100%+0.75rem)] left-0 right-0 z-20">
+        <div className="absolute top-[calc(100%+0.5rem)] left-0 right-0 z-30 animate-in fade-in slide-in-from-top-2 duration-200">
           {results.length === 0 ? (
-            <div className="rounded-2xl border bg-background/95 backdrop-blur-md p-8 text-center text-muted-foreground shadow-lg">
-              <Search className="h-8 w-8 mx-auto mb-2 opacity-25" />
-              <p className="text-sm">没有找到匹配的工具</p>
-              <p className="text-xs mt-1 opacity-70">试试其他关键词？</p>
+            <div className="rounded-2xl border border-border/50 bg-background/95 backdrop-blur-xl p-10 text-center shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-muted/60 flex items-center justify-center">
+                <Search className="h-5 w-5 text-muted-foreground/35" />
+              </div>
+              <p className="text-sm font-medium text-foreground/70">{emptyTitle}</p>
+              <p className="text-xs mt-1 text-muted-foreground/50">{emptyHint}</p>
             </div>
           ) : (
-            <div className="rounded-2xl border bg-background/95 backdrop-blur-md shadow-lg overflow-hidden">
-              <div className="px-3 py-2 text-xs text-muted-foreground border-b bg-muted/30">
-                找到 <span className="font-medium text-foreground">{liveCount}</span> 个匹配工具
+            <div className="rounded-2xl border border-border/50 bg-background/95 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] overflow-hidden">
+              <div className="px-4 py-2.5 text-[11px] font-medium tracking-wide text-muted-foreground/60 border-b border-border/40 bg-muted/20">
+                {resultsText}
               </div>
-              <div className="max-h-[320px] overflow-y-auto py-1 space-y-0.5">
+              <div className="max-h-[340px] overflow-y-auto py-1 divide-y divide-border/30">
                 {results.map(tool => {
                   const tm = tools?.[tool.i18nKey]
-                  const title = tm?.title ?? tool.slug
+                  const t = tm?.title ?? tool.slug
                   const href = tool.enabled ? `${basePath}/tools/${tool.slug}/` : null
-                  return (
-                    <SearchResultRow
-                      key={tool.slug}
-                      tool={tool}
-                      title={title}
-                      href={href}
-                    />
-                  )
+                  return <SearchResultRow key={tool.slug} tool={tool} title={t} href={href} soonLabel={soonLabel} />
                 })}
               </div>
             </div>

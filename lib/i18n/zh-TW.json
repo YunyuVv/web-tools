@@ -25,7 +25,11 @@
   "home": {
     "title": "開發者工具箱",
     "subtitle": "快速、免費的線上開發工具，無需安裝。",
-    "search_placeholder": "搜尋 50+ 個工具..."
+    "search_placeholder": "搜尋工具…",
+    "search_hint": "輸入關鍵字搜尋 JSON、Base64、URL 編碼、時間戳等工具",
+    "search_results_count": "找到 {count} 個匹配工具",
+    "search_empty_title": "沒有找到匹配的工具",
+    "search_empty_hint": "試試其他關鍵字？"
   },
   "tools": {
     "json-formatter": {
