@@ -49,6 +49,17 @@ const localeDetectScript = `
 })();
 `;
 
+/** 侧栏状态脚本：同步执行，在首帧绘制前把持久化状态写到 <html data-sidebar>。
+ *  无论展开还是收起都显式写入，配合 globals.css 的 base opacity:0 + [data-sidebar] 规则，
+ *  保证“首帧即正确态”。该脚本以裸 <script> 形式置于 <head> 最前（已验证在 output:'export'
+ *  导出构建与 dev 下均保留为绘制前同步执行的裸内联脚本，而非被延迟到注水的 self.__next_s.push）。 */
+const sidebarStateScript = `
+try{
+  var collapsed = localStorage.getItem('devtoolbox:sidebar-collapsed')==='true';
+  document.documentElement.setAttribute('data-sidebar', collapsed ? 'collapsed' : 'expanded');
+}catch(e){}
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,8 +68,19 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full`} suppressHydrationWarning>
       <head>
-        {/* 语言检测脚本：放在最前面同步执行，消除语言切换闪烁 */}
-        <script dangerouslySetInnerHTML={{ __html: localeDetectScript }} />
+        {/* 语言检测：裸内联 <script> 置于 <head> 最前，绘制前同步执行，
+            在首帧绘制前完成语言重定向，消除语言切换闪烁 */}
+        <script
+          id="locale-detect"
+          dangerouslySetInnerHTML={{ __html: localeDetectScript }}
+        />
+        {/* 侧栏状态：同样裸内联、绘制前同步写入 <html data-sidebar>，
+            配合 globals.css（base opacity:0 + [data-sidebar] 规则）实现“首帧即正确态”，
+            彻底消除刷新/跳页时的“展开→收起”错误态闪动 */}
+        <script
+          id="sidebar-state"
+          dangerouslySetInnerHTML={{ __html: sidebarStateScript }}
+        />
       </head>
       <body className="min-h-full flex flex-col antialiased bg-background text-foreground">
         <ThemeProvider>

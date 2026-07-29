@@ -7,7 +7,7 @@
  */
 
 import { useState, useMemo, useCallback } from 'react'
-import { CalendarDays, Copy, Check, AlertTriangle, Sparkles } from 'lucide-react'
+import { Copy, Check, AlertTriangle, Sparkles } from 'lucide-react'
 
 const MONTH_NAMES: Record<string, number> = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 }
 const DOW_NAMES: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 }
@@ -162,9 +162,6 @@ export function CronParserTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/20">
-          <CalendarDays className="h-5 w-5" strokeWidth={2.2} />
-        </div>
         <span className="text-sm font-medium text-foreground">Cron 解析器</span>
         <div className="flex-1" />
         <button

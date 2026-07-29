@@ -1,6 +1,7 @@
 /**
- * 英文工具详情页（URL: /tools/[slug]/）
+ * 英文工具详情页（URL: /tools/[slug]/，无语言前缀，默认语言）
  * 使用 ToolPageShell 作为内容布局容器，页头（标题/眉批）不再渲染。
+ * 工具渲染统一走 components/tools/ToolContent，与带前缀路由共享同一份映射。
  */
 
 import { notFound } from 'next/navigation'
@@ -8,14 +9,7 @@ import type { Metadata } from 'next'
 import { getMessages } from '@/lib/i18n'
 import { TOOLS } from '@/lib/tools-registry'
 import { ToolPageShell } from '@/components/layout/ToolPageShell'
-import { JsonFormatterTool } from '@/components/tools/JsonFormatterTool'
-import { JsonInspectorTool } from '@/components/tools/JsonInspectorTool'
-import { Base64Tool } from '@/components/tools/Base64Tool'
-import { UrlEncodeTool } from '@/components/tools/UrlEncodeTool'
-import { UuidGeneratorTool } from '@/components/tools/UuidGeneratorTool'
-import { HashGeneratorTool } from '@/components/tools/HashGeneratorTool'
-import { TimestampTool } from '@/components/tools/TimestampTool'
-import { WordCounterTool } from '@/components/tools/WordCounterTool'
+import { ToolContent } from '@/components/tools/ToolContent'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -46,14 +40,7 @@ export default async function EnToolPage({ params }: Props) {
 
   return (
     <ToolPageShell>
-      {slug === 'json-formatter'  && <JsonFormatterTool />}
-      {slug === 'json-inspector'  && <JsonInspectorTool />}
-      {slug === 'base64'          && <Base64Tool />}
-      {slug === 'url-encode'      && <UrlEncodeTool />}
-      {slug === 'uuid-generator'  && <UuidGeneratorTool />}
-      {slug === 'hash-generator'  && <HashGeneratorTool />}
-      {slug === 'timestamp'       && <TimestampTool />}
-      {slug === 'word-counter'    && <WordCounterTool />}
+      <ToolContent slug={slug} />
     </ToolPageShell>
   )
 }

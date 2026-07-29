@@ -263,7 +263,7 @@ function LangSwitch() {
  * 这个组件的作用：浮动侧边栏主体，包含品牌标题、工具导航菜单和主题切换，支持展开/收起过渡动画和移动端遮罩。
  */
 export function Sidebar() {
-  const { isCollapsed, toggle, collapse } = useSidebar()
+  const { toggle, ready } = useSidebar()
   const { t } = useI18n()
   const pathname = usePathname()
   const basePath = getBasePath(pathname)
@@ -283,9 +283,9 @@ export function Sidebar() {
       {/* 移动端遮罩层 */}
       <div
         className={[
+          'sidebar-overlay',
           'fixed inset-0 z-40 bg-black/8 backdrop-blur-[1px] lg:hidden',
           'transition-opacity duration-200 ease-out',
-          isCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100',
         ].join(' ')}
         onClick={toggle}
         aria-hidden
@@ -299,12 +299,14 @@ export function Sidebar() {
           'w-[calc(82%-0.75rem)] max-w-[304px] lg:w-[268px]',
           'rounded-[26px]',
           'bg-background/80 backdrop-blur-2xl supports-[backdrop-filter]:bg-background/62',
-          isCollapsed ? 'sidebar-shell--collapsed' : 'sidebar-shell--expanded',
+          // 显示状态完全由 <html data-sidebar> 属性 + CSS 驱动（见 globals.css），避免首帧类名不一致闪动
+          // 首帧（恢复持久化状态那一刻）禁用过渡，避免“展开→收起”闪动
+          ready ? '' : 'sidebar-shell--no-anim',
         ].join(' ')}
         aria-label={t('sidebar.nav_label', '工具导航')}
       >
         {/* 顶部标题区 */}
-        <div className="flex h-14 items-center justify-between border-b border-border/60 px-4">
+        <div className="sidebar-divider sidebar-divider--bottom flex h-14 items-center justify-between px-4">
           <Link href={`${basePath}/`} className="inline-flex items-center gap-2.5 text-foreground">
             <DevToolBoxLogo className="w-[22px] h-[22px] shrink-0 text-primary" />
             <span className="text-sm font-semibold tracking-wide text-foreground/90">
@@ -339,7 +341,7 @@ export function Sidebar() {
         </nav>
 
         {/* 底部工具区 */}
-        <div className="flex h-12 items-center justify-between border-t border-border/60 px-3">
+        <div className="sidebar-divider sidebar-divider--top flex h-12 items-center justify-between px-3">
           <LangSwitch />
           <ThemeSwitch />
         </div>
@@ -349,17 +351,17 @@ export function Sidebar() {
       <button
         onClick={toggle}
         className={[
-          'fixed left-4 top-4 z-50',
-          'grid h-10 w-10 place-items-center rounded-xl',
+          'fixed left-3 top-3 z-50',
+          'grid h-9 w-9 place-items-center rounded-xl',
           'border border-border/80 bg-background/92 text-foreground',
-          'shadow-[0_8px_18px_oklch(0.56_0.21_262_/_0.08)]',
+          'shadow-[0_6px_14px_oklch(0.56_0.21_262_/_0.08)]',
           'backdrop-blur-md transition-all duration-200 ease-out',
           'hover:bg-muted cursor-pointer',
-          isCollapsed ? 'opacity-100 scale-100' : 'pointer-events-none opacity-0 scale-95',
+          'sidebar-expand-btn',
         ].join(' ')}
         aria-label={t('sidebar.expand', '展开侧边栏')}
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-[18px] w-[18px]" />
       </button>
     </>
   )

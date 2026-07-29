@@ -6,7 +6,7 @@
  */
 
 import { useState, useMemo, useCallback } from 'react'
-import { Square, Copy, Check } from 'lucide-react'
+import { Copy, Check } from 'lucide-react'
 
 export function BoxShadowTool() {
   const [x, setX] = useState(8)
@@ -71,9 +71,6 @@ export function BoxShadowTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/20">
-          <Square className="h-5 w-5" strokeWidth={2.2} />
-        </div>
         <span className="text-sm font-medium text-foreground">Box Shadow</span>
         <div className="flex-1" />
         <button

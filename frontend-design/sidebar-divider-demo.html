@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>侧栏分隔线方案对比 · DevToolBox</title>
+<style>
+  /* ── 设计 token（取自项目 globals.css）── */
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.14 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-fg: oklch(0.50 0 0);
+    --card: oklch(1 0 0);
+    --primary: oklch(0.55 0.13 187);
+    --primary-bg: oklch(0.55 0.13 187 / 0.1);
+    --page-bg: oklch(0.97 0.003 187);
+
+    /* 分隔线相关 */
+    --divider: oklch(0.90 0 0 / 0.6);
+    --divider-strong: oklch(0.90 0 0 / 0.75);
+    --divider-shadow: oklch(0 0 0 / 0.12);
+    --brand-line: oklch(0.55 0.13 187 / 0.14);
+  }
+  .dark {
+    --background: oklch(0.13 0.004 187);
+    --foreground: oklch(0.97 0 0);
+    --muted: oklch(0.23 0.004 187);
+    --muted-fg: oklch(0.70 0 0);
+    --card: oklch(0.16 0.004 187);
+    --primary: oklch(0.70 0.12 187);
+    --primary-bg: oklch(0.70 0.12 187 / 0.15);
+    --page-bg: oklch(0.10 0.004 187);
+
+    --divider: oklch(1 0 0 / 0.10);
+    --divider-strong: oklch(1 0 0 / 0.16);
+    --divider-shadow: oklch(0 0 0 / 0.5);
+    --brand-line: oklch(0.70 0.12 187 / 0.20);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--page-bg);
+    color: var(--foreground);
+    min-height: 100vh;
+    transition: background .3s, color .3s;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* 让毛玻璃有东西可虚化：点阵 + 光晕 */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, var(--muted-fg) 1px, transparent 0);
+    background-size: 22px 22px;
+    opacity: .18;
+    pointer-events: none;
+  }
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background: radial-gradient(60% 50% at 30% 20%, oklch(0.55 0.13 187 / 0.10), transparent 70%);
+    pointer-events: none;
+  }
+
+  .topbar {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; padding: 22px 28px 6px;
+  }
+  .topbar h1 { font-size: 18px; font-weight: 650; letter-spacing: .2px; }
+  .topbar p { font-size: 13px; color: var(--muted-fg); margin-top: 3px; }
+  .theme-toggle {
+    border: 1px solid var(--divider);
+    background: var(--background);
+    color: var(--foreground);
+    border-radius: 10px; padding: 8px 14px; font-size: 13px; cursor: pointer;
+    transition: background .2s, border-color .2s;
+  }
+  .theme-toggle:hover { border-color: var(--primary); }
+
+  .grid {
+    position: relative; z-index: 2;
+    display: grid; gap: 26px; padding: 24px 28px 48px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    align-items: start;
+  }
+
+  .card { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .caption { text-align: center; max-width: 260px; }
+  .caption .tag {
+    display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 1px;
+    color: var(--primary); background: var(--primary-bg);
+    border-radius: 999px; padding: 2px 10px; margin-bottom: 6px;
+  }
+  .caption .name { font-size: 14px; font-weight: 600; }
+  .caption .desc { font-size: 12px; color: var(--muted-fg); margin-top: 4px; line-height: 1.5; }
+
+  /* ── 浮动侧栏外壳（复用项目 .sidebar-shell 观感）── */
+  .sb {
+    position: relative;
+    width: 248px; height: 430px;
+    border-radius: 26px;
+    background: color-mix(in oklch, var(--background) 80%, transparent);
+    -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+    box-shadow: 0 16px 40px oklch(0.55 0.13 187 / 0.10);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: background .3s;
+  }
+
+  .sb-header {
+    position: relative;
+    height: 56px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+  }
+  .logo { display: flex; align-items: center; gap: 9px; }
+  .logo .mark {
+    width: 22px; height: 22px; border-radius: 7px;
+    background: linear-gradient(135deg, oklch(0.55 0.13 187), oklch(0.62 0.16 250));
+  }
+  .logo .title { font-size: 14px; font-weight: 600; letter-spacing: .3px; }
+  .chev {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: grid; place-items: center;
+    color: var(--muted-fg); transition: background .2s, color .2s;
+  }
+  .chev:hover { background: var(--muted); color: var(--foreground); }
+
+  .sb-nav {
+    flex: 1; overflow: hidden;
+    padding: 8px 12px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .group { }
+  .group-title {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    color: var(--foreground);
+    cursor: pointer;
+  }
+  .group-title .gicon {
+    width: 14px; height: 14px; border-radius: 4px;
+    background: var(--muted-fg); opacity: .8;
+  }
+  .group-title .caret { margin-left: auto; width: 12px; height: 12px; opacity: .45; }
+  .items { margin: 2px 0 4px 12px; padding-left: 10px; border-left: 1px solid var(--divider); display: flex; flex-direction: column; gap: 2px; }
+  .item {
+    padding: 6px 10px; border-radius: 8px; font-size: 13px;
+    color: var(--muted-fg);
+  }
+  .item.active {
+    background: var(--primary-bg); color: var(--primary); font-weight: 600;
+  }
+
+  .sb-footer {
+    position: relative;
+    height: 48px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 12px;
+  }
+  .seg { display: flex; gap: 4px; }
+  .seg button {
+    border: none; background: transparent; color: var(--muted-fg);
+    font-size: 12px; padding: 5px 9px; border-radius: 8px; cursor: pointer;
+  }
+  .seg button.on { background: var(--background); color: var(--foreground); box-shadow: 0 1px 2px oklch(0 0 0 / 0.15); }
+  .themes { display: flex; gap: 4px; }
+  .themes button {
+    width: 30px; height: 30px; border: none; background: transparent; color: var(--muted-fg);
+    border-radius: 8px; cursor: pointer; display: grid; place-items: center;
+  }
+  .themes button.on { background: var(--background); color: var(--foreground); box-shadow: 0 1px 2px oklch(0 0 0 / 0.15); }
+
+  /* ── 方案变体 ── */
+  /* 现状（基线）：实线 60% */
+  .v-base .sb-header { border-bottom: 1px solid var(--divider); }
+  .v-base .sb-footer { border-top: 1px solid var(--divider); }
+
+  /* A：渐变淡出线 */
+  .v-a .sb-header, .v-a .sb-footer { border: none; }
+  .v-a .sb-header::after, .v-a .sb-footer::after {
+    content: ""; position: absolute; left: 0; right: 0; height: 1px;
+    background: var(--divider-strong);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+  }
+  .v-a .sb-header::after { bottom: 0; }
+  .v-a .sb-footer::after { top: 0; }
+
+  /* B：纯间距，无分隔线 */
+  .v-b .sb-header, .v-b .sb-footer { border: none; }
+  .v-b .sb-nav { padding-top: 20px; }
+  .v-b .sb-footer { margin-top: 4px; }
+
+  /* C：极淡内阴影 */
+  .v-c .sb-header { border-bottom: none; box-shadow: inset 0 -1px 2px -1px var(--divider-shadow); }
+  .v-c .sb-footer { border-top: none; box-shadow: inset 0 1px 2px -1px var(--divider-shadow); }
+
+  /* D：主色极淡条 */
+  .v-d .sb-header { border-bottom: 1px solid var(--brand-line); }
+  .v-d .sb-footer { border-top: 1px solid var(--brand-line); }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div>
+      <h1>侧栏分隔线方案对比</h1>
+      <p>现状 + A/B/C/D 四版并排展示 · 点击右上切换亮/暗主题</p>
+    </div>
+    <button class="theme-toggle" onclick="document.body.classList.toggle('dark')">🌓 切换主题</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+<script>
+  const SVGS = {
+    chevL: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+    caret: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+    sun: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+    moon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
+    monitor: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
+  };
+
+  function sidebar(cls) {
+    return `
+    <div class="sb ${cls}">
+      <div class="sb-header">
+        <div class="logo"><div class="mark"></div><span class="title">DevToolBox</span></div>
+        <div class="chev">${SVGS.chevL}</div>
+      </div>
+      <nav class="sb-nav">
+        <div class="group">
+          <div class="group-title"><span class="gicon"></span>JSON<span class="caret">${SVGS.caret}</span></div>
+          <div class="items">
+            <div class="item active">JSON 格式化</div>
+            <div class="item">JSON 检查器</div>
+            <div class="item">JSON → CSV</div>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-title"><span class="gicon"></span>Encoding<span class="caret">${SVGS.caret}</span></div>
+        </div>
+        <div class="group">
+          <div class="group-title"><span class="gicon"></span>Crypto<span class="caret">${SVGS.caret}</span></div>
+        </div>
+      </nav>
+      <div class="sb-footer">
+        <div class="seg"><button>EN</button><button class="on">简</button><button>繁</button></div>
+        <div class="themes"><button>${SVGS.sun}</button><button class="on">${SVGS.moon}</button><button>${SVGS.monitor}</button></div>
+      </div>
+    </div>`;
+  }
+
+  const cards = [
+    { cls: 'v-base', tag: '现状', name: '实线 60%', desc: '当前线上效果：头部下、底部上一道 1px 实线，透明度 60%。最稳但偏生硬。' },
+    { cls: 'v-a', tag: 'A', name: '渐变淡出线', desc: '两端向圆角方向渐隐的细线，保留分隔语义又融化进边缘，与毛玻璃最协调。' },
+    { cls: 'v-b', tag: 'B', name: '纯间距无分隔', desc: '去掉线条，仅靠留白分区。最极简克制，但头/底边界感弱。' },
+    { cls: 'v-c', tag: 'C', name: '极淡内阴影', desc: '用柔和内阴影替代实线，像被轻微压暗，比硬线更自然。' },
+    { cls: 'v-d', tag: 'D', name: '主色极淡条', desc: '分隔线染上极淡品牌色，增加层次与一致性，但仍轻。' },
+  ];
+
+  document.getElementById('grid').innerHTML = cards.map(c => `
+    <div class="card">
+      ${sidebar(c.cls)}
+      <div class="caption">
+        <span class="tag">${c.tag}</span>
+        <div class="name">${c.name}</div>
+        <div class="desc">${c.desc}</div>
+      </div>
+    </div>
+  `).join('');
+</script>
+</body>
+</html>

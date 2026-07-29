@@ -2,12 +2,17 @@
 
 /**
  * IpLookupTool — IP 地理信息查询工具。
- * 浏览器端调用免费无密钥 API（ipapi.co）查询本机或指定 IP 的地理位置信息；
- * 网络不可用时优雅降级给出提示。纯客户端实现，无需服务端密钥。
+ *
+ * 纯浏览器端直连多个免费无密钥 API，按顺序容灾：
+ *   1. ipinfo.io  （主，国内实测可达、响应快、支持 CORS）
+ *   2. ipwho.is   （备，字段更全、支持指定 IP 查询）
+ *   3. ipapi.co   （历史兜底，当前常被 Cloudflare 拦截，放最后）
+ *
+ * 任一源返回有效 IP 即采用，全部失败才提示用户。无服务端密钥依赖。
  */
 
 import { useState, useCallback, useEffect } from 'react'
-import { Globe, Copy, Check, Search, AlertTriangle } from 'lucide-react'
+import { Copy, Check, Search, AlertTriangle, Globe } from 'lucide-react'
 
 interface IpInfo {
   ip: string
@@ -19,7 +24,72 @@ interface IpInfo {
   timezone?: string
   latitude?: number
   longitude?: number
+  source?: string
 }
+
+// ── 多源容灾：顺序尝试，归一化到统一结构 ──
+interface Provider {
+  name: string
+  /** 生成本机 / 指定 IP 的查询 URL */
+  url: (ip?: string) => string
+  /** 把各源的响应归一化为 IpInfo */
+  normalize: (d: Record<string, unknown>) => Partial<IpInfo>
+}
+
+const PROVIDERS: Provider[] = [
+  {
+    name: 'ipinfo.io',
+    url: ip => (ip ? `https://ipinfo.io/${ip}/json` : 'https://ipinfo.io/json'),
+    normalize: d => {
+      const loc = typeof d.loc === 'string' ? (d.loc as string).split(',').map(Number) : []
+      return {
+        ip: d.ip as string,
+        city: d.city as string | undefined,
+        region: d.region as string | undefined,
+        country_name: d.country as string | undefined,
+        country_code: d.country as string | undefined,
+        org: d.org as string | undefined,
+        timezone: d.timezone as string | undefined,
+        latitude: loc[0],
+        longitude: loc[1],
+      }
+    },
+  },
+  {
+    name: 'ipwho.is',
+    url: ip => (ip ? `https://ipwho.is/${ip}` : 'https://ipwho.is/'),
+    normalize: d => {
+      const conn = (d.connection as Record<string, unknown>) || {}
+      const tz = d.timezone
+      return {
+        ip: d.ip as string,
+        city: d.city as string | undefined,
+        region: d.region as string | undefined,
+        country_name: d.country as string | undefined,
+        country_code: d.country_code as string | undefined,
+        org: (d.org as string) || (conn.isp as string) || (conn.org as string) || undefined,
+        timezone: typeof tz === 'string' ? tz : ((tz as Record<string, unknown>)?.id as string | undefined),
+        latitude: typeof d.latitude === 'number' ? d.latitude : undefined,
+        longitude: typeof d.longitude === 'number' ? d.longitude : undefined,
+      }
+    },
+  },
+  {
+    name: 'ipapi.co',
+    url: ip => (ip ? `https://ipapi.co/${ip}/json/` : 'https://ipapi.co/json/'),
+    normalize: d => ({
+      ip: d.ip as string,
+      city: d.city as string | undefined,
+      region: d.region as string | undefined,
+      country_name: d.country_name as string | undefined,
+      country_code: d.country_code as string | undefined,
+      org: d.org as string | undefined,
+      timezone: d.timezone as string | undefined,
+      latitude: d.latitude as number | undefined,
+      longitude: d.longitude as number | undefined,
+    }),
+  },
+]
 
 export function IpLookupTool() {
   const [input, setInput] = useState('')
@@ -31,23 +101,37 @@ export function IpLookupTool() {
   const lookup = useCallback(async (ip?: string) => {
     setLoading(true)
     setError(null)
-    try {
-      const url = ip && ip.trim() ? `https://ipapi.co/${ip.trim()}/json/` : 'https://ipapi.co/json/'
-      const res = await fetch(url)
-      if (!res.ok) throw new Error('bad status')
-      const data = (await res.json()) as IpInfo & { error?: boolean; reason?: string }
-      if (data.error) {
-        setError(data.reason || '查询失败，请稍后重试')
-        setInfo(null)
+
+    let lastReason = '网络请求失败'
+    for (const p of PROVIDERS) {
+      const ctrl = new AbortController()
+      const timer = setTimeout(() => ctrl.abort(), 8000)
+      try {
+        const res = await fetch(p.url(ip), { signal: ctrl.signal })
+        if (!res.ok) {
+          lastReason = `服务返回 ${res.status}`
+          continue
+        }
+        const data = (await res.json()) as Record<string, unknown>
+        const normalized = p.normalize(data)
+        if (!normalized.ip) {
+          lastReason = '响应缺少 IP 字段'
+          continue
+        }
+        setInfo({ ...(normalized as IpInfo), source: p.name })
+        setLoading(false)
         return
+      } catch (e) {
+        lastReason = e instanceof DOMException && e.name === 'AbortError' ? '请求超时' : '网络请求失败'
+        // 尝试下一个源
+      } finally {
+        clearTimeout(timer)
       }
-      setInfo(data)
-    } catch {
-      setError('网络请求失败，请检查网络连接或稍后重试')
-      setInfo(null)
-    } finally {
-      setLoading(false)
     }
+
+    setError(`所有 IP 查询服务暂不可用（${lastReason}），请稍后重试`)
+    setInfo(null)
+    setLoading(false)
   }, [])
 
   // 进入页面时查询本机 IP
@@ -56,7 +140,7 @@ export function IpLookupTool() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleSearch = useCallback(() => lookup(input), [input, lookup])
+  const handleSearch = useCallback(() => lookup(input.trim() || undefined), [input, lookup])
 
   const handleCopy = useCallback(async () => {
     if (!info?.ip) return
@@ -87,9 +171,6 @@ export function IpLookupTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/20">
-          <Globe className="h-5 w-5" strokeWidth={2.2} />
-        </div>
         <span className="text-sm font-medium text-foreground">IP 查询</span>
         <div className="flex-1" />
         <button
@@ -155,6 +236,9 @@ export function IpLookupTool() {
               )}
             </div>
           ))}
+          <div className="col-span-full text-xs text-muted-foreground/60">
+            数据来源：{info.source}
+          </div>
         </div>
       )}
 

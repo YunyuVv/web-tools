@@ -7,7 +7,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react'
-import { Table2, Copy, Check, Trash2, Sparkles, AlertTriangle } from 'lucide-react'
+import { Copy, Check, Trash2, Sparkles, AlertTriangle } from 'lucide-react'
 
 /** 示例 JSON（对象数组） */
 const SAMPLE = `[
@@ -116,9 +116,6 @@ export function JsonToCsvTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/20">
-          <Table2 className="h-5 w-5" strokeWidth={2.2} />
-        </div>
         <span className="text-sm font-medium text-foreground">JSON 转 CSV</span>
         <div className="flex-1" />
         <button

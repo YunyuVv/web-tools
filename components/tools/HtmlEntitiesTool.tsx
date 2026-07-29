@@ -7,7 +7,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react'
-import { Code2, Copy, Check, Trash2, ArrowLeftRight, Sparkles } from 'lucide-react'
+import { Copy, Check, Trash2, ArrowLeftRight, Sparkles } from 'lucide-react'
 import { SlidingSegmented } from '@/components/ui/SlidingSegmented'
 
 type Mode = 'encode' | 'decode'
@@ -83,9 +83,6 @@ export function HtmlEntitiesTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/20">
-          <Code2 className="h-5 w-5" strokeWidth={2.2} />
-        </div>
         <SlidingSegmented
           ariaLabel="编码或解码模式"
           value={mode}

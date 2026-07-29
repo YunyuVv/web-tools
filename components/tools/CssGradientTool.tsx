@@ -7,7 +7,7 @@
  */
 
 import { useState, useMemo, useCallback } from 'react'
-import { Paintbrush, Copy, Check, Plus, X } from 'lucide-react'
+import { Copy, Check, Plus, X } from 'lucide-react'
 
 interface Stop {
   id: number
@@ -63,9 +63,6 @@ export function CssGradientTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/20">
-          <Paintbrush className="h-5 w-5" strokeWidth={2.2} />
-        </div>
         <span className="text-sm font-medium text-foreground">CSS 渐变</span>
         <div className="flex-1" />
         <button

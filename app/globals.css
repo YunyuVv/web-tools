@@ -55,19 +55,19 @@
   --card-foreground: oklch(0.14 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.14 0 0);
-  --primary: oklch(0.55 0.13 187);
+  --primary: oklch(0.60 0.13 175);
   --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.20 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.52 0 0);
-  --accent: oklch(0.95 0.02 187);
+  --accent: oklch(0.95 0.02 175);
   --accent-foreground: oklch(0.20 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.90 0 0);
   --input: oklch(0.90 0 0);
-  --ring: oklch(0.55 0.13 187);
-  --chart-1: oklch(0.55 0.13 187);
+  --ring: oklch(0.60 0.13 175);
+  --chart-1: oklch(0.60 0.13 175);
   --chart-2: oklch(0.65 0.18 200);
   --chart-3: oklch(0.60 0.20 150);
   --chart-4: oklch(0.70 0.15 300);
@@ -75,46 +75,46 @@
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.14 0 0);
-  --sidebar-primary: oklch(0.55 0.13 187);
+  --sidebar-primary: oklch(0.60 0.13 175);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.95 0.02 187);
+  --sidebar-accent: oklch(0.95 0.02 175);
   --sidebar-accent-foreground: oklch(0.20 0 0);
   --sidebar-border: oklch(0.90 0 0);
-  --sidebar-ring: oklch(0.55 0.13 187);
+  --sidebar-ring: oklch(0.60 0.13 175);
 }
 
 .dark {
-  --background: oklch(0.13 0.004 187);
+  --background: oklch(0.13 0.004 175);
   --foreground: oklch(0.97 0 0);
-  --card: oklch(0.17 0.004 187);
+  --card: oklch(0.17 0.004 175);
   --card-foreground: oklch(0.97 0 0);
-  --popover: oklch(0.17 0.004 187);
+  --popover: oklch(0.17 0.004 175);
   --popover-foreground: oklch(0.97 0 0);
-  --primary: oklch(0.70 0.12 187);
+  --primary: oklch(0.70 0.12 175);
   --primary-foreground: oklch(0.11 0 0);
-  --secondary: oklch(0.23 0.004 187);
+  --secondary: oklch(0.23 0.004 175);
   --secondary-foreground: oklch(0.97 0 0);
-  --muted: oklch(0.23 0.004 187);
+  --muted: oklch(0.23 0.004 175);
   --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.24 0.01 187);
+  --accent: oklch(0.24 0.01 175);
   --accent-foreground: oklch(0.97 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.70 0.12 187);
-  --chart-1: oklch(0.70 0.12 187);
+  --ring: oklch(0.70 0.12 175);
+  --chart-1: oklch(0.70 0.12 175);
   --chart-2: oklch(0.72 0.15 200);
   --chart-3: oklch(0.68 0.18 150);
   --chart-4: oklch(0.75 0.13 300);
   --chart-5: oklch(0.70 0.19 30);
-  --sidebar: oklch(0.17 0.004 187);
+  --sidebar: oklch(0.17 0.004 175);
   --sidebar-foreground: oklch(0.97 0 0);
-  --sidebar-primary: oklch(0.70 0.12 187);
+  --sidebar-primary: oklch(0.70 0.12 175);
   --sidebar-primary-foreground: oklch(0.11 0 0);
-  --sidebar-accent: oklch(0.24 0.01 187);
+  --sidebar-accent: oklch(0.24 0.01 175);
   --sidebar-accent-foreground: oklch(0.97 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.70 0.12 187);
+  --sidebar-ring: oklch(0.70 0.12 175);
 }
 
 @layer base {
@@ -173,7 +173,7 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 50% -10%, oklch(0.55 0.13 187 / 0.18), transparent 70%),
+    radial-gradient(ellipse 80% 60% at 50% -10%, oklch(0.55 0.13 175 / 0.18), transparent 70%),
     radial-gradient(ellipse 50% 40% at 85% 70%,  oklch(0.65 0.18 200 / 0.10), transparent 70%);
   pointer-events: none;
   z-index: 0;
@@ -191,7 +191,7 @@
 
 .dark .hero-bg::before {
   background:
-    radial-gradient(ellipse 80% 60% at 50% -10%, oklch(0.55 0.13 187 / 0.25), transparent 70%),
+    radial-gradient(ellipse 80% 60% at 50% -10%, oklch(0.55 0.13 175 / 0.25), transparent 70%),
     radial-gradient(ellipse 50% 40% at 85% 70%,  oklch(0.65 0.18 200 / 0.15), transparent 70%);
 }
 
@@ -211,7 +211,7 @@
 */
 .text-gradient,
 .text-gradient > span > span {
-  background: linear-gradient(135deg, oklch(0.55 0.13 187) 0%, oklch(0.65 0.18 200) 100%);
+  background: linear-gradient(135deg, oklch(0.60 0.13 175) 0%, oklch(0.65 0.18 200) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -220,7 +220,7 @@
 
 .dark .text-gradient,
 .dark .text-gradient > span > span {
-  background: linear-gradient(135deg, oklch(0.80 0.13 187) 0%, oklch(0.80 0.11 187) 100%);
+  background: linear-gradient(135deg, oklch(0.80 0.13 175) 0%, oklch(0.80 0.11 175) 100%);
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -233,7 +233,7 @@
 .shiny-text {
   /* 明亮模式：实心近黑底（白底高对比、清晰不灰）+ 青绿扫光 */
   --shiny-base: var(--foreground);
-  --shiny-shine: oklch(0.50 0.16 187);
+  --shiny-shine: oklch(0.58 0.16 175);
   background: linear-gradient(
     115deg,
     var(--shiny-base) 40%,
@@ -315,6 +315,8 @@
   border-radius: 26px;
   will-change: transform, opacity;
   transform: translate3d(0, 0, 0);
+  /* 默认隐藏：首帧（绘制前脚本尚未写入 / 注水前）绝不展示“错误态”，避免 dev 与导出构建两种时机下都出现闪动 */
+  opacity: 0;
   transition:
     transform 240ms cubic-bezier(0.2, 0.9, 0.24, 1),
     opacity 180ms ease-out;
@@ -345,6 +347,48 @@
   transform: translate3d(calc(-100% - 16px), 0, 0);
   pointer-events: none;
 }
+/* 首帧恢复持久化状态时禁用过渡，避免进入页面出现“展开→收起”闪动 */
+.sidebar-shell--no-anim {
+  transition: none !important;
+}
+/* 侧栏显示状态完全由 <html data-sidebar> 驱动（而非 React 类名）：
+   - 导出构建：app/layout.tsx 的 beforeInteractive 脚本在绘制前写入该属性，首帧即正确（无 hidden 帧）。
+   - dev：该脚本被延迟到注水后执行，故首帧 base opacity:0（隐藏），注水后由 SidebarContext
+     把状态镜像到 data-sidebar 再揭示，因此也绝不会出现“展开→收起”错误态闪动。
+   无论哪种时机，首帧都只会是“隐藏”或“正确态”，不会是错误态。 */
+[data-sidebar="expanded"] .sidebar-shell {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  pointer-events: auto;
+}
+[data-sidebar="collapsed"] .sidebar-shell {
+  opacity: 0;
+  transform: translate3d(calc(-100% - 16px), 0, 0);
+  pointer-events: none;
+}
+[data-sidebar="collapsed"] .sidebar-overlay {
+  opacity: 0;
+  pointer-events: none;
+}
+.sidebar-expand-btn {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+}
+[data-sidebar="collapsed"] .sidebar-expand-btn {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+@media (min-width: 1024px) {
+  /* 默认采用收起态内边距：dev 首帧（data-sidebar 尚未写入）收起用户零位移，不闪动 */
+  .sidebar-content-area {
+    padding-left: 0.75rem; /* 等同 lg:pl-3（收起态） */
+  }
+  [data-sidebar="expanded"] .sidebar-content-area {
+    padding-left: 292px; /* 等同 lg:pl-[292px]（展开态） */
+  }
+}
 .dark .sidebar-shell {
   /* 暗色下中性深色投影保持层次（无青绿发光） */
   box-shadow: 0 16px 40px rgb(0 0 0 / 0.45);
@@ -353,7 +397,7 @@
   position: relative;
   z-index: 1;
   scrollbar-width: thin;
-  scrollbar-color: oklch(0.55 0.13 187 / 0.2) transparent;
+  scrollbar-color: oklch(0.55 0.13 175 / 0.2) transparent;
 }
 
 /* 侧栏统一激活令牌：激活工具与激活分类共用，保证视觉一致 */
@@ -364,12 +408,30 @@
   border-radius: 0.5rem; /* rounded-lg */
 }
 
+/* 侧栏头/底分隔线：两端向圆角渐隐，替代生硬实线（方案 A） */
+.sidebar-divider {
+  position: relative;
+}
+.sidebar-divider::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: color-mix(in srgb, var(--border) 75%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+  pointer-events: none;
+}
+.sidebar-divider--bottom::after { bottom: 0; }
+.sidebar-divider--top::after { top: 0; }
+
 /* ── Tool Panel（工具内容卡片）── */
 .tool-panel {
   border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   border-radius: 28px;
   background: color-mix(in srgb, var(--card) 76%, transparent);
-  box-shadow: 0 10px 28px color-mix(in srgb, oklch(0.55 0.13 187) 6%, transparent);
+  box-shadow: 0 10px 28px color-mix(in srgb, oklch(0.60 0.13 175) 6%, transparent);
   backdrop-filter: blur(14px);
   padding: 24px;
 }
@@ -390,7 +452,7 @@
   color: transparent;
 }
 .json-editor-textarea::selection {
-  background: oklch(0.55 0.13 187 / 0.22);
+  background: oklch(0.55 0.13 175 / 0.22);
   color: transparent;
 }
 
@@ -430,18 +492,19 @@
 /* ── JSON 工具卡片主题样式（消除 hydration mismatch，统一用 CSS 驱动）── */
 
 .json-tool-shell {
-  border: 1px solid rgb(165 180 252 / 0.55);
+  border: 1px solid rgb(148 163 184 / 0.40);
   background: linear-gradient(160deg, rgba(255,255,255,0.99) 0%, rgba(238,242,255,0.97) 100%);
   box-shadow:
-    0 0 0 1px rgba(99,102,241,0.06) inset,
-    0 10px 52px -12px rgba(99,102,241,0.18),
+    0 0 0 1px rgba(100,116,139,0.05) inset,
+    0 10px 52px -12px rgba(100,116,139,0.14),
     0 2px 10px -2px rgba(148,163,184,0.12);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 .dark .json-tool-shell {
-  border-color: rgba(51, 65, 85, 0.55);
-  background: linear-gradient(160deg, rgba(18, 19, 26, 0.98) 0%, rgba(12, 13, 18, 1) 100%);
+  border-color: color-mix(in srgb, var(--border) 55%, transparent);
+  /* 中性近黑 + 极淡薄荷调，与项目暗色主题（oklch 0.13 0.004 175）一致，去掉蓝紫味 */
+  background: linear-gradient(160deg, oklch(0.18 0.004 175 / 0.98) 0%, oklch(0.14 0.004 175 / 1) 100%);
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.03) inset,
     0 4px 20px rgba(0,0,0,0.55),
@@ -453,29 +516,31 @@
 /* Workbench 内嵌工具栏 header 栏 */
 .json-tool-header {
   background: linear-gradient(180deg, rgba(248,250,252,0.96), rgba(241,245,249,0.88));
-  border-bottom: 1px solid rgb(165 180 252 / 0.25);
+  border-bottom: 1px solid rgb(148 163 184 / 0.30);
 }
 .dark .json-tool-header {
-  background: linear-gradient(180deg, rgba(22,32,60,0.98), rgba(16,24,48,0.94));
-  border-bottom: 1px solid rgb(99 102 241 / 0.22);
+  /* 中性近黑，与暗色主题一致（原蓝紫 rgba(22,32,60) 去除）*/
+  background: linear-gradient(180deg, oklch(0.20 0.004 175 / 0.96), oklch(0.16 0.004 175 / 0.92));
+  border-bottom: 1px solid rgb(100 116 139 / 0.30);
 }
 
 .json-tool-pane {
   background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(248,250,252,0.96));
 }
 .dark .json-tool-pane {
-  background: linear-gradient(180deg, rgba(20,21,28,0.45), rgba(14,15,20,0.32));
+  /* 中性近黑，去掉原蓝紫 rgba(20,21,28) 的蓝味 */
+  background: linear-gradient(180deg, oklch(0.19 0.004 175 / 0.40), oklch(0.15 0.004 175 / 0.28));
 }
 
 .json-tool-divider {
-  background: linear-gradient(180deg, rgb(165 180 252 / 0.18), rgb(148 163 184 / 0.14));
+  background: linear-gradient(180deg, rgb(148 163 184 / 0.22), rgb(148 163 184 / 0.14));
 }
 .dark .json-tool-divider {
-  background: linear-gradient(180deg, rgb(99 102 241 / 0.25), rgb(148 163 184 / 0.08));
+  background: linear-gradient(180deg, rgb(100 116 139 / 0.30), rgb(148 163 184 / 0.08));
 }
 
 .json-tool-glow {
-  background: radial-gradient(ellipse 85% 50% at 50% 0%, rgba(99,102,241,0.09), rgba(56,189,248,0.05) 42%, transparent 68%);
+  background: radial-gradient(ellipse 85% 50% at 50% 0%, rgba(100,116,139,0.06), transparent 68%);
 }
 .dark .json-tool-glow {
   background: radial-gradient(ellipse 80% 40% at 50% 0%, rgba(148,163,184,0.05), transparent 55%);
@@ -486,28 +551,31 @@
   background: linear-gradient(180deg, rgba(248,250,252,0.85), rgba(241,245,249,0.95));
 }
 .dark .json-inspector-formatted-bg {
-  background: linear-gradient(180deg, rgba(10,14,28,0.32), rgba(5,7,18,0.18));
+  /* 中性近黑，去掉原蓝紫 rgba(10,14,28) 的蓝味 */
+  background: linear-gradient(180deg, oklch(0.16 0.004 175 / 0.30), oklch(0.12 0.004 175 / 0.18));
 }
 
 /* Inspector 行 hover / selected */
 .json-inspector-row:hover {
-  background-color: rgb(238 242 255 / 0.7);
+  background-color: rgb(241 245 249 / 0.7);
 }
 .dark .json-inspector-row:hover {
-  background-color: rgb(99 102 241 / 0.05);
+  /* 原靛蓝 rgb(99 102 241) → 项目薄荷主色，去掉紫味 */
+  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
 }
 .json-inspector-row-selected {
-  background-color: rgb(199 210 254 / 0.75) !important;
+  background-color: rgb(203 213 225 / 0.75) !important;
 }
 .dark .json-inspector-row-selected {
-  background: linear-gradient(180deg, rgb(99 102 241 / 0.12), rgb(56 189 248 / 0.07)) !important;
+  /* 原靛蓝+青 → 项目薄荷主色渐变，与其他页面高亮一致 */
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 16%, transparent), color-mix(in srgb, var(--primary) 8%, transparent)) !important;
 }
 
 /* Inspector 详情代码块 */
 .json-inspector-detail-code {
   background: linear-gradient(180deg, rgba(238,242,255,0.75), rgba(241,245,249,0.95));
   color: rgb(30 41 59);
-  border: 1px solid rgb(165 180 252 / 0.5);
+  border: 1px solid rgb(148 163 184 / 0.5);
   border-radius: 10px;
   padding: 12px 14px;
   font-family: ui-monospace, SFMono-Regular, 'SF Mono', Cascadia Code, Consolas, monospace;
@@ -518,6 +586,7 @@
 .dark .json-inspector-detail-code {
   background: linear-gradient(180deg, rgba(7,9,20,0.92), rgba(4,5,14,0.98));
   color: rgb(226 232 240);
-  border-color: rgb(99 102 241 / 0.2);
+  /* 原靛蓝边框 rgb(99 102 241) → 中性 slate 边框，去掉紫味 */
+  border-color: color-mix(in srgb, var(--border) 70%, transparent);
   box-shadow: inset 0 1px 0 rgb(148 163 184 / 0.07);
 }
