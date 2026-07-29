@@ -25,21 +25,22 @@ export interface Tool {
 }
 
 /**
- * 分类配置：图标（Lucide）、颜色（Tailwind 前缀）、标签、渐变
+ * 分类配置：图标（Lucide）、颜色、标签、渐变
+ * textClass 使用感知亮度/饱和度一致的 oklch 值（仅色相区分），保证侧栏与卡片配色协调
  * iconGradient 用于卡片图标背景实色渐变
  */
 export const CATEGORY_CONFIG: Record<
   ToolCategory,
   { label: string; icon: string; colorVar: string; bgClass: string; textClass: string; iconGradient: string }
 > = {
-  json:     { label: 'JSON',        icon: 'FileCode2',          colorVar: '#6366f1', bgClass: 'bg-indigo-500/10',  textClass: 'text-indigo-500',  iconGradient: 'linear-gradient(135deg,#6366f1,#7c3aed)' },
-  encoding: { label: 'Encoding',    icon: 'Binary',             colorVar: '#8b5cf6', bgClass: 'bg-violet-500/10',  textClass: 'text-violet-500',  iconGradient: 'linear-gradient(135deg,#8b5cf6,#6d28d9)' },
-  crypto:   { label: 'Crypto',      icon: 'Lock',               colorVar: '#f59e0b', bgClass: 'bg-amber-500/10',   textClass: 'text-amber-500',   iconGradient: 'linear-gradient(135deg,#f59e0b,#d97706)' },
-  datetime: { label: 'Date & Time', icon: 'Clock',              colorVar: '#06b6d4', bgClass: 'bg-cyan-500/10',    textClass: 'text-cyan-500',    iconGradient: 'linear-gradient(135deg,#06b6d4,#0284c7)' },
-  css:      { label: 'CSS',         icon: 'Paintbrush',         colorVar: '#ec4899', bgClass: 'bg-pink-500/10',    textClass: 'text-pink-500',    iconGradient: 'linear-gradient(135deg,#ec4899,#db2777)' },
-  color:    { label: 'Color',       icon: 'Palette',            colorVar: '#f97316', bgClass: 'bg-orange-500/10',  textClass: 'text-orange-500',  iconGradient: 'linear-gradient(135deg,#f97316,#ea580c)' },
-  text:     { label: 'Text',        icon: 'Type',               colorVar: '#22c55e', bgClass: 'bg-green-500/10',   textClass: 'text-green-500',   iconGradient: 'linear-gradient(135deg,#22c55e,#16a34a)' },
-  network:  { label: 'Network',     icon: 'Globe',              colorVar: '#0ea5e9', bgClass: 'bg-sky-500/10',     textClass: 'text-sky-500',     iconGradient: 'linear-gradient(135deg,#0ea5e9,#2563eb)' },
+  json:     { label: 'JSON',        icon: 'FileCode2',          colorVar: '#6366f1', bgClass: 'bg-indigo-500/10',  textClass: 'text-[oklch(0.60_0.15_264)]',  iconGradient: 'linear-gradient(135deg,#6366f1,#7c3aed)' },
+  encoding: { label: 'Encoding',    icon: 'Binary',             colorVar: '#8b5cf6', bgClass: 'bg-violet-500/10',  textClass: 'text-[oklch(0.60_0.15_285)]',  iconGradient: 'linear-gradient(135deg,#8b5cf6,#6d28d9)' },
+  crypto:   { label: 'Crypto',      icon: 'Lock',               colorVar: '#f59e0b', bgClass: 'bg-amber-500/10',   textClass: 'text-[oklch(0.70_0.13_75)]',   iconGradient: 'linear-gradient(135deg,#f59e0b,#d97706)' },
+  datetime: { label: 'Date & Time', icon: 'Clock',              colorVar: '#06b6d4', bgClass: 'bg-cyan-500/10',    textClass: 'text-[oklch(0.66_0.12_200)]',  iconGradient: 'linear-gradient(135deg,#06b6d4,#0284c7)' },
+  css:      { label: 'CSS',         icon: 'Paintbrush',         colorVar: '#ec4899', bgClass: 'bg-pink-500/10',    textClass: 'text-[oklch(0.63_0.15_350)]',  iconGradient: 'linear-gradient(135deg,#ec4899,#db2777)' },
+  color:    { label: 'Color',       icon: 'Palette',            colorVar: '#f97316', bgClass: 'bg-orange-500/10',  textClass: 'text-[oklch(0.69_0.14_45)]',   iconGradient: 'linear-gradient(135deg,#f97316,#ea580c)' },
+  text:     { label: 'Text',        icon: 'Type',               colorVar: '#22c55e', bgClass: 'bg-green-500/10',   textClass: 'text-[oklch(0.67_0.14_145)]',  iconGradient: 'linear-gradient(135deg,#22c55e,#16a34a)' },
+  network:  { label: 'Network',     icon: 'Globe',              colorVar: '#0ea5e9', bgClass: 'bg-sky-500/10',     textClass: 'text-[oklch(0.64_0.13_225)]',  iconGradient: 'linear-gradient(135deg,#0ea5e9,#2563eb)' },
 }
 
 /** 向后兼容的纯标签映射 */

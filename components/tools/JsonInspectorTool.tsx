@@ -6,7 +6,7 @@
  * 移植自参考项目 ideaflow-web-tool/app/components/Tools/json/JsonInspectorWorkbench.vue。
  */
 
-import { useState, useEffect, useRef, useMemo, useCallback, type ChangeEvent } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, type ChangeEvent, type VideoHTMLAttributes } from 'react'
 import { Search, ChevronDown, ChevronRight, Minus, Plus } from 'lucide-react'
 import {
   parseOrderedJson,
@@ -546,8 +546,14 @@ export function JsonInspectorTool({
                   <div className="border-b border-border/50 py-4">
                     <DetailLabel>Video</DetailLabel>
                     {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-                    <video src={selectedDetail.url} controls
-                      className="mt-2.5 max-h-72 w-full rounded-[18px] bg-slate-950" />
+                    <video
+                      {...({
+                        src: selectedDetail.url,
+                        controls: true,
+                        referrerPolicy: 'no-referrer',
+                        className: 'mt-2.5 max-h-72 w-full rounded-[18px] bg-slate-950',
+                      } as VideoHTMLAttributes<HTMLVideoElement>)}
+                    />
                     <a href={selectedDetail.url} target="_blank" rel="noopener noreferrer"
                       className="mt-2.5 inline-flex text-sm text-primary hover:opacity-80">
                       打开

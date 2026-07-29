@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>侧边栏 Logo 预览 · 主题色</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; padding: 40px; background: #f5f5f5; color: #111; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.sub { margin: 0 0 28px; color: #666; font-size: 14px; }
+  .grid { display: flex; gap: 40px; flex-wrap: wrap; }
+  .panel { background: #fff; border: 1px solid #e5e5e5; border-radius: 16px; padding: 22px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .panel.dark { background: #1e1e1e; border-color: #333; color: #eee; }
+  .panel h2 { font-size: 14px; margin: 0 0 18px; font-weight: 600; }
+  /* 模拟侧边栏头部一行 */
+  .bar { display: inline-flex; align-items: center; gap: 10px; height: 56px; padding: 0 16px; border-radius: 14px; border: 1px solid rgba(120,120,120,.18); background: color-mix(in oklch, #fff 82%, transparent); }
+  .bar.dark { background: color-mix(in oklch, #1e1e1e 80%, transparent); border-color: rgba(255,255,255,.1); }
+  .bar .logo { width: 22px; height: 22px; flex: none; }
+  .bar .name { font-size: 14px; font-weight: 600; letter-spacing: .02em; }
+  .panel.dark .bar .name { color: rgba(255,255,255,.92); }
+  .panel:not(.dark) .bar .name { color: rgba(0,0,0,.9); }
+  .oldbar .logo { /* 旧版：白底，不受 currentColor 控制 */
+    background:#fff; border:1px solid #000; border-radius:4px;
+  }
+  .row { display:flex; align-items:center; gap:18px; margin-bottom:20px; }
+  .row:last-child { margin-bottom:0; }
+  .tag { font-size:12px; color:#999; width:64px; }
+</style>
+</head>
+<body>
+  <h1>侧边栏顶部 Logo 预览</h1>
+  <p class="sub">左：新方案（透明背景 + 主题青绿 currentColor）· 右：旧版（白底黑字，与标签栏同样的白方块问题）</p>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>浅色主题</h2>
+      <div class="row">
+        <span class="tag">新方案</span>
+        <div class="bar" style="color: oklch(0.55 0.13 187)">
+          <svg class="logo" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M12.32 1.437c1.17-.1 1.47-.032 2.205.501l3.039 2.136c.5.367.668.467.668.867v11.715c0 .734-.267 1.168-1.202 1.234l-11.055.667c-.702.034-1.036-.066-1.404-.533L2.333 15.12c-.4-.534-.567-.934-.567-1.401V3.306c0-.6.267-1.101 1.035-1.168zM16.561 5.308l-10.854.634c-.4.034-.534.235-.534.668v9.945c0 .535.267.735.868.702l10.388-.601c.6-.033.668-.401.668-.835V5.942c0-.433-.167-.667-.536-.634zM12.722 2.372l-9.153.668c-.333.033-.4.2-.267.333l1.303 1.035c.534.433.735.4 1.737.333l9.452-.567c.2 0 .034-.2-.033-.233l-1.57-1.136c-.301-.233-.702-.5-1.47-.433z"/><text x="11.1" y="12.1" font-size="3.2" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-weight="900" text-anchor="middle" fill="currentColor" transform="rotate(-3 11.1 12.1)">tools</text></svg>
+          <span class="name">DevToolBox</span>
+        </div>
+      </div>
+      <div class="row">
+        <span class="tag">旧版</span>
+        <div class="bar oldbar">
+          <svg class="logo" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M12.266.69c.576-.049 1.048-.07 1.486.029.462.105.819.328 1.204.607h.001l3.038 2.135.012.008.334.248c.114.09.224.186.312.288.248.286.33.599.33.937v11.714l-.005.167c-.019.397-.116.837-.433 1.197-.368.418-.9.579-1.461.619h-.009l-11.055.668h-.01c-.375.018-.758.008-1.12-.123a1.9 1.9 0 0 1-.72-.479l-.189-.216-.003-.006-2.239-2.905-.006-.008c-.396-.527-.648-1.02-.705-1.597l-.012-.254V3.307c0-.4.088-.861.388-1.246.316-.404.785-.622 1.332-.67h.01z"/><path fill="#000" d="M12.32 1.437c1.17-.1 1.47-.032 2.205.501l3.039 2.136c.5.367.668.467.668.867v11.715c0 .734-.267 1.168-1.202 1.234l-11.055.667c-.702.034-1.036-.066-1.404-.533L2.333 15.12c-.4-.534-.567-.934-.567-1.401V3.306c0-.6.267-1.101 1.035-1.168zM16.561 5.308l-10.854.634c-.4.034-.534.235-.534.668v9.945c0 .535.267.735.868.702l10.388-.601c.6-.033.668-.401.668-.835V5.942c0-.433-.167-.667-.536-.634zM12.722 2.372l-9.153.668c-.333.033-.4.2-.267.333l1.303 1.035c.534.433.735.4 1.737.333l9.452-.567c.2 0 .034-.2-.033-.233l-1.57-1.136c-.301-.233-.702-.5-1.47-.433z"/><text x="11.1" y="12.1" font-size="3.2" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-weight="900" text-anchor="middle" fill="#000" transform="rotate(-3 11.1 12.1)">tools</text></svg>
+          <span class="name">DevToolBox</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel dark">
+      <h2>深色主题</h2>
+      <div class="row">
+        <span class="tag">新方案</span>
+        <div class="bar dark" style="color: oklch(0.70 0.12 187)">
+          <svg class="logo" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M12.32 1.437c1.17-.1 1.47-.032 2.205.501l3.039 2.136c.5.367.668.467.668.867v11.715c0 .734-.267 1.168-1.202 1.234l-11.055.667c-.702.034-1.036-.066-1.404-.533L2.333 15.12c-.4-.534-.567-.934-.567-1.401V3.306c0-.6.267-1.101 1.035-1.168zM16.561 5.308l-10.854.634c-.4.034-.534.235-.534.668v9.945c0 .535.267.735.868.702l10.388-.601c.6-.033.668-.401.668-.835V5.942c0-.433-.167-.667-.536-.634zM12.722 2.372l-9.153.668c-.333.033-.4.2-.267.333l1.303 1.035c.534.433.735.4 1.737.333l9.452-.567c.2 0 .034-.2-.033-.233l-1.57-1.136c-.301-.233-.702-.5-1.47-.433z"/><text x="11.1" y="12.1" font-size="3.2" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-weight="900" text-anchor="middle" fill="currentColor" transform="rotate(-3 11.1 12.1)">tools</text></svg>
+          <span class="name">DevToolBox</span>
+        </div>
+      </div>
+      <div class="row">
+        <span class="tag">旧版</span>
+        <div class="bar oldbar dark">
+          <svg class="logo" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M12.266.69c.576-.049 1.048-.07 1.486.029.462.105.819.328 1.204.607h.001l3.038 2.135.012.008.334.248c.114.09.224.186.312.288.248.286.33.599.33.937v11.714l-.005.167c-.019.397-.116.837-.433 1.197-.368.418-.9.579-1.461.619h-.009l-11.055.668h-.01c-.375.018-.758.008-1.12-.123a1.9 1.9 0 0 1-.72-.479l-.189-.216-.003-.006-2.239-2.905-.006-.008c-.396-.527-.648-1.02-.705-1.597l-.012-.254V3.307c0-.4.088-.861.388-1.246.316-.404.785-.622 1.332-.67h.01z"/><path fill="#000" d="M12.32 1.437c1.17-.1 1.47-.032 2.205.501l3.039 2.136c.5.367.668.467.668.867v11.715c0 .734-.267 1.168-1.202 1.234l-11.055.667c-.702.034-1.036-.066-1.404-.533L2.333 15.12c-.4-.534-.567-.934-.567-1.401V3.306c0-.6.267-1.101 1.035-1.168zM16.561 5.308l-10.854.634c-.4.034-.534.235-.534.668v9.945c0 .535.267.735.868.702l10.388-.601c.6-.033.668-.401.668-.835V5.942c0-.433-.167-.667-.536-.634zM12.722 2.372l-9.153.668c-.333.033-.4.2-.267.333l1.303 1.035c.534.433.735.4 1.737.333l9.452-.567c.2 0 .034-.2-.033-.233l-1.57-1.136c-.301-.233-.702-.5-1.47-.433z"/><text x="11.1" y="12.1" font-size="3.2" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-weight="900" text-anchor="middle" fill="#000" transform="rotate(-3 11.1 12.1)">tools</text></svg>
+          <span class="name">DevToolBox</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

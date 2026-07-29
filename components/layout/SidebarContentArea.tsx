@@ -22,7 +22,7 @@ export function SidebarContentArea({ children }: Props) {
       className={[
         'relative z-0 min-h-screen',
         'transition-[padding-left] duration-[240ms] ease-[cubic-bezier(0.2,0.9,0.24,1)]',
-        isCollapsed ? 'lg:pl-0' : 'lg:pl-[292px]',
+        isCollapsed ? 'lg:pl-3' : 'lg:pl-[292px]',
       ].join(' ')}
     >
       {children}

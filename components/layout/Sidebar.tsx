@@ -18,6 +18,7 @@ import { PREFIXED_LOCALES, type Locale } from '@/lib/i18n'
 
 /**
  * 这个组件的作用：品牌 Logo 内联 SVG（Notion 风格 tools 图标）。
+ * 透明背景，描边与文字使用 currentColor（由外层 text-primary 控制，随明暗主题取品牌青绿）。
  */
 function DevToolBoxLogo({ className }: { className?: string }) {
   return (
@@ -28,9 +29,9 @@ function DevToolBoxLogo({ className }: { className?: string }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path fill="#fff" d="M12.266.69c.576-.049 1.048-.07 1.486.029.462.105.819.328 1.204.607h.001l3.038 2.135.012.008.334.248c.114.09.224.186.312.288.248.286.33.599.33.937v11.714l-.005.167c-.019.397-.116.837-.433 1.197-.368.418-.9.579-1.461.619h-.009l-11.055.668h-.01c-.375.018-.758.008-1.12-.123a1.9 1.9 0 0 1-.72-.479l-.189-.216-.003-.006-2.239-2.905-.006-.008c-.396-.527-.648-1.02-.705-1.597l-.012-.254V3.307c0-.4.088-.861.388-1.246.316-.404.785-.622 1.332-.67h.01z" />
-      <path fill="#000" d="M12.32 1.437c1.17-.1 1.47-.032 2.205.501l3.039 2.136c.5.367.668.467.668.867v11.715c0 .734-.267 1.168-1.202 1.234l-11.055.667c-.702.034-1.036-.066-1.404-.533L2.333 15.12c-.4-.534-.567-.934-.567-1.401V3.306c0-.6.267-1.101 1.035-1.168zM16.561 5.308l-10.854.634c-.4.034-.534.235-.534.668v9.945c0 .535.267.735.868.702l10.388-.601c.6-.033.668-.401.668-.835V5.942c0-.433-.167-.667-.536-.634zM12.722 2.372l-9.153.668c-.333.033-.4.2-.267.333l1.303 1.035c.534.433.735.4 1.737.333l9.452-.567c.2 0 .034-.2-.033-.233l-1.57-1.136c-.301-.233-.702-.5-1.47-.433z" />
-      <text x="11.1" y="12.1" fontSize="3.2" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" fontWeight="900" textAnchor="middle" fill="#000" transform="rotate(-3 11.1 12.1)">tools</text>
+      {/* 文档轮廓（currentColor）+ tools 文字（currentColor），无白底 */}
+      <path fill="currentColor" d="M12.32 1.437c1.17-.1 1.47-.032 2.205.501l3.039 2.136c.5.367.668.467.668.867v11.715c0 .734-.267 1.168-1.202 1.234l-11.055.667c-.702.034-1.036-.066-1.404-.533L2.333 15.12c-.4-.534-.567-.934-.567-1.401V3.306c0-.6.267-1.101 1.035-1.168zM16.561 5.308l-10.854.634c-.4.034-.534.235-.534.668v9.945c0 .535.267.735.868.702l10.388-.601c.6-.033.668-.401.668-.835V5.942c0-.433-.167-.667-.536-.634zM12.722 2.372l-9.153.668c-.333.033-.4.2-.267.333l1.303 1.035c.534.433.735.4 1.737.333l9.452-.567c.2 0 .034-.2-.033-.233l-1.57-1.136c-.301-.233-.702-.5-1.47-.433z" />
+      <text x="11.1" y="12.1" fontSize="3.2" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" fontWeight="900" textAnchor="middle" fill="currentColor" transform="rotate(-3 11.1 12.1)">tools</text>
     </svg>
   )
 }
@@ -83,7 +84,7 @@ function NavItem({ title, href, isActive, soonLabel }: NavItemProps) {
       className={[
         'flex h-7 items-center gap-2 rounded-lg px-2.5 text-[13px] transition-colors duration-150',
         isActive
-          ? 'bg-primary/10 text-primary font-semibold'
+          ? 'nav-active-item'
           : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
       ].join(' ')}
     >
@@ -100,12 +101,13 @@ interface NavGroupProps {
   activeToolSlug?: string
   basePath: string
   t: (key: string, fallback?: string) => string
+  isActiveCategory?: boolean
 }
 
 /**
  * 这个组件的作用：渲染侧边栏中一个工具分类的可折叠导航组，包含分类图标、标签和子工具列表。
  */
-function NavGroup({ category, defaultExpanded = false, activeToolSlug, basePath, t }: NavGroupProps) {
+function NavGroup({ category, defaultExpanded = false, activeToolSlug, basePath, t, isActiveCategory = false }: NavGroupProps) {
   const config = CATEGORY_CONFIG[category]
   const allByCategory = getAllToolsByCategory()
   const tools = allByCategory.get(category) ?? []
@@ -119,23 +121,26 @@ function NavGroup({ category, defaultExpanded = false, activeToolSlug, basePath,
       {/* 分类标题行 */}
       <button
         onClick={() => setExpanded(prev => !prev)}
-        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[13px] font-medium transition-colors hover:bg-muted/40 cursor-pointer"
+        className={[
+          'flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[13px] transition-colors cursor-pointer',
+          isActiveCategory
+            ? 'nav-active-item'
+            : 'font-medium text-foreground hover:bg-muted/40',
+        ].join(' ')}
       >
         <CategoryIcon
           name={config.icon}
-          className={`h-3.5 w-3.5 shrink-0 transition-colors ${expanded ? config.textClass : 'text-muted-foreground'}`}
+          className={`h-3.5 w-3.5 shrink-0 transition-colors ${isActiveCategory ? 'text-primary' : config.textClass}`}
         />
-        <span className={`transition-colors ${expanded ? 'text-foreground' : 'text-muted-foreground'}`}>
-          {categoryLabel}
-        </span>
+        <span className={isActiveCategory ? '' : 'text-foreground'}>{categoryLabel}</span>
         <ChevronRight
-          className={`ml-auto h-3 w-3 text-muted-foreground/50 transition-transform duration-200 ${expanded ? 'rotate-90' : 'rotate-0'}`}
+          className={`ml-auto h-3 w-3 text-muted-foreground/60 transition-transform duration-200 ${expanded ? 'rotate-90' : 'rotate-0'}`}
         />
       </button>
 
       {/* 工具列表 */}
       {expanded && (
-        <div className="mt-0.5 ml-2 pl-2 border-l border-border/50 space-y-0.5">
+        <div className="mt-1 ml-3 pl-3 border-l border-border/70 space-y-1">
           {tools.map(tool => {
             const href = tool.enabled ? `${basePath}/tools/${tool.slug}/` : undefined
             const toolTitle = t(`tools.${tool.slug}.title`, tool.slug)
@@ -183,7 +188,7 @@ function ThemeSwitch() {
           className={[
             'flex h-6 w-6 items-center justify-center rounded-md transition-all duration-150 cursor-pointer',
             theme === key
-              ? 'bg-background text-foreground shadow-sm'
+              ? 'bg-background text-primary shadow-sm'
               : 'text-muted-foreground hover:text-foreground',
           ].join(' ')}
           aria-label={label}
@@ -240,7 +245,7 @@ function LangSwitch() {
           className={[
             'flex h-6 min-w-[1.5rem] px-1 items-center justify-center rounded-md text-[11px] font-medium tracking-wide transition-all duration-150 cursor-pointer',
             currentLocale === locale
-              ? 'bg-background text-foreground shadow-sm'
+              ? 'bg-background text-primary shadow-sm'
               : 'text-muted-foreground hover:text-foreground',
           ].join(' ')}
           aria-label={locale}
@@ -299,16 +304,16 @@ export function Sidebar() {
         aria-label={t('sidebar.nav_label', '工具导航')}
       >
         {/* 顶部标题区 */}
-        <div className="flex h-14 items-center justify-between px-4">
+        <div className="flex h-14 items-center justify-between border-b border-border/60 px-4">
           <Link href={`${basePath}/`} className="inline-flex items-center gap-2.5 text-foreground">
-            <DevToolBoxLogo className="w-[22px] h-[22px] shrink-0" />
+            <DevToolBoxLogo className="w-[22px] h-[22px] shrink-0 text-primary" />
             <span className="text-sm font-semibold tracking-wide text-foreground/90">
               DevToolBox
             </span>
           </Link>
           <button
             onClick={toggle}
-            className="grid h-8 w-8 cursor-pointer place-items-center rounded-lg text-muted-foreground/75 transition-colors hover:bg-muted/60 hover:text-foreground"
+            className="grid h-8 w-8 cursor-pointer place-items-center rounded-lg text-muted-foreground/60 transition-colors hover:bg-muted/60 hover:text-foreground"
             aria-label={t('sidebar.collapse', '收起侧边栏')}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -317,7 +322,7 @@ export function Sidebar() {
 
         {/* 导航内容区 */}
         <nav
-          className="sidebar-scroll-area h-[calc(100%-6.5rem)] overflow-y-auto px-3 pb-3 pt-1 space-y-0.5"
+          className="sidebar-scroll-area h-[calc(100%-6.5rem)] overflow-y-auto px-3 pb-3 pt-2 space-y-1"
           aria-label={t('sidebar.tool_list', '工具列表')}
         >
           {categories.map(category => (
@@ -325,6 +330,7 @@ export function Sidebar() {
               key={category}
               category={category}
               defaultExpanded={category === activeCategory}
+              isActiveCategory={category === activeCategory}
               activeToolSlug={activeSlug}
               basePath={basePath}
               t={t}
@@ -333,7 +339,7 @@ export function Sidebar() {
         </nav>
 
         {/* 底部工具区 */}
-        <div className="flex h-12 items-center justify-between px-3">
+        <div className="flex h-12 items-center justify-between border-t border-border/60 px-3">
           <LangSwitch />
           <ThemeSwitch />
         </div>

@@ -3,15 +3,21 @@
 /**
  * Base64 编码/解码工具组件。
  * 提供左右双栏布局：左侧可编辑输入区，右侧只读输出区（含复制按钮）。
- * 顶部工具栏支持编码/解码模式切换、左右内容互换、一键清空。
+ * 顶部工具栏支持编码/解码模式切换（分段控制器）、输入/输出互换、示例、一键清空。
  * 输入内容变化时实时转换；解码模式下输入非法 Base64 时显示错误提示。
  */
 
 import { useState, useCallback, useEffect } from 'react'
-import { ArrowLeftRight, Trash2, Copy, Check, Lock, Unlock } from 'lucide-react'
+import { ArrowLeftRight, Trash2, Copy, Check, Lock, Unlock, Binary, Sparkles } from 'lucide-react'
 
 /** 工具运行模式：encode 表示编码，decode 表示解码 */
 type Mode = 'encode' | 'decode'
+
+/** 编码模式下的示例（明文） */
+const SAMPLE_PLAIN = 'Hello, 世界！Base64 编码示例 🚀'
+
+/** 解码模式下的示例（有效的 Base64 编码结果） */
+const SAMPLE_B64 = 'SGVsbG8sIOS4lueVjO+8gUJhc2U2NCDnvJbnoIHnpLrkvosg8J+agA=='
 
 // ─── Base64 工具函数 ─────────────────────────────────────────────────────────
 
@@ -36,31 +42,36 @@ function decodeBase64(b64: string): string {
   return new TextDecoder().decode(bytes)
 }
 
-// ─── 子组件 ──────────────────────────────────────────────────────────────────
+// ─── 图标工具栏按钮 ─────────────────────────────────────────────────────────
 
-interface ModeBtnProps {
-  /** 按钮显示文字 */
+interface IconBtnProps {
+  /** 无障碍标签 / 提示文字 */
   label: string
-  /** 是否为当前激活态 */
-  active: boolean
   /** 点击回调 */
   onClick: () => void
+  /** 是否禁用 */
+  disabled?: boolean
+  /** 是否只在移动端显示（桌面端由浮动交换按钮接管） */
+  className?: string
+  children: React.ReactNode
 }
 
-/**
- * 模式切换按钮：激活态显示主色背景，非激活态显示次要样式。
- */
-function ModeBtn({ label, active, onClick }: ModeBtnProps) {
+function IconBtn({ label, onClick, disabled, className = '', children }: IconBtnProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={
-        active
-          ? 'inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 active:scale-95 cursor-pointer'
-          : 'inline-flex items-center gap-1.5 rounded-xl border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer'
-      }
+      disabled={disabled}
+      title={label}
+      aria-label={label}
+      className={[
+        'inline-flex items-center justify-center rounded-xl border border-border/60 px-3 py-2 text-sm text-muted-foreground transition',
+        'hover:border-primary/40 hover:bg-primary/5 hover:text-foreground active:scale-95 cursor-pointer',
+        'disabled:opacity-40 disabled:pointer-events-none',
+        className,
+      ].join(' ')}
     >
-      {label}
+      {children}
     </button>
   )
 }
@@ -113,6 +124,10 @@ export function Base64Tool() {
     }
   }, [input, mode])
 
+  // 输入内容的 UTF-8 字节数（用于统计展示）
+  const inputBytes = input ? new TextEncoder().encode(input).length : 0
+  const outputBytes = output && !error ? new TextEncoder().encode(output).length : 0
+
   /** 切换模式并重置内容 */
   const handleModeChange = useCallback((newMode: Mode) => {
     setMode(newMode)
@@ -136,6 +151,13 @@ export function Base64Tool() {
     setError(null)
   }, [])
 
+  /** 填入示例文本（根据当前模式选择对应内容） */
+  const handleSample = useCallback(() => {
+    setInput(mode === 'encode' ? SAMPLE_PLAIN : SAMPLE_B64)
+    setOutput('')
+    setError(null)
+  }, [mode])
+
   /** 复制输出内容到剪贴板，并短暂显示已复制状态 */
   const handleCopy = useCallback(async () => {
     if (!output) return
@@ -149,43 +171,72 @@ export function Base64Tool() {
   }, [output])
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
+    <div className="relative mx-auto w-full max-w-5xl overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+      {/* 顶部极淡主色光晕（随明暗主题自适应） */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[radial-gradient(60%_120%_at_50%_0%,color-mix(in_oklch,var(--primary)_14%,transparent),transparent)]"
+      />
 
       {/* ── 顶部工具栏 ── */}
-      <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-4 py-2.5 gap-3 flex-wrap">
-        {/* 左侧：模式切换 */}
-        <div className="flex items-center gap-2">
-          <ModeBtn
-            label="编码"
-            active={mode === 'encode'}
-            onClick={() => handleModeChange('encode')}
-          />
-          <ModeBtn
-            label="解码"
-            active={mode === 'decode'}
-            onClick={() => handleModeChange('decode')}
-          />
+      <div className="relative flex flex-wrap items-center justify-between gap-3 border-b border-border/40 px-4 py-3">
+        {/* 左：徽标 + 分段控制器 */}
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/20">
+            <Binary className="h-5 w-5" strokeWidth={2.2} />
+          </div>
+
+          {/* 分段控制器：编码 / 解码 */}
+          <div className="relative inline-flex rounded-xl border border-border/60 bg-muted/40 p-1">
+            <span
+              aria-hidden
+              className="absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-lg bg-primary shadow-sm transition-transform duration-300 ease-out"
+              style={{ transform: mode === 'encode' ? 'translateX(0)' : 'translateX(100%)' }}
+            />
+            <button
+              type="button"
+              onClick={() => handleModeChange('encode')}
+              className={[
+                'relative z-10 w-[88px] rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                mode === 'encode' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
+              ].join(' ')}
+            >
+              编码
+            </button>
+            <button
+              type="button"
+              onClick={() => handleModeChange('decode')}
+              className={[
+                'relative z-10 w-[88px] rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                mode === 'decode' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
+              ].join(' ')}
+            >
+              解码
+            </button>
+          </div>
         </div>
 
-        {/* 右侧：交换 + 清空 */}
-        <div className="flex items-center gap-2">
+        {/* 右：示例 / 交换 / 清空 */}
+        <div className="flex items-center gap-1.5">
           <button
-            onClick={handleSwap}
-            title="将输出内容填入输入区并切换模式"
-            disabled={!output}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 px-3 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            type="button"
+            onClick={handleSample}
+            title="填入示例文本"
+            aria-label="填入示例"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 px-3 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:bg-primary/5 hover:text-foreground active:scale-95 cursor-pointer"
           >
+            <Sparkles className="h-3.5 w-3.5" />
+            示例
+          </button>
+          {/* 桌面端由中间浮动按钮接管，故此处仅移动端显示 */}
+          <IconBtn label="将输出内容填入输入区并切换模式" onClick={handleSwap} disabled={!output} className="lg:hidden">
             <ArrowLeftRight className="h-3.5 w-3.5" />
             交换
-          </button>
-          <button
-            onClick={handleClear}
-            title="清空所有内容"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 px-3 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
-          >
+          </IconBtn>
+          <IconBtn label="清空所有内容" onClick={handleClear}>
             <Trash2 className="h-3.5 w-3.5" />
             清空
-          </button>
+          </IconBtn>
         </div>
       </div>
 
@@ -198,19 +249,21 @@ export function Base64Tool() {
       )}
 
       {/* ── 双栏工作区 ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-border/40">
+      <div className="relative grid grid-cols-1 divide-y divide-border/40 lg:grid-cols-2 lg:divide-y-0 lg:divide-x">
 
         {/* 左侧：输入区 */}
-        <div className="flex flex-col min-h-[360px]">
-          {/* 面板标题 */}
-          <div className="flex items-center gap-1.5 border-b border-border/40 bg-muted/20 px-4 py-2.5 text-xs text-muted-foreground">
-            {mode === 'encode'
-              ? <Unlock className="h-3 w-3" />
-              : <Lock className="h-3 w-3" />
-            }
-            <span>{mode === 'encode' ? '原始文本' : 'Base64 字符串'}</span>
+        <div className="flex min-h-[360px] flex-col">
+          <div className="flex h-9 items-center justify-between border-b border-border/40 bg-muted/20 px-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              {mode === 'encode'
+                ? <Unlock className="h-3 w-3" />
+                : <Lock className="h-3 w-3" />
+              }
+              <span>{mode === 'encode' ? '原始文本' : 'Base64 字符串'}</span>
+            </div>
+            {/* 占位：与右侧「复制」按钮等宽，保持左右标题行对齐 */}
+            <span className="invisible">复制</span>
           </div>
-          {/* 输入框 */}
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -221,16 +274,20 @@ export function Base64Tool() {
             }
             spellCheck={false}
             className={[
-              'w-full flex-1 resize-none border-0 bg-transparent px-4 py-3 font-mono text-sm focus:outline-none placeholder:text-muted-foreground/60 min-h-[316px]',
+              'w-full flex-1 resize-none border-0 bg-transparent px-4 py-3 font-mono text-sm leading-relaxed focus:outline-none placeholder:text-muted-foreground/60 min-h-[316px]',
               error ? 'text-destructive/80' : '',
             ].join(' ')}
           />
         </div>
 
         {/* 右侧：输出区 */}
-        <div className="flex flex-col min-h-[360px]">
-          {/* 面板标题 + 复制按钮 */}
-          <div className="flex items-center justify-between border-b border-border/40 bg-muted/20 px-4 py-2.5 text-xs text-muted-foreground">
+        <div
+          className={[
+            'flex min-h-[360px] flex-col transition-colors',
+            error ? 'bg-destructive/[0.03] ring-1 ring-inset ring-destructive/30' : '',
+          ].join(' ')}
+        >
+          <div className="flex h-9 items-center justify-between border-b border-border/40 bg-muted/20 px-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5">
               {mode === 'encode'
                 ? <Lock className="h-3 w-3" />
@@ -238,12 +295,13 @@ export function Base64Tool() {
               }
               <span>{mode === 'encode' ? 'Base64 结果' : '解码结果'}</span>
             </div>
-            {/* 复制按钮 */}
             <button
+              type="button"
               onClick={handleCopy}
               disabled={!output}
               title="复制结果"
-              className="inline-flex items-center gap-1 rounded-lg border border-border/60 px-2.5 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="复制结果"
+              className="inline-flex items-center gap-1 rounded-lg border border-border/60 px-2.5 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground active:scale-95 cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
             >
               {copied
                 ? <Check className="h-3 w-3 text-green-500" />
@@ -252,38 +310,46 @@ export function Base64Tool() {
               {copied ? '已复制' : '复制'}
             </button>
           </div>
-          {/* 只读输出 */}
           <textarea
             value={output}
             readOnly
             placeholder={error ? '' : '转换结果将显示在此处…'}
             spellCheck={false}
-            className="w-full flex-1 resize-none border-0 bg-transparent px-4 py-3 font-mono text-sm focus:outline-none placeholder:text-muted-foreground/60 min-h-[316px] cursor-default select-all"
+            className="w-full flex-1 resize-none border-0 bg-transparent px-4 py-3 font-mono text-sm leading-relaxed focus:outline-none placeholder:text-muted-foreground/60 min-h-[316px] cursor-default select-all"
           />
         </div>
+
+        {/* 桌面端中间浮动交换按钮 */}
+        <button
+          type="button"
+          onClick={handleSwap}
+          disabled={!output}
+          title="交换输入与输出"
+          aria-label="交换输入与输出"
+          className="absolute left-1/2 top-1/2 z-20 hidden h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-md transition hover:border-primary/40 hover:text-primary active:scale-90 disabled:opacity-40 disabled:pointer-events-none lg:flex"
+        >
+          <ArrowLeftRight className="h-4 w-4" />
+        </button>
       </div>
 
       {/* ── 底部状态栏 ── */}
-      <div className="flex items-center justify-between border-t border-border/40 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-        <span>
-          模式：
-          <span className="font-medium text-foreground/70 ml-1">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border/40 bg-muted/20 px-4 py-2.5 text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="font-medium text-foreground/70">
             {mode === 'encode' ? '文本 → Base64' : 'Base64 → 文本'}
           </span>
         </span>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           {input && (
             <span>
-              输入：
-              <span className="font-mono ml-1">{input.length}</span>
-              {' '}字符
+              输入：<span className="font-mono text-foreground/70">{input.length}</span> 字符
+              <span className="text-muted-foreground/50"> · {inputBytes} 字节</span>
             </span>
           )}
           {output && !error && (
             <span>
-              输出：
-              <span className="font-mono ml-1">{output.length}</span>
-              {' '}字符
+              输出：<span className="font-mono text-foreground/70">{output.length}</span> 字符
+              <span className="text-muted-foreground/50"> · {outputBytes} 字节</span>
             </span>
           )}
         </div>

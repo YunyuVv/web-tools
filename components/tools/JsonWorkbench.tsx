@@ -137,8 +137,8 @@ export function JsonWorkbench({ messages }: Props) {
           </ToolbarBtn>
         </div>
 
-        {/* 中：当前 Tab 的布局切换 */}
-        <div className="flex items-center justify-start gap-1.5 lg:justify-center">
+        {/* 中：当前 Tab 的布局切换（桌面端显示） */}
+        <div className="hidden items-center justify-center gap-1.5 lg:flex">
           {activeTab === 'formatter' ? (
             <>
               <ToolbarBtn

@@ -629,7 +629,7 @@ export function createJsonSample(): string {
   "assets": {
     "cover": "https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg",
     "audio": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    "video": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+    "video": "https://vjs.zencdn.net/v/oceans.mp4"
   },
   "stats": {
     "views": 1824,
