@@ -36,13 +36,8 @@ export function ToolsHomePage({ locale, messages, basePath }: Props) {
   const home = messages.home
 
   return (
-    <HeroShell>
-      {/* 交互式点阵背景 */}
-      <DotField className="absolute inset-0" />
-
-      {/* 内容层 */}
-      <div className="relative z-10 flex flex-col items-center w-full max-w-4xl mx-auto">
-        {/* 主标题（✨ 与文字共用渐变一起扫光） */}
+    <HeroShell background={<DotField className="absolute inset-0" />}>
+      {/* 主标题（✨ 与文字共用渐变一起扫光） */}
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-5">
           <ShinyText text={`✨ ${home.title}`} speed={3} />
         </h1>
@@ -60,7 +55,6 @@ export function ToolsHomePage({ locale, messages, basePath }: Props) {
           home={messages.home}
           sidebar={messages.sidebar}
         />
-      </div>
     </HeroShell>
   )
 }
