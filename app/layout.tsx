@@ -17,6 +17,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "DevToolBox - Free Online Developer Tools",
   description: "Fast, free, and online developer utilities. JSON formatter, Base64 encoder, UUID generator and more.",
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
 };
 
 /** 语言检测脚本：同步执行，阻塞渲染，消除首屏闪烁 */

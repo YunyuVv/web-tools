@@ -10,7 +10,7 @@ import {
   Code2, Columns2, Square, Layers, AlignLeft, Minimize2,
   ShieldCheck, Copy, FileCode2, Search, Trash2, ListTree, ListOrdered,
 } from 'lucide-react'
-import { JsonFormatterTool } from './JsonFormatterTool'
+import { JsonFormatterTool, type FormatterStats } from './JsonFormatterTool'
 import { JsonInspectorTool } from './JsonInspectorTool'
 
 type JsonToolTab = 'formatter' | 'inspector'
@@ -75,6 +75,9 @@ export function JsonWorkbench({ messages }: Props) {
   const [formatterLayoutMode, setFormatterLayoutMode] = useState<FormatterLayoutMode>('single')
   const [inspectorLayoutMode, setInspectorLayoutMode] = useState<InspectorLayoutMode>('formatted')
   const [inspectorSearchText, setInspectorSearchText] = useState('')
+
+  // 格式化工作台上报的解析统计（在全局工具栏展示）
+  const [formatterStats, setFormatterStats] = useState<FormatterStats | null>(null)
 
   // 格式化工作台内部操作通过 ref 触发
   const formatterActionRef = useRef<{
@@ -185,6 +188,21 @@ export function JsonWorkbench({ messages }: Props) {
             </ToolbarBtn>
           )}
 
+          {/* 格式化统计信息（仅 formatter 标签，从工具内上报）*/}
+          {activeTab === 'formatter' && formatterStats && (
+            <span className="mr-1 hidden items-center gap-1.5 pl-3 text-xs text-muted-foreground border-l border-border/50 sm:inline-flex">
+              <Layers className="h-3 w-3" />
+              <span className="font-mono">{formatterStats.nodes}</span>
+              <span>节点</span>
+              <span className="text-border/50">·</span>
+              <span className="font-mono">{formatterStats.depth}</span>
+              <span>层</span>
+              <span className="text-border/50">·</span>
+              <span className="font-mono">{formatterStats.size}</span>
+              <span>字符</span>
+            </span>
+          )}
+
           {activeTab === 'formatter' && (
             <>
               <ToolbarBtn active={false} title="加载示例" onClick={() => formatterActionRef.current?.insertSample()}>
@@ -234,6 +252,7 @@ export function JsonWorkbench({ messages }: Props) {
             onLayoutModeChange={setFormatterLayoutMode}
             hideToolbar
             actionRef={formatterActionRef}
+            onStatsChange={setFormatterStats}
           />
         ) : (
           <JsonInspectorTool

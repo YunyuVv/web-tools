@@ -32,32 +32,46 @@ interface StatusState {
   col?: number
 }
 
-// ─── 工具栏图标按钮子组件 ────────────────────────────────────────────
-
-interface IconBtnProps {
-  onClick: () => void
-  title: string
-  active?: boolean
-  children: React.ReactNode
-}
+// ─── 工具栏子组件 ────────────────────────────────────────────────────
 
 /**
- * 这个组件的作用：工具栏中的图标按钮，支持激活态样式切换。
+ * 这个组件的作用：分段控件中的单个选项按钮（用于布局模式切换）。
  */
-function IconBtn({ onClick, title, active, children }: IconBtnProps) {
+function SegBtn({
+  active, onClick, title, children,
+}: { active?: boolean; onClick: () => void; title: string; children: React.ReactNode }) {
   return (
     <button
       onClick={onClick}
       title={title}
       aria-label={title}
       className={[
-        'json-toolbar-btn h-9 w-9 grid place-items-center rounded-xl border transition-all duration-150 cursor-pointer',
+        'inline-flex items-center justify-center h-7 w-7 rounded-lg text-[13px] transition-all duration-150 cursor-pointer',
         active
-          ? 'border-primary bg-primary text-white shadow-sm'
-          : 'border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground',
+          ? 'bg-background text-foreground shadow-sm'
+          : 'text-muted-foreground hover:text-foreground',
       ].join(' ')}
     >
       {children}
+    </button>
+  )
+}
+
+/**
+ * 这个组件的作用：工具栏操作按钮，图标 + 文字标签，让用户一眼看懂每个按钮的功能。
+ */
+function ActionBtn({
+  onClick, label, icon: Icon, title,
+}: { onClick: () => void; label: string; icon: React.ElementType; title?: string }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title ?? label}
+      aria-label={title ?? label}
+      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium border border-border/60 text-muted-foreground bg-background/50 hover:border-primary/50 hover:text-foreground hover:bg-muted/50 transition-all duration-150 cursor-pointer"
+    >
+      <Icon className="h-3.5 w-3.5 shrink-0" />
+      {label}
     </button>
   )
 }
@@ -78,6 +92,13 @@ export interface FormatterActionRef {
   copyContent: () => void
 }
 
+/** 解析统计信息，供父级在全局工具栏展示 */
+export interface FormatterStats {
+  nodes: number
+  depth: number
+  size: number
+}
+
 interface Props {
   messages?: Messages
   /** 外部共享 JSON 文本（受控） */
@@ -92,6 +113,8 @@ interface Props {
   actionRef?: React.MutableRefObject<FormatterActionRef | null>
   /** 由父级提供外壳时设为 true，跳过自身的 json-tool-shell 包裹层 */
   noShell?: boolean
+  /** 统计信息变化时回调（父级在全局工具栏展示时使用） */
+  onStatsChange?: (stats: FormatterStats | null) => void
 }
 
 /**
@@ -106,6 +129,7 @@ export function JsonFormatterTool({
   hideToolbar = false,
   actionRef,
   noShell = false,
+  onStatsChange,
 }: Props) {
   // ── 核心状态 ──
   const [text, setText]           = useState(sharedValue ?? '')
@@ -258,6 +282,11 @@ export function JsonFormatterTool({
     }
   }, [parsedValue, text])
 
+  // ── 向父级同步统计信息（供全局工具栏展示）──
+  useEffect(() => {
+    onStatsChange?.(parsedValue ? stats : null)
+  }, [stats, parsedValue, onStatsChange])
+
   // ── 语法高亮 HTML ──
   const editableHtml = useMemo(() => renderJsonHtml(text || ' '), [text])
   const outputHtml   = useMemo(() => renderJsonHtml(outputText || ' '), [outputText])
@@ -269,44 +298,48 @@ export function JsonFormatterTool({
         <div className="flex flex-col gap-3 pb-4 border-b border-border/60 mb-4">
           {/* 第一行：布局切换 + 操作按钮 */}
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            {/* 布局切换 */}
-            <div className="flex items-center gap-1.5">
-              <IconBtn active={layoutMode === 'single'} title="单栏模式" onClick={() => handleSetLayout('single')}>
-                <Square className="h-4 w-4" />
-              </IconBtn>
-              <IconBtn active={layoutMode === 'split'} title="双栏对照" onClick={() => handleSetLayout('split')}>
-                <Columns2 className="h-4 w-4" />
-              </IconBtn>
+            {/* 布局切换：分段控件 */}
+            <div className="flex items-center gap-0.5 rounded-xl bg-muted/50 p-0.5">
+              <SegBtn active={layoutMode === 'single'} title="单栏模式" onClick={() => handleSetLayout('single')}>
+                <Square className="h-3.5 w-3.5" />
+              </SegBtn>
+              <SegBtn active={layoutMode === 'split'} title="双栏对照" onClick={() => handleSetLayout('split')}>
+                <Columns2 className="h-3.5 w-3.5" />
+              </SegBtn>
             </div>
 
-            {/* 操作按钮 */}
-            <div className="flex items-center gap-1.5">
-              <IconBtn onClick={handleSample}   title="加载示例"><FileCode2  className="h-4 w-4" /></IconBtn>
-              <IconBtn onClick={handleFormat}   title="格式化"><AlignLeft   className="h-4 w-4" /></IconBtn>
-              <IconBtn onClick={handleMinify}   title="压缩"><Minimize2     className="h-4 w-4" /></IconBtn>
-              <IconBtn onClick={handleValidate} title="校验"><ShieldCheck   className="h-4 w-4" /></IconBtn>
-              <IconBtn onClick={handleCopy}     title={layoutMode === 'single' ? '复制内容' : '复制输出'}>
-                <Copy className="h-4 w-4" />
-              </IconBtn>
+            {/* 操作按钮：图标 + 标签 */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <ActionBtn onClick={handleSample}   label="示例"   icon={FileCode2} />
+              <ActionBtn onClick={handleFormat}   label="格式化" icon={AlignLeft} />
+              <ActionBtn onClick={handleMinify}   label="压缩"   icon={Minimize2} />
+              <ActionBtn onClick={handleValidate} label="校验"   icon={ShieldCheck} />
+              <ActionBtn
+                onClick={handleCopy}
+                label="复制"
+                icon={Copy}
+                title={layoutMode === 'single' ? '复制内容' : '复制输出'}
+              />
             </div>
           </div>
 
-          {/* 第二行：统计信息 */}
-          {parsedValue && (
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <Layers className="h-3 w-3" />
-                <span className="font-mono">{stats.nodes}</span>
-                <span>节点</span>
-              </span>
-              <span className="text-border">·</span>
-              <span className="font-mono">{stats.depth}</span>
-              <span className="-ml-3">层</span>
-              <span className="text-border">·</span>
-              <span className="font-mono">{stats.size}</span>
-              <span className="-ml-3">字符</span>
-            </div>
-          )}
+          {/* 第二行：统计信息（平滑淡入） */}
+          <div className={[
+            'flex items-center gap-4 text-xs text-muted-foreground overflow-hidden transition-all duration-300 ease-out',
+            parsedValue ? 'max-h-8 opacity-100 mt-1' : 'max-h-0 opacity-0',
+          ].join(' ')}>
+            <span className="inline-flex items-center gap-1">
+              <Layers className="h-3 w-3" />
+              <span className="font-mono">{stats.nodes}</span>
+              <span>节点</span>
+            </span>
+            <span className="text-border">·</span>
+            <span className="font-mono">{stats.depth}</span>
+            <span className="-ml-3">层</span>
+            <span className="text-border">·</span>
+            <span className="font-mono">{stats.size}</span>
+            <span className="-ml-3">字符</span>
+          </div>
         </div>
       )}
 
@@ -342,24 +375,7 @@ export function JsonFormatterTool({
           }`}
         >
           {/* 左侧输入面板（带实时高亮叠加）*/}
-          <div className="json-tool-pane flex flex-col min-w-0 min-h-[560px] overflow-hidden">
-            {/* 统计信息内嵌在 pane 顶部 */}
-            {parsedValue && (
-              <div className="flex items-center gap-3 border-b border-border/20 px-5 py-2 text-xs text-muted-foreground/70">
-                <span className="inline-flex items-center gap-1">
-                  <Layers className="h-3 w-3" />
-                  <span className="font-mono">{stats.nodes}</span>
-                  <span>节点</span>
-                </span>
-                <span className="text-border/50">·</span>
-                <span className="font-mono">{stats.depth}</span>
-                <span>层</span>
-                <span className="text-border/50">·</span>
-                <span className="font-mono">{stats.size}</span>
-                <span>字符</span>
-              </div>
-            )}
-            <div className="relative flex-1 min-h-[520px]">
+          <div className="json-tool-pane flex flex-col min-w-0 min-h-[560px] overflow-hidden">            <div className="relative flex-1 min-h-[520px]">
               {/* 高亮层 (pre) - 绝对定位在后，不可交互 */}
               <pre
                 ref={highlightRef}

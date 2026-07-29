@@ -36,8 +36,8 @@
       "indent_label": "Indent"
     },
     "json-inspector": {
-      "title": "JSON Inspector",
-      "description": "Explore JSON structure with tree view and node details",
+      "title": "JSON Tree View",
+      "description": "Explore JSON in tree view, click any node for details",
       "seo_description": "Free online JSON inspector. Browse JSON structure in tree or formatted view, click any node to see its path, type and raw value."
     },
     "json-to-csv": { "title": "JSON to CSV", "description": "Convert JSON arrays to CSV format" },
@@ -59,6 +59,23 @@
     "markdown-preview": { "title": "Markdown Preview", "description": "Write and preview Markdown in real time" },
     "ip-lookup": { "title": "IP Lookup", "description": "Look up IP address geolocation info" },
     "user-agent": { "title": "User Agent Parser", "description": "Parse browser user agent strings" }
+  },
+  "categories": {
+    "json":     "JSON",
+    "encoding": "Encoding",
+    "crypto":   "Crypto",
+    "datetime": "Date & Time",
+    "css":      "CSS",
+    "color":    "Color",
+    "text":     "Text",
+    "network":  "Network"
+  },
+  "sidebar": {
+    "soon":      "SOON",
+    "nav_label": "Tool Navigation",
+    "tool_list": "Tool List",
+    "collapse":  "Collapse Sidebar",
+    "expand":    "Expand Sidebar"
   },
   "footer": {
     "tagline": "Free online developer tools",

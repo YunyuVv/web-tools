@@ -1,6 +1,6 @@
 /**
  * 英文工具详情页（URL: /tools/[slug]/）
- * 使用 ToolPageShell 提供统一工具页标题和说明布局。
+ * 使用 ToolPageShell 作为内容布局容器，页头（标题/眉批）不再渲染。
  */
 
 import { notFound } from 'next/navigation'
@@ -44,14 +44,8 @@ export default async function EnToolPage({ params }: Props) {
   const messages = await getMessages('en')
   const tm = (messages as any).tools?.[slug] ?? {}
 
-  const homeMessages = (messages as any).home ?? {}
-
   return (
-    <ToolPageShell
-      eyebrow={homeMessages.title ?? 'DevToolBox'}
-      title={tm.title ?? slug}
-      description={tm.description ?? ''}
-    >
+    <ToolPageShell>
       {slug === 'json-formatter'  && <JsonFormatterTool />}
       {slug === 'json-inspector'  && <JsonInspectorTool />}
       {slug === 'base64'          && <Base64Tool />}
@@ -60,13 +54,6 @@ export default async function EnToolPage({ params }: Props) {
       {slug === 'hash-generator'  && <HashGeneratorTool />}
       {slug === 'timestamp'       && <TimestampTool />}
       {slug === 'word-counter'    && <WordCounterTool />}
-
-      {/* SEO 说明区 */}
-      {tm.seo_description && (
-        <div className="pt-6 border-t border-border/50 text-sm text-muted-foreground">
-          <p>{tm.seo_description}</p>
-        </div>
-      )}
     </ToolPageShell>
   )
 }

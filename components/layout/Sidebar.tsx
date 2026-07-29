@@ -11,33 +11,28 @@ import { useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
 import { ChevronRight, ChevronLeft, Menu, Sun, Moon, Monitor } from 'lucide-react'
 import { useSidebar } from './SidebarContext'
+import { useI18n } from './I18nProvider'
 import { CategoryIcon } from '@/components/home/CategoryIcon'
 import { CATEGORY_CONFIG, TOOLS, getAllToolsByCategory, type ToolCategory } from '@/lib/tools-registry'
 import { PREFIXED_LOCALES, type Locale } from '@/lib/i18n'
 
-/** 工具 slug 到英文显示名称的映射 */
-const TOOL_DISPLAY_NAMES: Record<string, string> = {
-  'json-formatter': 'JSON Formatter',
-  'json-inspector': 'JSON Inspector',
-  'json-to-csv': 'JSON to CSV',
-  'base64': 'Base64',
-  'url-encode': 'URL Encode / Decode',
-  'html-entities': 'HTML Entities',
-  'hash-generator': 'Hash Generator',
-  'uuid-generator': 'UUID Generator',
-  'password-generator': 'Password Generator',
-  'regex-tester': 'Regex Tester',
-  'timestamp': 'Timestamp Converter',
-  'cron-parser': 'Cron Parser',
-  'css-gradient': 'CSS Gradient',
-  'box-shadow': 'Box Shadow',
-  'color-converter': 'Color Converter',
-  'contrast-checker': 'Contrast Checker',
-  'lorem-ipsum': 'Lorem Ipsum',
-  'word-counter': 'Word Counter',
-  'markdown-preview': 'Markdown Preview',
-  'ip-lookup': 'IP Lookup',
-  'user-agent': 'User Agent Parser',
+/**
+ * 这个组件的作用：品牌 Logo 内联 SVG（Notion 风格 tools 图标）。
+ */
+function DevToolBoxLogo({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={className}
+      aria-hidden
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path fill="#fff" d="M12.266.69c.576-.049 1.048-.07 1.486.029.462.105.819.328 1.204.607h.001l3.038 2.135.012.008.334.248c.114.09.224.186.312.288.248.286.33.599.33.937v11.714l-.005.167c-.019.397-.116.837-.433 1.197-.368.418-.9.579-1.461.619h-.009l-11.055.668h-.01c-.375.018-.758.008-1.12-.123a1.9 1.9 0 0 1-.72-.479l-.189-.216-.003-.006-2.239-2.905-.006-.008c-.396-.527-.648-1.02-.705-1.597l-.012-.254V3.307c0-.4.088-.861.388-1.246.316-.404.785-.622 1.332-.67h.01z" />
+      <path fill="#000" d="M12.32 1.437c1.17-.1 1.47-.032 2.205.501l3.039 2.136c.5.367.668.467.668.867v11.715c0 .734-.267 1.168-1.202 1.234l-11.055.667c-.702.034-1.036-.066-1.404-.533L2.333 15.12c-.4-.534-.567-.934-.567-1.401V3.306c0-.6.267-1.101 1.035-1.168zM16.561 5.308l-10.854.634c-.4.034-.534.235-.534.668v9.945c0 .535.267.735.868.702l10.388-.601c.6-.033.668-.401.668-.835V5.942c0-.433-.167-.667-.536-.634zM12.722 2.372l-9.153.668c-.333.033-.4.2-.267.333l1.303 1.035c.534.433.735.4 1.737.333l9.452-.567c.2 0 .034-.2-.033-.233l-1.57-1.136c-.301-.233-.702-.5-1.47-.433z" />
+      <text x="11.1" y="12.1" fontSize="3.2" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" fontWeight="900" textAnchor="middle" fill="#000" transform="rotate(-3 11.1 12.1)">tools</text>
+    </svg>
+  )
 }
 
 /**
@@ -66,17 +61,18 @@ interface NavItemProps {
   title: string
   href?: string
   isActive: boolean
+  soonLabel: string
 }
 
 /**
  * 这个组件的作用：渲染侧边栏中单个工具的导航条目，区分已上线（可点击）和开发中（不可点击）两种状态。
  */
-function NavItem({ title, href, isActive }: NavItemProps) {
+function NavItem({ title, href, isActive, soonLabel }: NavItemProps) {
   if (!href) {
     return (
       <div className="flex h-7 items-center gap-2 rounded-lg px-2.5 text-[13px] text-muted-foreground/40 cursor-default select-none">
         <span className="truncate">{title}</span>
-        <span className="ml-auto text-[10px] font-medium tracking-wide opacity-60">SOON</span>
+        <span className="ml-auto text-[10px] font-medium tracking-wide opacity-60">{soonLabel}</span>
       </div>
     )
   }
@@ -103,16 +99,20 @@ interface NavGroupProps {
   defaultExpanded?: boolean
   activeToolSlug?: string
   basePath: string
+  t: (key: string, fallback?: string) => string
 }
 
 /**
  * 这个组件的作用：渲染侧边栏中一个工具分类的可折叠导航组，包含分类图标、标签和子工具列表。
  */
-function NavGroup({ category, defaultExpanded = false, activeToolSlug, basePath }: NavGroupProps) {
+function NavGroup({ category, defaultExpanded = false, activeToolSlug, basePath, t }: NavGroupProps) {
   const config = CATEGORY_CONFIG[category]
   const allByCategory = getAllToolsByCategory()
   const tools = allByCategory.get(category) ?? []
   const [expanded, setExpanded] = useState(defaultExpanded)
+
+  const categoryLabel = t(`categories.${category}`, config.label)
+  const soonLabel = t('sidebar.soon', 'SOON')
 
   return (
     <div className="select-none">
@@ -126,7 +126,7 @@ function NavGroup({ category, defaultExpanded = false, activeToolSlug, basePath 
           className={`h-3.5 w-3.5 shrink-0 transition-colors ${expanded ? config.textClass : 'text-muted-foreground'}`}
         />
         <span className={`transition-colors ${expanded ? 'text-foreground' : 'text-muted-foreground'}`}>
-          {config.label}
+          {categoryLabel}
         </span>
         <ChevronRight
           className={`ml-auto h-3 w-3 text-muted-foreground/50 transition-transform duration-200 ${expanded ? 'rotate-90' : 'rotate-0'}`}
@@ -138,12 +138,14 @@ function NavGroup({ category, defaultExpanded = false, activeToolSlug, basePath 
         <div className="mt-0.5 ml-2 pl-2 border-l border-border/50 space-y-0.5">
           {tools.map(tool => {
             const href = tool.enabled ? `${basePath}/tools/${tool.slug}/` : undefined
+            const toolTitle = t(`tools.${tool.slug}.title`, tool.slug)
             return (
               <NavItem
                 key={tool.slug}
-                title={TOOL_DISPLAY_NAMES[tool.slug] ?? tool.slug}
+                title={toolTitle}
                 href={href}
                 isActive={tool.slug === activeToolSlug}
+                soonLabel={soonLabel}
               />
             )
           })}
@@ -257,6 +259,7 @@ function LangSwitch() {
  */
 export function Sidebar() {
   const { isCollapsed, toggle, collapse } = useSidebar()
+  const { t } = useI18n()
   const pathname = usePathname()
   const basePath = getBasePath(pathname)
   const activeCategory = getActiveCategoryFromPath(pathname, basePath)
@@ -293,17 +296,12 @@ export function Sidebar() {
           'bg-background/80 backdrop-blur-2xl supports-[backdrop-filter]:bg-background/62',
           isCollapsed ? 'sidebar-shell--collapsed' : 'sidebar-shell--expanded',
         ].join(' ')}
-        aria-label="工具导航"
+        aria-label={t('sidebar.nav_label', '工具导航')}
       >
         {/* 顶部标题区 */}
         <div className="flex h-14 items-center justify-between px-4">
-          <Link href={`${basePath}/`} className="inline-flex items-center gap-3 text-foreground">
-            {/* macOS 红绿灯 */}
-            <span className="flex items-center gap-[7px]" aria-hidden>
-              <span className="w-3 h-3 rounded-full bg-[#ff5f57] block" />
-              <span className="w-3 h-3 rounded-full bg-[#febc2e] block" />
-              <span className="w-3 h-3 rounded-full bg-[#28c840] block" />
-            </span>
+          <Link href={`${basePath}/`} className="inline-flex items-center gap-2.5 text-foreground">
+            <DevToolBoxLogo className="w-[22px] h-[22px] shrink-0" />
             <span className="text-sm font-semibold tracking-wide text-foreground/90">
               DevToolBox
             </span>
@@ -311,7 +309,7 @@ export function Sidebar() {
           <button
             onClick={toggle}
             className="grid h-8 w-8 cursor-pointer place-items-center rounded-lg text-muted-foreground/75 transition-colors hover:bg-muted/60 hover:text-foreground"
-            aria-label="收起侧边栏"
+            aria-label={t('sidebar.collapse', '收起侧边栏')}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -320,7 +318,7 @@ export function Sidebar() {
         {/* 导航内容区 */}
         <nav
           className="sidebar-scroll-area h-[calc(100%-6.5rem)] overflow-y-auto px-3 pb-3 pt-1 space-y-0.5"
-          aria-label="工具列表"
+          aria-label={t('sidebar.tool_list', '工具列表')}
         >
           {categories.map(category => (
             <NavGroup
@@ -329,6 +327,7 @@ export function Sidebar() {
               defaultExpanded={category === activeCategory}
               activeToolSlug={activeSlug}
               basePath={basePath}
+              t={t}
             />
           ))}
         </nav>
@@ -352,7 +351,7 @@ export function Sidebar() {
           'hover:bg-muted cursor-pointer',
           isCollapsed ? 'opacity-100 scale-100' : 'pointer-events-none opacity-0 scale-95',
         ].join(' ')}
-        aria-label="展开侧边栏"
+        aria-label={t('sidebar.expand', '展开侧边栏')}
       >
         <Menu className="h-5 w-5" />
       </button>

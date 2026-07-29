@@ -330,46 +330,48 @@ export function JsonInspectorTool({
       {!hideToolbar && (
         <div className="json-inspector-toolbar flex flex-col gap-3 pb-3.5 border-b border-border/60 mb-3">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            {/* 布局切换 */}
-            <div className="flex items-center gap-1.5">
+            {/* 布局切换：分段控件 */}
+            <div className="flex items-center gap-0.5 rounded-xl bg-muted/50 p-0.5">
               <button
-                className={`h-9 w-9 grid place-items-center rounded-xl border transition-all duration-150 cursor-pointer ${
+                className={[
+                  'inline-flex items-center justify-center h-7 w-7 rounded-lg transition-all duration-150 cursor-pointer',
                   layoutMode === 'tree'
-                    ? 'border-primary bg-primary text-white'
-                    : 'border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground'
-                }`}
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground',
+                ].join(' ')}
                 title="树视图"
                 aria-label="树视图"
                 onClick={() => changeLayout('tree')}
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
                 </svg>
               </button>
               <button
-                className={`h-9 w-9 grid place-items-center rounded-xl border transition-all duration-150 cursor-pointer ${
+                className={[
+                  'inline-flex items-center justify-center h-7 w-7 rounded-lg transition-all duration-150 cursor-pointer',
                   layoutMode === 'formatted'
-                    ? 'border-primary bg-primary text-white'
-                    : 'border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground'
-                }`}
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground',
+                ].join(' ')}
                 title="JSON 格式"
                 aria-label="JSON 格式"
                 onClick={() => changeLayout('formatted')}
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                 </svg>
               </button>
             </div>
 
             {/* 搜索框 */}
-            <label className="json-inspector-search flex h-9 w-full max-w-[320px] items-center gap-2 px-3 rounded-xl border border-border/60 cursor-text">
-              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <label className="json-inspector-search flex h-8 w-full max-w-[280px] items-center gap-2 px-3 rounded-lg border border-border/60 cursor-text">
+              <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
               <input
                 value={searchText}
                 onChange={handleSearchChange}
                 className="w-full border-0 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                placeholder="Search"
+                placeholder="搜索节点..."
               />
             </label>
           </div>
@@ -453,7 +455,6 @@ export function JsonInspectorTool({
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="font-mono text-sm text-foreground">{row.key}</span>
-                              <TypeChip label={row.type} />
                             </div>
                             <p className="mt-1 line-clamp-1 text-xs leading-5 text-muted-foreground">
                               {row.preview}

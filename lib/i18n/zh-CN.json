@@ -36,8 +36,8 @@
       "indent_label": "缩进"
     },
     "json-inspector": {
-      "title": "JSON 结构浏览器",
-      "description": "树视图浏览 JSON 结构，点击节点查看详情",
+      "title": "JSON 树视图",
+      "description": "树形浏览 JSON 结构，点击节点查看详情",
       "seo_description": "免费在线 JSON 结构浏览工具，支持树视图与格式化行视图切换，点击任意节点查看路径、类型和原始值。"
     },
     "json-to-csv": { "title": "JSON 转 CSV", "description": "将 JSON 数组转换为 CSV 格式" },
@@ -59,6 +59,23 @@
     "markdown-preview": { "title": "Markdown 预览", "description": "实时写作与预览 Markdown" },
     "ip-lookup": { "title": "IP 查询", "description": "查询 IP 地理位置信息" },
     "user-agent": { "title": "User Agent 解析", "description": "解析浏览器 User Agent 字符串" }
+  },
+  "categories": {
+    "json":     "JSON",
+    "encoding": "编码",
+    "crypto":   "加密",
+    "datetime": "日期时间",
+    "css":      "CSS",
+    "color":    "颜色",
+    "text":     "文本",
+    "network":  "网络"
+  },
+  "sidebar": {
+    "soon":      "即将上线",
+    "nav_label": "工具导航",
+    "tool_list": "工具列表",
+    "collapse":  "收起侧边栏",
+    "expand":    "展开侧边栏"
   },
   "footer": {
     "tagline": "免费在线开发者工具",

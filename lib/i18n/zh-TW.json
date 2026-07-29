@@ -35,6 +35,11 @@
       "input_placeholder": "在此貼上 JSON...",
       "indent_label": "縮排"
     },
+    "json-inspector": {
+      "title": "JSON 樹視圖",
+      "description": "樹形瀏覽 JSON 結構，點擊節點查看詳情",
+      "seo_description": "免費線上 JSON 結構瀏覽工具，支援樹視圖與格式化行視圖切換，點擊任意節點查看路徑、類型和原始值。"
+    },
     "json-to-csv": { "title": "JSON 轉 CSV", "description": "將 JSON 陣列轉換為 CSV 格式" },
     "base64": { "title": "Base64 編解碼", "description": "Base64 字串編碼與解碼" },
     "url-encode": { "title": "URL 編解碼", "description": "URL 元件編碼與解碼" },
@@ -54,6 +59,23 @@
     "markdown-preview": { "title": "Markdown 預覽", "description": "即時撰寫與預覽 Markdown" },
     "ip-lookup": { "title": "IP 查詢", "description": "查詢 IP 地理位置資訊" },
     "user-agent": { "title": "User Agent 解析", "description": "解析瀏覽器 User Agent 字串" }
+  },
+  "categories": {
+    "json":     "JSON",
+    "encoding": "編碼",
+    "crypto":   "加密",
+    "datetime": "日期時間",
+    "css":      "CSS",
+    "color":    "顏色",
+    "text":     "文字",
+    "network":  "網路"
+  },
+  "sidebar": {
+    "soon":      "即將上線",
+    "nav_label": "工具導航",
+    "tool_list": "工具列表",
+    "collapse":  "收起側邊欄",
+    "expand":    "展開側邊欄"
   },
   "footer": {
     "tagline": "免費線上開發者工具",
