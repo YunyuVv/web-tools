@@ -30,6 +30,36 @@ export function toolPageUrl(locale: string, slug: string): string {
 }
 
 /**
+ * 为多语言页面生成 hreflang 互标 + canonical，避免中/英/繁三版被搜索引擎
+ * 判定为重复内容而只展示其中一种语言。
+ *
+ * path 为「不含语言前缀」的路径片段：
+ *   - ''            → 首页（en 在 /，zh-CN 在 /zh-CN/，zh-TW 在 /zh-TW/）
+ *   - 'tools/slug'  → 工具页（en 在 /tools/slug/，其余加前缀）
+ *
+ * 静态导出站点无运行时，hreflang/canonical 必须写死绝对 URL，因此这里直接用 SITE_URL。
+ * 默认语言 en 同时作为 canonical 与 x-default。
+ */
+export function localizedAlternates(path: string): {
+  canonical: string
+  languages: Record<string, string>
+} {
+  const clean = path.replace(/^\/+|\/+$/g, '')
+  const en = clean ? `${SITE_URL}/${clean}/` : `${SITE_URL}/`
+  const zhCN = clean ? `${SITE_URL}/zh-CN/${clean}/` : `${SITE_URL}/zh-CN/`
+  const zhTW = clean ? `${SITE_URL}/zh-TW/${clean}/` : `${SITE_URL}/zh-TW/`
+  return {
+    canonical: en,
+    languages: {
+      en: en,
+      'zh-CN': zhCN,
+      'zh-TW': zhTW,
+      'x-default': en,
+    },
+  }
+}
+
+/**
  * 生成工具页的 JSON-LD（SoftwareApplication 类型）
  * 让搜索引擎在结果中展示更丰富的信息（名称、描述、应用类别、语言、URL）。
  * 返回可序列化对象，由调用方用 <script type="application/ld+json"> 注入。

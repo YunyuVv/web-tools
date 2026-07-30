@@ -7,6 +7,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getMessages } from '@/lib/i18n'
+import { localizedAlternates } from '@/lib/site'
 import { TOOLS } from '@/lib/tools-registry'
 import { ToolPageShell } from '@/components/layout/ToolPageShell'
 import { ToolContent } from '@/components/tools/ToolContent'
@@ -28,6 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${tm.title ?? slug} - DevToolBox`,
     description: tm.seo_description ?? tm.description ?? '',
+    alternates: localizedAlternates(`tools/${slug}`),
   }
 }
 
