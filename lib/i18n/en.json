@@ -478,6 +478,24 @@
   },
   "footer": {
     "tagline": "Free online developer tools",
-    "rights": "All rights reserved"
+    "rights": "All rights reserved",
+    "privacy": "Privacy Policy"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "updated": "Last updated: July 2026",
+    "intro": "This page explains what information DevToolBox collects and how it is used, including advertising delivered by Google AdSense.",
+    "info_title": "Information We Collect",
+    "info_body": "DevToolBox is a client-side toolbox: most tools process your input directly in your browser and never send it to our servers. We do not require an account and do not knowingly collect personal information such as your name or email.",
+    "ads_title": "Advertising (Google AdSense)",
+    "ads_body": "We use Google AdSense to serve third-party advertisements. AdSense and its partners may use cookies and unique identifiers to serve personalized or non-personalized ads based on your prior visits and inferred interests. This is governed by Google's advertising policies.",
+    "cookies_title": "Cookies",
+    "cookies_body": "Advertising cookies are set by Google and its partners when ads are displayed. You can disable personalized advertising or clear cookies through your browser settings at any time.",
+    "choices_title": "Your Choices",
+    "choices_body": "You can opt out of personalized advertising, control ad preferences, or learn how Google uses data via the links below. In the EEA and UK, consent is requested before any advertising cookies are set.",
+    "contact_title": "Contact",
+    "contact_body": "If you have questions about this policy, contact us via the project repository on GitHub (YunyuVv/web-tools).",
+    "link_ads_settings": "Google Ads Settings",
+    "link_about_ads": "How Google uses information"
   }
 }

@@ -10,6 +10,7 @@ import { I18nProvider } from '@/components/layout/I18nProvider'
 import { SidebarProvider } from '@/components/layout/SidebarContext'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { SidebarContentArea } from '@/components/layout/SidebarContentArea'
+import { Footer } from '@/components/layout/Footer'
 
 interface Props {
   children: React.ReactNode
@@ -37,6 +38,7 @@ export default async function LocaleLayout({ children, params }: Props) {
               {children}
             </main>
           </SidebarContentArea>
+          <Footer locale={locale} />
         </div>
       </SidebarProvider>
     </I18nProvider>

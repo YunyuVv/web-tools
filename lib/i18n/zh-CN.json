@@ -478,6 +478,24 @@
   },
   "footer": {
     "tagline": "免费的在线开发者工具",
-    "rights": "保留所有权利"
+    "rights": "保留所有权利",
+    "privacy": "隐私政策"
+  },
+  "privacy": {
+    "title": "隐私政策",
+    "updated": "最近更新：2026 年 7 月",
+    "intro": "本页说明 DevToolBox 收集哪些信息以及如何使用，包括由 Google AdSense 投放的广告。",
+    "info_title": "我们收集的信息",
+    "info_body": "DevToolBox 是一个纯前端工具箱：绝大多数工具直接在您的浏览器中处理输入，不会发送到我们的服务器。我们不要求注册账号，也不会主动收集姓名、邮箱等个人身份信息。",
+    "ads_title": "广告（Google AdSense）",
+    "ads_body": "我们使用 Google AdSense 投放第三方广告。AdSense 及其合作伙伴可能使用 Cookie 和唯一标识符，根据您此前的访问与推断的兴趣，投放个性化或非个性化广告。相关处理受 Google 广告政策约束。",
+    "cookies_title": "Cookie",
+    "cookies_body": "展示广告时，Google 及其合作伙伴会设置广告 Cookie。您可以随时通过浏览器设置关闭个性化广告或清除 Cookie。",
+    "choices_title": "您的选择",
+    "choices_body": "您可通过下方链接退出个性化广告、管理广告偏好或了解 Google 如何使用数据。在欧盟经济区（EEA）和英国，设置任何广告 Cookie 前会先征求您的同意。",
+    "contact_title": "联系方式",
+    "contact_body": "如对本政策有疑问，可通过 GitHub 项目仓库（YunyuVv/web-tools）联系我们。",
+    "link_ads_settings": "Google 广告设置",
+    "link_about_ads": "Google 如何使用信息"
   }
 }

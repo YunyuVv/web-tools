@@ -4,6 +4,7 @@
  */
 
 import { type ReactNode } from 'react'
+import { AdsenseUnit } from '@/components/ads/AdsenseUnit'
 
 interface Props {
   /** 页面主体内容 */
@@ -19,6 +20,7 @@ export function ToolPageShell({ children }: Props) {
       {/* 内容区 */}
       <section className="flex flex-col gap-[18px] mt-5">
         {children}
+        <AdsenseUnit />
       </section>
     </div>
   )

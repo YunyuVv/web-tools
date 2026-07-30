@@ -9,6 +9,7 @@ import { I18nProvider } from '@/components/layout/I18nProvider'
 import { SidebarProvider } from '@/components/layout/SidebarContext'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { SidebarContentArea } from '@/components/layout/SidebarContentArea'
+import { Footer } from '@/components/layout/Footer'
 
 interface Props {
   children: React.ReactNode
@@ -26,6 +27,7 @@ export default async function EnLayout({ children }: Props) {
               {children}
             </main>
           </SidebarContentArea>
+          <Footer />
         </div>
       </SidebarProvider>
     </I18nProvider>

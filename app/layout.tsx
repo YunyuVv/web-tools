@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
+import Script from 'next/script';
 import { PREFIXED_LOCALES, DEFAULT_LOCALE } from "@/lib/i18n";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
@@ -92,6 +93,29 @@ export default function RootLayout({
               token: process.env.NEXT_PUBLIC_CF_BEACON_TOKEN,
               spa: true,
             })}
+          />
+        ) : null}
+        {/* Google AdSense：NEXT_PUBLIC_ADSENSE_CLIENT_ID 控制；未配置时不注入。
+           静态导出下用 afterInteractive（beforeInteractive 会被延迟到注水、失效）。
+           仅生产构建（Cloudflare 填入 ID）才加载广告；本地/预览零广告。 */}
+        {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ? (
+          <Script
+            id="adsbygoogle-loader"
+            strategy="afterInteractive"
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
+            crossOrigin="anonymous"
+          />
+        ) : null}
+        {/* Google 广告同意管理平台（Funding Choices）：覆盖 EEA/UK，GDPR 强制。
+           NEXT_PUBLIC_ADSENSE_FC_ID 为 AdSense 后台「隐私权和消息」生成的发布商数字 ID；
+           未配置则不注入（非欧盟流量不受影响）。 */}
+        {process.env.NEXT_PUBLIC_ADSENSE_FC_ID ? (
+          <Script
+            id="google-funding-choices"
+            strategy="afterInteractive"
+            async
+            src={`https://fundingchoicesmessages.google.com/i/${process.env.NEXT_PUBLIC_ADSENSE_FC_ID}.js`}
           />
         ) : null}
       </head>
