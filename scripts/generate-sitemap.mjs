@@ -46,10 +46,10 @@ function collectIndexHtml(dir, base = '') {
 /** index.html 相对路径 → sitemap <url> 条目 */
 function toUrlEntry(relHtml) {
   // relHtml 形如 "tools/json-formatter/index.html" 或 "zh-CN/tools/x/index.html" 或 "index.html"
-  const pathOnly = relHtml.replace(/index\.html$/, '').replace(/\\/g, '/')
+  const pathOnly = relHtml.replace(/index\.html$/, '').replace(/\\/g, '/').replace(/\/+$/, '')
   // 根 index.html 的 pathOnly 为 '' → 站点根 '/'
   // 其余目录页（trailingSlash 已在 next.config 开启）以 '/' 结尾
-  const loc = pathOnly === '' ? '/' : `${pathOnly}/`
+  const loc = pathOnly === '' ? '/' : `/${pathOnly}/`
   return `  <url>
     <loc>${SITE_URL}${loc}</loc>
     <changefreq>weekly</changefreq>
