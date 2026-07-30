@@ -32,7 +32,7 @@
 
 ## 二、代码落地：全局脚本（已落地）
 
-> 实际改动：`app/layout.tsx` 的 `<head>` 内，按 `NEXT_PUBLIC_ADSENSE_CLIENT_ID` 注入 `adsbygoogle.js`（`afterInteractive`，避开静态导出 `beforeInteractive` 失效坑），按 `NEXT_PUBLIC_ADSENSE_FC_ID` 注入 Funding Choices 同意脚本（2.3）。下方 2.2 代码即线上在用版本。
+> 实际改动：`app/layout.tsx` 的 `<head>` 内，按 `NEXT_PUBLIC_ADSENSE_CLIENT_ID` 注入 `adsbygoogle.js`（`lazyOnload`，严格等页面 `load` 事件后才拉，绝不拖慢首屏/国内访问），按 `NEXT_PUBLIC_ADSENSE_FC_ID` 注入 Funding Choices 同意脚本（同样 `lazyOnload`）。下方 2.2 代码即线上在用版本。
 
 ### 2.1 用环境变量控制，本地/预览零广告
 
@@ -40,7 +40,9 @@
 
 ### 2.2 在根布局注入加载器
 
-⚠️ **静态导出坑（已踩过）**：`next/script` 的 `strategy="beforeInteractive"` 在 `output:'export'` 下会被序列化为 `self.__next_s.push(...)`、延迟到注水后才执行，不能用于首屏。请用 `strategy="afterInteractive"` 或裸 `<script async>`。
+⚠️ **静态导出坑（已踩过）**：`next/script` 的 `strategy="beforeInteractive"` 在 `output:'export'` 下会被序列化为 `self.__next_s.push(...)`、延迟到注水后才执行，不能用于首屏。
+
+✅ **加载策略选用 `lazyOnload`（非 `afterInteractive`）**：本项目主要流量在国内，Google 域名（`pagead2.googlesyndication.com` 等）被墙。若用 `afterInteractive`，`async` 脚本在抓取完成/失败前会拖住浏览器 `window.load` 事件，国内请求"黑盒挂起"可达数十秒，标签页转圈晚停。改用 `lazyOnload` 后，广告脚本严格等 `window.load` 之后才拉，无论 Google 是否可达都**绝不拖慢页面加载**；AdSense 的 `adsbygoogle.push({})` 队列机制兼容晚到脚本，广告仍正常展示。
 
 根布局 `app/layout.tsx` 的 `<head>` 内（与现有 CF beacon 并列）：
 
@@ -48,7 +50,7 @@
 {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ? (
   <Script
     id="adsbygoogle-loader"
-    strategy="afterInteractive"
+    strategy="lazyOnload"
     src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
     crossOrigin="anonymous"
   />
@@ -137,18 +139,64 @@ export function AdsenseUnit({
 
 ---
 
-## 五、部署：填环境变量 + 重试
+## 五、部署：在 Cloudflare Pages 配置三个环境变量
 
-> ⚠️ **关键点**：`NEXT_PUBLIC_*` 变量在**构建时**就被内联进静态 HTML，不是运行时读取。所以改完环境变量后必须**重新构建（Retry deployment）**才生效——只改变量不重试等于没改。
+### 5.1 为什么必须配置（原理）
+本站是 `output:'export'` 纯静态导出，**没有运行时服务器**。所有 `NEXT_PUBLIC_*` 变量在 `next build` 时就被**内联进静态 HTML/JS**，不是页面运行时去读。因此：
 
-1. Cloudflare Pages 控制台 → 站点 `web-tools-9jh` → **Settings → Environment variables**。
-2. 在**生产环境**加以下变量（Preview 环境留空，避免预览页展示真实广告）：
-   - `NEXT_PUBLIC_ADSENSE_CLIENT_ID` = `ca-pub-你的ID`（必填，加载广告脚本）
-   - `NEXT_PUBLIC_ADSENSE_SLOT` = 展示广告单元的 `data-ad-slot`（必填，否则广告位为空；在 AdSense 后台「广告」→「按广告单元」创建「展示广告」后取得）
-   - `NEXT_PUBLIC_ADSENSE_FC_ID` = 发布商数字 ID（选填；在 AdSense 后台「隐私权和消息」创建消息后取得，用于 EEA/UK 同意横幅；不填则非欧盟流量照常，欧盟流量不展示广告）
-3. 回到 **Deployments → 最新一次构建 → Retry deployment**，让 `next build` 重新内联变量。
+- **改了环境变量 → 必须 Retry deployment 重新构建才生效**；只改变量不重试等于没改。
+- 变量为空时，代码里对应脚本/广告位**自动不渲染**（本地、Preview 零广告）——这是设计上的安全闸门，详见 5.3 的"空值行为"。
 
-> 也可把 ID 直接写死进 `app/layout.tsx`（不读环境变量）。缺点：换号/停用要改代码重部署，故不推荐；但实现最简单。
+### 5.2 Cloudflare Pages 控制台操作步骤
+
+1. 打开 Cloudflare 控制台 → 左侧 **Workers 和 Pages** → 选站点 **`web-tools-9jh`**。
+2. 进入 **Settings → Environment variables（环境变量）**。
+3. 在 **Production（生产）** 环境那一栏点 **Add variable**，逐个添加 5.3 里的三个变量（值见下）。
+4. **Preview 环境保持为空**（避免预览/测试页展示真实广告，造成政策风险与误点）。
+5. 保存后，进入 **Deployments → 最新一次构建 → Retry deployment**，让 `next build` 重新内联变量。
+
+> 也可把值直接写死进 `app/layout.tsx`（不读环境变量）。缺点：换号/停用要改代码重部署，故不推荐；但实现最简单。
+
+### 5.3 三个变量逐个说明（含义 / 格式 / 去哪取 / 示例）
+
+| 变量名 | 必填 | 含义 | 取值格式 | 在 AdSense 后台哪取 |
+| --- | --- | --- | --- | --- |
+| `NEXT_PUBLIC_ADSENSE_CLIENT_ID` | **必填** | 你的 AdSense **发布商账号 ID**，决定广告收益归谁 | `ca-pub-` + 16 位数字 | 右上角头像 → 账号信息 →「发布商 ID」；或任意广告单元代码里的 `data-ad-client` |
+| `NEXT_PUBLIC_ADSENSE_SLOT` | **必填** | 单个**广告单元**的 ID，对应页面上那「一个」广告位 | 一串数字（通常 10 位） | 「广告」→「按广告单元」→ 新建「展示广告」→ 代码里的 `data-ad-slot` |
+| `NEXT_PUBLIC_ADSENSE_FC_ID` | 选填 | **Funding Choices** 发布商 ID，用于欧盟/英国 GDPR 同意横幅 | 纯数字 | 「隐私权和消息」→ 创建消息（覆盖 EEA+UK）→ 生成的发布商 ID |
+
+**逐一要点与示例：**
+
+- **`NEXT_PUBLIC_ADSENSE_CLIENT_ID`**（例：`ca-pub-1234567890123456`）
+  - 会被拼进广告脚本 URL（`.../adsbygoogle.js?client=ca-pub-...`，见 `app/layout.tsx`）。**没有它，整个站不显示任何广告。**
+  - **空值行为**：为空时根布局不注入 `adsbygoogle.js`，全站零广告。
+
+- **`NEXT_PUBLIC_ADSENSE_SLOT`**（例：`1234567890`）
+  - 对应 `<ins data-ad-slot="...">`（见 `components/ads/AdsenseUnit.tsx`）。一个 slot = 页面上一个广告位；当前只在工具页底部放了一个，填**一个**即可。
+  - 想换位置/放多个广告再新增 slot 并改代码。
+  - **空值行为**：`AdsenseUnit` 组件检测到 `clientId` 或 `slot` 任一为空就返回 `null`，广告位不渲染。
+  - 注意：新单元刚建可能几小时「无填充」（Google 审核/学习期），属正常。
+
+- **`NEXT_PUBLIC_ADSENSE_FC_ID`**（例：`1234567890`）
+  - 留空则**非欧盟流量照常、欧盟流量不弹横幅也不展示广告**（不违规，只是那部分零收益）；流量基本在中国可安全留空。
+  - 有欧盟/英国访客时才建议填：根布局会按此 ID 注入 `fundingchoicesmessages.google.com` 脚本，自动弹「接受/拒绝 Cookie 与广告追踪」横幅，满足 GDPR。
+
+### 5.3.1 本站已配置的实际值（2026-07-30 经 Cloudflare MCP 写入）
+
+> 已通过 Cloudflare MCP 向 `web-tools` 项目的 **Production** 环境写入以下变量，并触发重新部署使 `NEXT_PUBLIC_*` 内联生效（Preview 环境保持为空）。`FC_ID` 因流量以中国为主暂留空。
+
+| 变量 | 实际值 |
+| --- | --- |
+| `NEXT_PUBLIC_ADSENSE_CLIENT_ID` | `ca-pub-1870872898412136` |
+| `NEXT_PUBLIC_ADSENSE_SLOT` | `3267462591` |
+| `NEXT_PUBLIC_ADSENSE_FC_ID` | （未填，留空） |
+
+> 注：你原始给出的 ID 为 `pub-1870872898412136`，已补全 AdSense 标准前缀 `ca-` 为 `ca-pub-1870872898412136`（缺 `ca-` 会导致 `adsbygoogle.js` 加载失败、广告不出）。
+
+### 5.4 配置完成后如何自查（命令行）
+
+- **重试部署前**：`curl -s https://tools.ideaflow.top/ | grep adsbygoogle.js` 应**无输出**（变量未内联）。
+- **重试部署后**：同样命令应**有输出**，且页面源码里能看到 `client=ca-pub-...` 与 `data-ad-slot=...`，表示脚本与广告位已正确注入。
 
 ---
 
@@ -173,14 +221,16 @@ export function AdsenseUnit({
 
 ## 九、你这边要补的后续步骤（代码落地后）
 
-代码已合并并部署，但广告真正展示还需你完成：
+> ✅ 进展（2026-07-30）：`NEXT_PUBLIC_ADSENSE_CLIENT_ID` 与 `NEXT_PUBLIC_ADSENSE_SLOT` 已通过 Cloudflare MCP 写入 `web-tools` 项目**生产环境**并触发重新部署（部署 ID `f4fee003`）；你提供的 `SLOT=3267462591` 说明展示广告单元已在 AdSense 后台建好。下列仅剩 **ads.txt（建议）** 与 **FC_ID（仅欧盟流量）** 待办。
 
-1. **创建展示广告单元**：AdSense 后台 → 「广告」→「按广告单元」→ 新建「展示广告」（建议 响应式 / Leaderboard 728×90 或 矩形 300×250）→ 复制其 `data-ad-slot` 填到 Cloudflare 的 `NEXT_PUBLIC_ADSENSE_SLOT`。
+代码已合并并部署，广告展示还需确认/补充：
+
+1. ~~**创建展示广告单元**~~ ✅ 已完成：AdSense 后台「展示广告」单元已建，其 `data-ad-slot=3267462591` 已填入 Cloudflare `NEXT_PUBLIC_ADSENSE_SLOT`，且已重新部署。
 2. **（建议）配置 ads.txt**：AdSense 后台 → 「网站」→ 你的站点 → 「ads.txt」处会给出一行授权记录，放到本站根目录 `public/ads.txt`（随静态导出进 `out/ads.txt`，线上 `https://tools.ideaflow.top/ads.txt` 可访问），防止 unauthorized inventory 导致收益损失。这是 AdSense 的推荐项，非强制但在账号里会提示。
 3. **（欧盟流量）开启同意管理**：AdSense 后台 → 「隐私权和消息」→ 创建消息（覆盖 EEA+UK）→ 拿到发布商数字 ID 填 `NEXT_PUBLIC_ADSENSE_FC_ID`，重试部署。
 4. **等广告填充**：新单元刚建好可能短暂「无广告填充」（尤其低流量页面），通常几小时到一天内开始填充，属正常。
 
-> 完成 1+2 并设好 `CLIENT_ID` / `SLOT` 后重试部署，工具页底部即会出现广告。
+> `CLIENT_ID` / `SLOT` 已设好并重新部署，工具页底部即会出现广告（新单元可能几小时内"无填充"，属正常）。
 
 ---
 

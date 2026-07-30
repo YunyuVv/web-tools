@@ -101,7 +101,7 @@ export default function RootLayout({
         {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ? (
           <Script
             id="adsbygoogle-loader"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             async
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
             crossOrigin="anonymous"
@@ -113,7 +113,7 @@ export default function RootLayout({
         {process.env.NEXT_PUBLIC_ADSENSE_FC_ID ? (
           <Script
             id="google-funding-choices"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             async
             src={`https://fundingchoicesmessages.google.com/i/${process.env.NEXT_PUBLIC_ADSENSE_FC_ID}.js`}
           />
