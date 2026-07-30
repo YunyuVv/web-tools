@@ -1,11 +1,21 @@
 /**
  * 站点级全局常量与 JSON-LD 工厂
  * JSON-LD 需要绝对 URL，因此必须有一个站点规范域名。
- * 部署域名见 memory：生产自定义域 tools.ideaflow.top（Cloudflare Pages）。
+ *
+ * 静态导出站点（output:'export'）没有运行时，每个页面在【构建时】生成，
+ * 无法按访客实际域名动态决定。因此按构建环境区分：
+ *   - 开发环境（next dev，NODE_ENV=development）→ http://localhost:3000
+ *   - 生产构建（next build / Cloudflare 部署，NODE_ENV=production）→ 线上域名
+ * 也可用环境变量 SITE_URL 显式覆盖（仍保留，方便将来换域名）。
  */
 
-/** 站点规范域名（不含末尾斜杠）。改域名时只动这一处。 */
-export const SITE_URL = 'https://tools.ideaflow.top'
+const DEV_SITE_URL = 'http://localhost:3000'
+const PROD_SITE_URL = 'https://tools.ideaflow.top'
+
+/** 站点规范域名（不含末尾斜杠）。 */
+export const SITE_URL =
+  process.env.SITE_URL ||
+  (process.env.NODE_ENV === 'development' ? DEV_SITE_URL : PROD_SITE_URL)
 
 /** 站点/品牌名，用于结构化数据 */
 export const SITE_NAME = 'DevToolBox'

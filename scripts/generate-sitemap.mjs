@@ -16,7 +16,15 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const OUT_DIR = join(__dirname, '..', 'out')
-const SITE_URL = process.env.SITE_URL || 'https://tools.ideaflow.top'
+
+// 站点规范域名：按构建环境自动判定（静态导出无运行时，构建时定死）。
+//   dev（NODE_ENV=development）→ localhost；生产构建/CF 部署 → 线上域名。
+// 仍可用环境变量 SITE_URL 显式覆盖（方便将来换域名）。
+const DEV_SITE_URL = 'http://localhost:3000'
+const PROD_SITE_URL = 'https://tools.ideaflow.top'
+const SITE_URL =
+  process.env.SITE_URL ||
+  (process.env.NODE_ENV === 'development' ? DEV_SITE_URL : PROD_SITE_URL)
 
 /** 递归收集 out/ 下所有 index.html 的相对路径（不含前导斜杠） */
 function collectIndexHtml(dir, base = '') {
