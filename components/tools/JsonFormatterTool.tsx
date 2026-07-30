@@ -21,6 +21,7 @@ import {
   OrderedJsonParseError,
   type OrderedJsonValue,
 } from '@/lib/json-tools'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 type LayoutMode = 'single' | 'split'
 type StatusTone = 'success' | 'error' | 'info' | null
@@ -78,11 +79,6 @@ function ActionBtn({
 
 // ─── 主组件 ─────────────────────────────────────────────────────────
 
-interface Messages {
-  common?: Record<string, string>
-  tools?: Record<string, Record<string, string>>
-}
-
 /** 外部工具栏接管时，父组件通过此 ref 调用格式化工作台内的方法 */
 export interface FormatterActionRef {
   insertSample: () => void
@@ -100,7 +96,6 @@ export interface FormatterStats {
 }
 
 interface Props {
-  messages?: Messages
   /** 外部共享 JSON 文本（受控） */
   sharedValue?: string
   onSharedValueChange?: (v: string) => void
@@ -121,7 +116,6 @@ interface Props {
  * 这个组件的作用：JSON 格式化工作台，包含工具栏、状态栏和编辑/预览双栏区域。
  */
 export function JsonFormatterTool({
-  messages,
   sharedValue,
   onSharedValueChange,
   layoutMode: layoutModeProp,
@@ -131,6 +125,7 @@ export function JsonFormatterTool({
   noShell = false,
   onStatsChange,
 }: Props) {
+  const { t } = useI18n()
   // ── 核心状态 ──
   const [text, setText]           = useState(sharedValue ?? '')
   const [outputText, setOutput]   = useState('')
@@ -209,9 +204,9 @@ export function JsonFormatterTool({
       setParsed(parseOrderedJson(formatted))
       if (layoutMode === 'single') updateText(formatted)
       setOutput(formatted)
-      setStatus({ tone: 'success', message: '已格式化' })
+      setStatus({ tone: 'success', message: t('tools.json-formatter.status_formatted') })
     } catch (e) { setError(e) }
-  }, [text, layoutMode, updateText, setError])
+  }, [text, layoutMode, updateText, setError, t])
 
   /** 压缩：同上 */
   const handleMinify = useCallback(() => {
@@ -220,23 +215,23 @@ export function JsonFormatterTool({
       setParsed(parseOrderedJson(minified))
       if (layoutMode === 'single') updateText(minified)
       setOutput(minified)
-      setStatus({ tone: 'success', message: '已压缩' })
+      setStatus({ tone: 'success', message: t('tools.json-formatter.status_minified') })
     } catch (e) { setError(e) }
-  }, [text, layoutMode, updateText, setError])
+  }, [text, layoutMode, updateText, setError, t])
 
   /** 校验：仅检查合法性，不修改内容 */
   const handleValidate = useCallback(() => {
     try {
       parseOrderedJson(text)
-      setStatus({ tone: 'success', message: 'JSON 校验通过 ✓' })
+      setStatus({ tone: 'success', message: t('tools.json-formatter.status_valid') })
     } catch (e) { setError(e) }
-  }, [text, setError])
+  }, [text, setError, t])
 
   /** 填充示例 */
   const handleSample = useCallback(() => {
     updateText(createJsonSample())
-    setStatus({ tone: 'info', message: '已填充示例 JSON' })
-  }, [updateText])
+    setStatus({ tone: 'info', message: t('tools.json-formatter.status_sample') })
+  }, [updateText, t])
 
   /** 复制：单栏复制当前输入，双栏优先复制输出 */
   const handleCopy = useCallback(async () => {
@@ -244,9 +239,9 @@ export function JsonFormatterTool({
     if (!content.trim()) return
     try {
       await navigator.clipboard.writeText(content)
-      setStatus({ tone: 'success', message: '已复制到剪贴板' })
-    } catch { setStatus({ tone: 'error', message: '复制失败，请手动复制' }) }
-  }, [text, outputText, layoutMode])
+      setStatus({ tone: 'success', message: t('tools.json-formatter.status_copied') })
+    } catch { setStatus({ tone: 'error', message: t('tools.json-formatter.status_copy_fail') }) }
+  }, [text, outputText, layoutMode, t])
 
   // ── 暴露方法给父组件 ──
   useEffect(() => {
@@ -300,25 +295,25 @@ export function JsonFormatterTool({
           <div className="flex items-center justify-between gap-3 flex-wrap">
             {/* 布局切换：分段控件 */}
             <div className="flex items-center gap-0.5 rounded-xl bg-muted/50 p-0.5">
-              <SegBtn active={layoutMode === 'single'} title="单栏模式" onClick={() => handleSetLayout('single')}>
+              <SegBtn active={layoutMode === 'single'} title={t('tools.json-formatter.single')} onClick={() => handleSetLayout('single')}>
                 <Square className="h-3.5 w-3.5" />
               </SegBtn>
-              <SegBtn active={layoutMode === 'split'} title="双栏对照" onClick={() => handleSetLayout('split')}>
+              <SegBtn active={layoutMode === 'split'} title={t('tools.json-formatter.split')} onClick={() => handleSetLayout('split')}>
                 <Columns2 className="h-3.5 w-3.5" />
               </SegBtn>
             </div>
 
             {/* 操作按钮：图标 + 标签 */}
             <div className="flex items-center gap-1.5 flex-wrap">
-              <ActionBtn onClick={handleSample}   label="示例"   icon={FileCode2} />
-              <ActionBtn onClick={handleFormat}   label="格式化" icon={AlignLeft} />
-              <ActionBtn onClick={handleMinify}   label="压缩"   icon={Minimize2} />
-              <ActionBtn onClick={handleValidate} label="校验"   icon={ShieldCheck} />
+              <ActionBtn onClick={handleSample}   label={t('common.sample')}   icon={FileCode2} />
+              <ActionBtn onClick={handleFormat}   label={t('common.format')}   icon={AlignLeft} />
+              <ActionBtn onClick={handleMinify}   label={t('common.minify')}   icon={Minimize2} />
+              <ActionBtn onClick={handleValidate} label={t('common.validate')} icon={ShieldCheck} />
               <ActionBtn
                 onClick={handleCopy}
-                label="复制"
+                label={t('common.copy')}
                 icon={Copy}
-                title={layoutMode === 'single' ? '复制内容' : '复制输出'}
+                title={layoutMode === 'single' ? t('tools.json-formatter.copy_input') : t('tools.json-formatter.copy_output')}
               />
             </div>
           </div>
@@ -331,14 +326,14 @@ export function JsonFormatterTool({
             <span className="inline-flex items-center gap-1">
               <Layers className="h-3 w-3" />
               <span className="font-mono">{stats.nodes}</span>
-              <span>节点</span>
+              <span>{t('tools.json-formatter.nodes')}</span>
             </span>
             <span className="text-border">·</span>
             <span className="font-mono">{stats.depth}</span>
-            <span className="-ml-3">层</span>
+            <span className="-ml-3">{t('tools.json-formatter.levels')}</span>
             <span className="text-border">·</span>
             <span className="font-mono">{stats.size}</span>
-            <span className="-ml-3">字符</span>
+            <span className="-ml-3">{t('tools.json-formatter.chars')}</span>
           </div>
         </div>
       )}
@@ -348,7 +343,9 @@ export function JsonFormatterTool({
         <div className="mb-3 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive font-mono">
           {status.message}
           {status.line !== undefined && (
-            <span className="ml-2 opacity-70">行 {status.line}：{status.col}</span>
+            <span className="ml-2 opacity-70">
+              {t('tools.json-formatter.line_col').replace('{line}', String(status.line)).replace('{col}', String(status.col))}
+            </span>
           )}
         </div>
       )}
@@ -390,7 +387,7 @@ export function JsonFormatterTool({
                 onChange={e => updateText(e.target.value)}
                 onScroll={syncScroll}
                 className="json-editor-textarea relative z-10 h-full min-h-[520px] w-full resize-none overflow-auto border-0 bg-transparent px-5 py-4 font-mono text-sm leading-[1.85] focus:outline-none caret-slate-800 dark:caret-slate-100 placeholder:text-slate-400/90 dark:placeholder:text-slate-500"
-                placeholder='在此粘贴或输入 JSON，例如 {"name":"devtoolbox"}'
+                placeholder={t('tools.json-formatter.input_placeholder')}
                 spellCheck={false}
               />
             </div>

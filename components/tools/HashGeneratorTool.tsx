@@ -9,6 +9,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Hash, Copy, Check, AlertCircle } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 /** 哈希算法类型 */
 type HashAlgorithm = 'SHA-1' | 'SHA-256' | 'SHA-512'
@@ -67,6 +68,8 @@ export function HashGeneratorTool() {
   const [error, setError] = useState(false)
   /** 防止组件卸载后更新状态的 ref */
   const mountedRef = useRef(true)
+
+  const { t } = useI18n()
 
   useEffect(() => {
     mountedRef.current = true
@@ -135,15 +138,15 @@ export function HashGeneratorTool() {
         <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Hash className="h-3.5 w-3.5" />
-            <span>输入文本</span>
+            <span>{t('tools.hash-generator.input_label')}</span>
           </div>
           {computing && (
-            <span className="text-primary/70 animate-pulse">计算中…</span>
+            <span className="text-primary/70 animate-pulse">{t('tools.hash-generator.computing')}</span>
           )}
           {error && (
             <span className="flex items-center gap-1 text-destructive">
               <AlertCircle className="h-3 w-3" />
-              计算失败
+              {t('tools.hash-generator.error')}
             </span>
           )}
         </div>
@@ -153,7 +156,7 @@ export function HashGeneratorTool() {
           rows={5}
           spellCheck={false}
           className="w-full resize-none border-0 bg-transparent px-4 py-3 font-mono text-sm focus:outline-none placeholder:text-muted-foreground/60"
-          placeholder="在此输入或粘贴文本，将自动计算各哈希值…"
+          placeholder={t('tools.hash-generator.input_placeholder')}
         />
       </div>
 
@@ -184,6 +187,7 @@ interface HashRowProps {
  * 展示算法名称、哈希值（或占位符），以及复制按钮。
  */
 function HashRow({ result, empty, onCopy }: HashRowProps) {
+  const { t } = useI18n()
   const hasValue = !empty && result.value
 
   return (
@@ -194,7 +198,7 @@ function HashRow({ result, empty, onCopy }: HashRowProps) {
         <button
           onClick={() => onCopy(result.algorithm)}
           disabled={!hasValue}
-          title={hasValue ? `复制 ${result.label} 哈希值` : '暂无内容可复制'}
+          title={hasValue ? t('tools.hash-generator.copy_title').replace('{label}', result.label) : t('tools.hash-generator.copy_empty')}
           className={[
             'inline-flex items-center gap-1.5 rounded-xl border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer',
             !hasValue ? 'opacity-40 cursor-not-allowed pointer-events-none' : '',
@@ -203,12 +207,12 @@ function HashRow({ result, empty, onCopy }: HashRowProps) {
           {result.copying ? (
             <>
               <Check className="h-3 w-3 text-green-500" />
-              <span className="text-green-500">已复制</span>
+              <span className="text-green-500">{t('common.copied')}</span>
             </>
           ) : (
             <>
               <Copy className="h-3 w-3" />
-              <span>复制</span>
+              <span>{t('common.copy')}</span>
             </>
           )}
         </button>
@@ -222,7 +226,7 @@ function HashRow({ result, empty, onCopy }: HashRowProps) {
           </span>
         ) : (
           <span className="font-mono text-xs text-muted-foreground/40 italic">
-            {empty ? '等待输入…' : '计算中…'}
+            {empty ? t('tools.hash-generator.waiting') : t('tools.hash-generator.computing')}
           </span>
         )}
       </div>

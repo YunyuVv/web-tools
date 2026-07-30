@@ -9,6 +9,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { Copy, Check } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 type RGB = { r: number; g: number; b: number }
 
@@ -161,6 +162,7 @@ function ReadoutRow({ label, value, copiedKey, copied, onCopy }: {
   copied: string | null
   onCopy: (v: string, k: string) => void
 }) {
+  const { t } = useI18n()
   return (
     <div className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-card px-5 py-4 shadow-sm">
       <div className="flex min-w-0 items-baseline gap-3">
@@ -170,7 +172,7 @@ function ReadoutRow({ label, value, copiedKey, copied, onCopy }: {
       <button
         type="button"
         onClick={() => onCopy(value, copiedKey)}
-        title="复制"
+        title={t('common.copy')}
         className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-border/60 px-2 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
       >
         {copied === copiedKey ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
@@ -182,6 +184,7 @@ function ReadoutRow({ label, value, copiedKey, copied, onCopy }: {
 export function ColorConverterTool() {
   const [raw, setRaw] = useState('#6366F1')
   const [copied, setCopied] = useState<string | null>(null)
+  const { t } = useI18n()
   const copyTimer = useCallback((k: string) => {
     setCopied(k)
     setTimeout(() => setCopied(null), 1500)
@@ -212,13 +215,13 @@ export function ColorConverterTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-sm font-medium text-foreground">颜色转换</span>
+        <span className="text-sm font-medium text-foreground">{t('tools.color-converter.title')}</span>
         <input
           type="color"
           value={hex || '#000000'}
           onChange={handlePicker}
           className="ml-1 h-9 w-9 cursor-pointer rounded-lg border border-border/60 bg-transparent p-0.5"
-          aria-label="取色器"
+          aria-label={t('tools.color-converter.picker_aria')}
         />
         <div className="flex-1" />
       </div>
@@ -226,7 +229,7 @@ export function ColorConverterTool() {
       {/* ── 输入 + 预览 ── */}
       <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
         <div className="flex items-center gap-3 border-b border-border/40 bg-muted/30 px-5 py-3">
-          <span className="text-xs font-medium text-muted-foreground">输入任意格式</span>
+          <span className="text-xs font-medium text-muted-foreground">{t('tools.color-converter.input_label')}</span>
           <span
             className="h-5 w-5 shrink-0 rounded-md border border-border/40"
             style={{ backgroundColor: previewColor }}
@@ -235,14 +238,14 @@ export function ColorConverterTool() {
         <input
           value={raw}
           onChange={e => setRaw(e.target.value)}
-          placeholder="如 #6366F1、rgb(99 102 241)、hsl(243 75% 67%)、oklch(0.6 0.15 264)"
+          placeholder={t('tools.color-converter.input_placeholder')}
           spellCheck={false}
           className={`w-full border-0 bg-transparent px-5 py-4 font-mono text-sm focus:outline-none placeholder:text-muted-foreground/60 ${
             valid ? 'text-foreground' : 'text-destructive'
           }`}
         />
         {!valid && raw.trim() && (
-          <div className="px-5 pb-3 text-xs text-destructive">无法识别的颜色格式</div>
+          <div className="px-5 pb-3 text-xs text-destructive">{t('tools.color-converter.error_invalid')}</div>
         )}
       </div>
 

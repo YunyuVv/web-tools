@@ -8,10 +8,11 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { Copy, Check, AlertTriangle, Sparkles } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 const MONTH_NAMES: Record<string, number> = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 }
 const DOW_NAMES: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 }
-const DOW_CN = ['日', '一', '二', '三', '四', '五', '六']
+const DOW_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
 
 interface Field {
   set: Set<number>
@@ -64,9 +65,9 @@ interface Cron {
   dow: Field
 }
 
-function parseCron(expr: string): { cron: Cron | null; error: string | null } {
+function parseCron(expr: string, t: (key: string) => string): { cron: Cron | null; error: string | null } {
   const parts = expr.trim().split(/\s+/)
-  if (parts.length !== 5) return { cron: null, error: '需要 5 个字段：分 时 日 月 周' }
+  if (parts.length !== 5) return { cron: null, error: t('tools.cron-parser.error_fields') }
   const [m, h, dom, mon, dow] = parts
   const cm = parseField(m, 0, 59)
   const ch = parseField(h, 0, 23)
@@ -75,7 +76,7 @@ function parseCron(expr: string): { cron: Cron | null; error: string | null } {
   const cdow = parseField(dow, 0, 7, DOW_NAMES)
   if (cdow.set.has(7)) cdow.set.add(0)
   if (cm.set.size === 0 || ch.set.size === 0 || cdom.set.size === 0 || cmon.set.size === 0 || cdow.set.size === 0) {
-    return { cron: null, error: '存在无法解析的字段' }
+    return { cron: null, error: t('tools.cron-parser.error_parse') }
   }
   return { cron: { min: cm, hour: ch, dom: cdom, month: cmon, dow: cdow }, error: null }
 }
@@ -112,18 +113,22 @@ function fmt(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-function describe(c: Cron): string {
+function describe(c: Cron, t: (key: string) => string): string {
   const parts: string[] = []
-  if (!c.min.star) parts.push(`第 ${[...c.min.set].sort((a, b) => a - b).join('/')} 分`)
-  if (!c.hour.star) parts.push(`${[...c.hour.set].sort((a, b) => a - b).join('/')} 时`)
-  if (!c.dom.star && c.dow.star) parts.push(`每月 ${[...c.dom.set].sort((a, b) => a - b).join('/')} 日`)
-  if (!c.dow.star && c.dom.star) parts.push(`每周${[...c.dow.set].sort((a, b) => a - b).map(x => DOW_CN[x]).join('/')}`)
-  if (!c.month.star) parts.push(`${[...c.month.set].sort((a, b) => a - b).join('/')} 月`)
-  let base = '自定义计划'
-  if (c.min.star && c.hour.star && c.dom.star && c.month.star && c.dow.star) base = '每分钟执行'
-  else if (!c.min.star && c.hour.star && c.dom.star && c.month.star && c.dow.star) base = '每小时执行'
-  else if (!c.min.star && !c.hour.star && c.dom.star && c.month.star && c.dow.star) base = '每天执行'
-  return parts.length ? `${base}（${parts.join('，')}）` : base
+  if (!c.min.star) parts.push(`${t('tools.cron-parser.field_min')} ${[...c.min.set].sort((a, b) => a - b).join('/')}`)
+  if (!c.hour.star) parts.push(`${t('tools.cron-parser.field_hour')} ${[...c.hour.set].sort((a, b) => a - b).join('/')}`)
+  if (!c.dom.star && c.dow.star) parts.push(`${t('tools.cron-parser.field_day')} ${[...c.dom.set].sort((a, b) => a - b).join('/')}`)
+  if (!c.dow.star && c.dom.star) {
+    const names = [...c.dow.set].sort((a, b) => a - b).map(x => t(`tools.cron-parser.weekday_${DOW_KEYS[x % 7]}`)).join('/')
+    parts.push(t('tools.cron-parser.desc_weekly').replace('{days}', names))
+  }
+  if (!c.month.star) parts.push(`${t('tools.cron-parser.field_month')} ${[...c.month.set].sort((a, b) => a - b).join('/')}`)
+  let base: string
+  if (c.min.star && c.hour.star && c.dom.star && c.month.star && c.dow.star) base = t('tools.cron-parser.desc_per_minute')
+  else if (!c.min.star && c.hour.star && c.dom.star && c.month.star && c.dow.star) base = t('tools.cron-parser.desc_per_hour')
+  else if (!c.min.star && !c.hour.star && c.dom.star && c.month.star && c.dow.star) base = t('tools.cron-parser.desc_per_day')
+  else base = t('tools.cron-parser.desc_custom')
+  return parts.length ? `${base} (${parts.join(', ')})` : base
 }
 
 const SAMPLE = '0 9 * * 1-5'
@@ -133,7 +138,9 @@ export function CronParserTool() {
   const [count, setCount] = useState(5)
   const [copied, setCopied] = useState(false)
 
-  const { cron, error } = useMemo(() => parseCron(expr), [expr])
+  const { t } = useI18n()
+
+  const { cron, error } = useMemo(() => parseCron(expr, t), [expr, t])
   const occurrences = useMemo(() => (cron ? nextOccurrences(cron, count, new Date()) : []), [cron, count])
 
   const handleSample = useCallback(() => setExpr(SAMPLE), [])
@@ -150,11 +157,11 @@ export function CronParserTool() {
 
   const fields = cron
     ? [
-        { label: '分', value: cron.min.star ? '*' : [...cron.min.set].sort((a, b) => a - b).join(', ') },
-        { label: '时', value: cron.hour.star ? '*' : [...cron.hour.set].sort((a, b) => a - b).join(', ') },
-        { label: '日', value: cron.dom.star ? '*' : [...cron.dom.set].sort((a, b) => a - b).join(', ') },
-        { label: '月', value: cron.month.star ? '*' : [...cron.month.set].sort((a, b) => a - b).join(', ') },
-        { label: '周', value: cron.dow.star ? '*' : [...cron.dow.set].sort((a, b) => a - b).join(', ') },
+        { label: t('tools.cron-parser.field_min'), value: cron.min.star ? '*' : [...cron.min.set].sort((a, b) => a - b).join(', ') },
+        { label: t('tools.cron-parser.field_hour'), value: cron.hour.star ? '*' : [...cron.hour.set].sort((a, b) => a - b).join(', ') },
+        { label: t('tools.cron-parser.field_day'), value: cron.dom.star ? '*' : [...cron.dom.set].sort((a, b) => a - b).join(', ') },
+        { label: t('tools.cron-parser.field_month'), value: cron.month.star ? '*' : [...cron.month.set].sort((a, b) => a - b).join(', ') },
+        { label: t('tools.cron-parser.field_week'), value: cron.dow.star ? '*' : [...cron.dow.set].sort((a, b) => a - b).join(', ') },
       ]
     : []
 
@@ -162,7 +169,7 @@ export function CronParserTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-sm font-medium text-foreground">Cron 解析器</span>
+        <span className="text-sm font-medium text-foreground">{t('tools.cron-parser.title')}</span>
         <div className="flex-1" />
         <button
           type="button"
@@ -170,7 +177,7 @@ export function CronParserTool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
         >
           <Sparkles className="h-3.5 w-3.5" />
-          示例
+          {t('common.sample')}
         </button>
         <button
           type="button"
@@ -179,7 +186,7 @@ export function CronParserTool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-          {copied ? '已复制' : '复制'}
+          {copied ? t('common.copied') : t('common.copy')}
         </button>
       </div>
 
@@ -189,12 +196,12 @@ export function CronParserTool() {
           <input
             value={expr}
             onChange={e => setExpr(e.target.value)}
-            placeholder="输入 Cron 表达式，如 0 9 * * 1-5"
+            placeholder={t('tools.cron-parser.input_placeholder')}
             spellCheck={false}
             className="w-full border-0 bg-transparent font-mono text-sm focus:outline-none placeholder:text-muted-foreground/60"
           />
           <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
-            <span>次数</span>
+            <span>{t('tools.cron-parser.count_label')}</span>
             <input
               type="number"
               min={1}
@@ -216,8 +223,8 @@ export function CronParserTool() {
       {/* ── 描述 ── */}
       {cron && (
         <div className="rounded-2xl border border-border/60 bg-card px-5 py-4 text-sm text-foreground shadow-sm">
-          <span className="text-muted-foreground">含义：</span>
-          {describe(cron)}
+          <span className="text-muted-foreground">{t('tools.cron-parser.meaning')}</span>
+          {describe(cron, t)}
         </div>
       )}
 
@@ -237,7 +244,7 @@ export function CronParserTool() {
       {cron && (
         <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
           <div className="border-b border-border/40 bg-muted/30 px-5 py-3 text-xs font-medium text-muted-foreground">
-            未来 {occurrences.length} 次执行时间
+            {t('tools.cron-parser.next_runs').replace('{count}', String(occurrences.length))}
           </div>
           <div className="divide-y divide-border/30">
             {occurrences.map((d, i) => (
@@ -245,7 +252,7 @@ export function CronParserTool() {
                 <span className="rounded bg-primary/10 px-1.5 py-0.5 font-mono text-xs text-primary">#{i + 1}</span>
                 <span className="font-mono text-foreground">{fmt(d)}</span>
                 <span className="text-xs text-muted-foreground">
-                  {['周日', '周一', '周二', '周三', '周四', '周五', '周六'][d.getDay()]}
+                  {t(`tools.cron-parser.weekday_${DOW_KEYS[d.getDay()]}`)}
                 </span>
               </div>
             ))}

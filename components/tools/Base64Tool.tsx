@@ -10,6 +10,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { ArrowLeftRight, Trash2, Copy, Check, Lock, Unlock, Sparkles } from 'lucide-react'
 import { SlidingSegmented } from '@/components/ui/SlidingSegmented'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 /** 工具运行模式：encode 表示编码，decode 表示解码 */
 type Mode = 'encode' | 'decode'
@@ -51,6 +52,7 @@ function decodeBase64(b64: string): string {
  * 解码模式下输入非法 Base64 时，右侧显示错误提示并以红色边框标注。
  */
 export function Base64Tool() {
+  const { t } = useI18n()
   /** 当前工具模式：编码或解码 */
   const [mode, setMode] = useState<Mode>('encode')
   /** 左侧输入内容 */
@@ -76,7 +78,7 @@ export function Base64Tool() {
         setError(null)
       } catch {
         setOutput('')
-        setError('编码失败，请检查输入内容')
+        setError(t('tools.base64.error_encode'))
       }
     } else {
       // 解码前过滤首尾空白，以减少误报
@@ -86,7 +88,7 @@ export function Base64Tool() {
         setError(null)
       } catch {
         setOutput('')
-        setError('无效的 Base64 字符串，请检查输入格式')
+        setError(t('tools.base64.error_invalid'))
       }
     }
   }, [input, mode])
@@ -142,7 +144,7 @@ export function Base64Tool() {
       <div className="flex items-center gap-3 flex-wrap">
         {/* 模式切换：滑动玻璃分段控件 */}
         <SlidingSegmented
-          ariaLabel="编码或解码模式"
+          ariaLabel={t('common.mode_aria')}
           value={mode}
           onChange={handleModeChange}
           options={[
@@ -160,7 +162,7 @@ export function Base64Tool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
         >
           <Sparkles className="h-3.5 w-3.5" />
-          示例
+          {t('common.sample')}
         </button>
 
         {/* 交换 */}
@@ -168,11 +170,11 @@ export function Base64Tool() {
           type="button"
           onClick={handleSwap}
           disabled={!output}
-          title="将输出内容交换到输入框"
+          title={t('common.swap_title')}
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ArrowLeftRight className="h-4 w-4" />
-          交换
+          {t('common.swap')}
         </button>
 
         {/* 清空 */}
@@ -182,14 +184,14 @@ export function Base64Tool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-destructive/40 hover:text-destructive cursor-pointer"
         >
           <Trash2 className="h-4 w-4" />
-          清空
+          {t('common.clear')}
         </button>
       </div>
 
       {/* ── 错误提示 ── */}
       {error && (
         <div className="flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-2.5 text-xs text-destructive">
-          <span className="shrink-0 font-medium">错误：</span>
+          <span className="shrink-0 font-medium">{t('common.error')}：</span>
           <span>{error}</span>
         </div>
       )}
@@ -201,10 +203,10 @@ export function Base64Tool() {
           <div className="flex items-center justify-between border-b border-border/40 bg-muted/20 px-5 py-3 text-xs">
             <span className="flex items-center gap-1.5 font-medium text-muted-foreground">
               {mode === 'encode' ? <Unlock className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-              {mode === 'encode' ? '原始文本' : 'Base64 字符串'}
+              {mode === 'encode' ? t('tools.base64.input_raw') : t('tools.base64.input_base64')}
             </span>
             <span className="rounded-md bg-background/70 px-2 py-0.5 font-mono tabular-nums text-muted-foreground">
-              {input.length} 字符 · {inputBytes} 字节
+              {input.length} {t('tools.base64.chars')} · {inputBytes} {t('tools.base64.bytes')}
             </span>
           </div>
           <textarea
@@ -212,8 +214,8 @@ export function Base64Tool() {
             onChange={(e) => setInput(e.target.value)}
             placeholder={
               mode === 'encode'
-                ? '在此输入要编码的文本…'
-                : '在此粘贴 Base64 字符串进行解码…'
+                ? t('tools.base64.encode_placeholder')
+                : t('tools.base64.decode_placeholder')
             }
             spellCheck={false}
             className={[
@@ -233,23 +235,23 @@ export function Base64Tool() {
           <div className="flex items-center justify-between border-b border-border/40 bg-muted/20 px-5 py-3 text-xs">
             <span className="flex items-center gap-1.5 font-medium text-muted-foreground">
               {mode === 'encode' ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
-              {mode === 'encode' ? 'Base64 结果' : '解码结果'}
+              {mode === 'encode' ? t('tools.base64.output_base64') : t('tools.base64.output_decoded')}
             </span>
             <button
               type="button"
               onClick={handleCopy}
               disabled={!output}
-              title="复制结果"
+              title={t('common.copy')}
               className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-              {copied ? '已复制' : '复制'}
+              {copied ? t('common.copied') : t('common.copy')}
             </button>
           </div>
           <textarea
             value={output}
             readOnly
-            placeholder={error ? '' : '转换结果将显示在此处…'}
+            placeholder={error ? '' : t('tools.base64.output_placeholder')}
             spellCheck={false}
             className="w-full resize-none border-0 bg-transparent px-5 py-4 font-mono text-sm leading-7 focus:outline-none placeholder:text-muted-foreground/60 min-h-[360px] cursor-default select-all"
           />

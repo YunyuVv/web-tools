@@ -7,6 +7,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { Check, X } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 type RGB = { r: number; g: number; b: number }
 
@@ -34,6 +35,7 @@ function relLum({ r, g, b }: RGB): number {
 
 /** 单条判定行 */
 function PassRow({ label, required, passed }: { label: string; required: string; passed: boolean }) {
+  const { t } = useI18n()
   return (
     <div className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/20 px-4 py-2.5">
       <span className="text-sm text-foreground">{label}</span>
@@ -41,11 +43,11 @@ function PassRow({ label, required, passed }: { label: string; required: string;
         <span className="font-mono text-xs text-muted-foreground">≥ {required}</span>
         {passed ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400">
-            <Check className="h-3 w-3" /> 通过
+            <Check className="h-3 w-3" /> {t('tools.contrast-checker.pass')}
           </span>
         ) : (
           <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-600 dark:text-red-400">
-            <X className="h-3 w-3" /> 未达
+            <X className="h-3 w-3" /> {t('tools.contrast-checker.fail')}
           </span>
         )}
       </div>
@@ -54,6 +56,7 @@ function PassRow({ label, required, passed }: { label: string; required: string;
 }
 
 export function ContrastCheckerTool() {
+  const { t } = useI18n()
   const [fg, setFg] = useState('#FFFFFF')
   const [bg, setBg] = useState('#6366F1')
 
@@ -78,22 +81,22 @@ export function ContrastCheckerTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-sm font-medium text-foreground">对比度检测</span>
+        <span className="text-sm font-medium text-foreground">{t('tools.contrast-checker.title')}</span>
         <div className="flex-1" />
         <button
           type="button"
           onClick={swap}
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
         >
-          交换前景/背景
+          {t('tools.contrast-checker.swap')}
         </button>
       </div>
 
       {/* ── 取色区 ── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {([
-          { label: '前景色', value: fg, set: setFg },
-          { label: '背景色', value: bg, set: setBg },
+          { label: t('tools.contrast-checker.fg_color'), value: fg, set: setFg },
+          { label: t('tools.contrast-checker.bg_color'), value: bg, set: setBg },
         ] as const).map(c => (
           <div key={c.label} className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-3 shadow-sm">
             <input
@@ -123,24 +126,24 @@ export function ContrastCheckerTool() {
           style={{ backgroundColor: bgRgb ? toHex(bgRgb) : '#000', color: fgRgb ? toHex(fgRgb) : '#fff' }}
         >
           <span className="text-4xl font-bold">Aa</span>
-          <span className="text-sm">示例文本预览</span>
+          <span className="text-sm">{t('tools.contrast-checker.preview_text')}</span>
         </div>
       </div>
 
       {/* ── 结果 ── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col items-center justify-center rounded-2xl border border-border/60 bg-card py-6 shadow-sm">
-          <span className="text-xs text-muted-foreground">对比度比例</span>
+          <span className="text-xs text-muted-foreground">{t('tools.contrast-checker.ratio_label')}</span>
           <span className="font-mono text-3xl font-bold text-foreground">
             {ratio ? ratio.toFixed(2) : '—'}
           </span>
           <span className="text-xs text-muted-foreground">: 1</span>
         </div>
         <div className="flex flex-col gap-2 rounded-2xl border border-border/60 bg-card p-4 shadow-sm">
-          <PassRow label="普通文本 AA" required="4.5" passed={!!ratio && ratio >= 4.5} />
-          <PassRow label="普通文本 AAA" required="7.0" passed={!!ratio && ratio >= 7} />
-          <PassRow label="大字文本 AA" required="3.0" passed={!!ratio && ratio >= 3} />
-          <PassRow label="大字文本 AAA" required="4.5" passed={!!ratio && ratio >= 4.5} />
+          <PassRow label={t('tools.contrast-checker.aa_normal')} required="4.5" passed={!!ratio && ratio >= 4.5} />
+          <PassRow label={t('tools.contrast-checker.aaa_normal')} required="7.0" passed={!!ratio && ratio >= 7} />
+          <PassRow label={t('tools.contrast-checker.aa_large')} required="3.0" passed={!!ratio && ratio >= 3} />
+          <PassRow label={t('tools.contrast-checker.aaa_large')} required="4.5" passed={!!ratio && ratio >= 4.5} />
         </div>
       </div>
     </div>

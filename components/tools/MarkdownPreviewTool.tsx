@@ -7,6 +7,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { Copy, Check } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 const SAMPLE = `# 标题示例
 
@@ -183,6 +184,7 @@ function mdToHtml(src: string): string {
 }
 
 export function MarkdownPreviewTool() {
+  const { t } = useI18n()
   const [text, setText] = useState(SAMPLE)
   const [copied, setCopied] = useState(false)
 
@@ -202,7 +204,7 @@ export function MarkdownPreviewTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-sm font-medium text-foreground">Markdown 预览</span>
+        <span className="text-sm font-medium text-foreground">{t('tools.markdown-preview.title')}</span>
         <div className="flex-1" />
         <button
           type="button"
@@ -210,7 +212,7 @@ export function MarkdownPreviewTool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
         >
           {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-          {copied ? '已复制' : '复制'}
+          {copied ? t('common.copied') : t('common.copy')}
         </button>
       </div>
 
@@ -218,19 +220,19 @@ export function MarkdownPreviewTool() {
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
         <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
           <div className="border-b border-border/40 bg-muted/30 px-5 py-3 text-xs font-medium text-muted-foreground">
-            Markdown
+            {t('tools.markdown-preview.input_label')}
           </div>
           <textarea
             value={text}
             onChange={e => setText(e.target.value)}
-            placeholder="在此输入 Markdown…"
+            placeholder={t('tools.markdown-preview.input_placeholder')}
             spellCheck={false}
             className="w-full resize-none border-0 bg-transparent px-5 py-4 font-mono text-sm leading-7 focus:outline-none placeholder:text-muted-foreground/60 min-h-[420px]"
           />
         </div>
         <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
           <div className="border-b border-border/40 bg-muted/30 px-5 py-3 text-xs font-medium text-muted-foreground">
-            预览
+            {t('tools.markdown-preview.preview_label')}
           </div>
           <div
             className="md-preview min-h-[420px] px-5 py-4"

@@ -8,6 +8,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { Copy, Check, AlertTriangle, Sparkles } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 interface MatchInfo {
   index: number
@@ -22,19 +23,22 @@ interface Segment {
 }
 
 /** 受支持的 flags */
-const FLAG_DEFS: { key: keyof Flags; label: string; hint: string }[] = [
-  { key: 'g', label: 'g', hint: '全局匹配' },
-  { key: 'i', label: 'i', hint: '忽略大小写' },
-  { key: 'm', label: 'm', hint: '多行 ^ $' },
-  { key: 's', label: 's', hint: '点匹配换行' },
+const FLAG_DEFS: { key: keyof Flags; label: string; i18nKey: string }[] = [
+  { key: 'g', label: 'g', i18nKey: 'tools.regex-tester.flag_g' },
+  { key: 'i', label: 'i', i18nKey: 'tools.regex-tester.flag_i' },
+  { key: 'm', label: 'm', i18nKey: 'tools.regex-tester.flag_m' },
+  { key: 's', label: 's', i18nKey: 'tools.regex-tester.flag_s' },
 ]
 
 type Flags = { g: boolean; i: boolean; m: boolean; s: boolean }
 
 const SAMPLE_PATTERN = '\\b(\\w+@\\w+\\.\\w+)\\b'
-const SAMPLE_TEXT = '联系: alice@example.com 或 bob@test.org\n无效: not-an-email\n支持: carol@mail.cn'
 
 export function RegexTesterTool() {
+  const { t } = useI18n()
+
+  const SAMPLE_TEXT = t('tools.regex-tester.sample_text')
+
   const [pattern, setPattern] = useState('')
   const [flags, setFlags] = useState<Flags>({ g: true, i: false, m: false, s: false })
   const [text, setText] = useState('')
@@ -121,7 +125,7 @@ export function RegexTesterTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-sm font-medium text-foreground">正则测试器</span>
+        <span className="text-sm font-medium text-foreground">{t('tools.regex-tester.title')}</span>
         <div className="flex-1" />
         <button
           type="button"
@@ -129,7 +133,7 @@ export function RegexTesterTool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
         >
           <Sparkles className="h-3.5 w-3.5" />
-          示例
+          {t('common.sample')}
         </button>
         <button
           type="button"
@@ -138,7 +142,7 @@ export function RegexTesterTool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-          {copied ? '已复制' : '复制'}
+          {copied ? t('common.copied') : t('common.copy')}
         </button>
       </div>
 
@@ -150,7 +154,7 @@ export function RegexTesterTool() {
             <input
               value={pattern}
               onChange={e => setPattern(e.target.value)}
-              placeholder="输入正则表达式…"
+              placeholder={t('tools.regex-tester.input_placeholder')}
               spellCheck={false}
               className="w-full border-0 bg-transparent font-mono text-sm focus:outline-none placeholder:text-muted-foreground/60"
             />
@@ -161,7 +165,7 @@ export function RegexTesterTool() {
               <button
                 key={f.key}
                 type="button"
-                title={f.hint}
+                title={t(f.i18nKey)}
                 onClick={() => toggleFlag(f.key)}
                 className={`h-7 w-7 rounded-lg text-xs font-mono font-medium transition cursor-pointer ${
                   flags[f.key]
@@ -177,7 +181,7 @@ export function RegexTesterTool() {
         {error && (
           <div className="flex items-center gap-2 border-t border-destructive/30 bg-destructive/5 px-4 py-2 text-xs text-destructive">
             <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-            <span>正则错误：{error}</span>
+            <span>{t('tools.regex-tester.error_prefix').replace('{error}', error)}</span>
           </div>
         )}
       </div>
@@ -185,15 +189,15 @@ export function RegexTesterTool() {
       {/* ── 测试文本 ── */}
       <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
         <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-5 py-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5 font-medium">测试文本</span>
+          <span className="flex items-center gap-1.5 font-medium">{t('tools.regex-tester.test_label')}</span>
           <span className="rounded-md bg-background/70 px-2 py-0.5 font-mono tabular-nums">
-            {matches.length} 处匹配
+            {t('tools.regex-tester.match_count').replace('{count}', String(matches.length))}
           </span>
         </div>
         <textarea
           value={text}
           onChange={e => setText(e.target.value)}
-          placeholder="在此输入要测试的文本…"
+          placeholder={t('tools.regex-tester.text_placeholder')}
           spellCheck={false}
           className="w-full resize-none border-0 bg-transparent px-5 py-4 font-mono text-sm leading-7 focus:outline-none placeholder:text-muted-foreground/60 min-h-[160px]"
         />
@@ -202,11 +206,11 @@ export function RegexTesterTool() {
       {/* ── 高亮预览 ── */}
       <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
         <div className="border-b border-border/40 bg-muted/30 px-5 py-3 text-xs font-medium text-muted-foreground">
-          匹配高亮
+          {t('tools.regex-tester.highlight_label')}
         </div>
         <div className="whitespace-pre-wrap break-words px-5 py-4 font-mono text-sm leading-7">
           {segments.length === 0 ? (
-            <span className="text-muted-foreground/50">高亮结果将显示在此处…</span>
+            <span className="text-muted-foreground/50">{t('tools.regex-tester.highlight_placeholder')}</span>
           ) : (
             segments.map((s, i) =>
               s.match ? (
@@ -225,21 +229,21 @@ export function RegexTesterTool() {
       {matches.length > 0 && (
         <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
           <div className="border-b border-border/40 bg-muted/30 px-5 py-3 text-xs font-medium text-muted-foreground">
-            匹配详情
+            {t('tools.regex-tester.detail_label')}
           </div>
           <div className="divide-y divide-border/30">
             {matches.slice(0, 50).map((m, i) => (
               <div key={i} className="px-5 py-3 text-sm">
                 <div className="flex items-center gap-2">
                   <span className="rounded bg-primary/10 px-1.5 py-0.5 font-mono text-xs text-primary">#{i + 1}</span>
-                  <span className="text-muted-foreground">位置 {m.index}</span>
-                  <code className="truncate font-mono text-foreground">{m.value || '(空)'}</code>
+                  <span className="text-muted-foreground">{t('tools.regex-tester.position').replace('{i}', String(m.index))}</span>
+                  <code className="truncate font-mono text-foreground">{m.value || t('tools.regex-tester.empty')}</code>
                 </div>
                 {m.groups.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2">
                     {m.groups.map((g, gi) => (
                       <span key={gi} className="rounded-md bg-muted/40 px-2 py-1 font-mono text-xs text-muted-foreground">
-                        ${gi + 1}: {g === undefined ? '—' : g || '(空)'}
+                        {t('tools.regex-tester.group').replace('{n}', String(gi + 1))}: {g === undefined ? '—' : g || t('tools.regex-tester.empty')}
                       </span>
                     ))}
                   </div>
@@ -248,7 +252,7 @@ export function RegexTesterTool() {
                   <div className="mt-2 flex flex-wrap gap-2">
                     {Object.entries(m.named).map(([k, v]) => (
                       <span key={k} className="rounded-md bg-muted/40 px-2 py-1 font-mono text-xs text-muted-foreground">
-                        &lt;{k}&gt;: {v || '(空)'}
+                        {t('tools.regex-tester.named_group').replace('{k}', k)}: {v || t('tools.regex-tester.empty')}
                       </span>
                     ))}
                   </div>

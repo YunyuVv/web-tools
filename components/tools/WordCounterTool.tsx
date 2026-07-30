@@ -17,6 +17,7 @@ import {
   Type,
   Space,
 } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 // ─── 统计卡片子组件 ─────────────────────────────────────────────────────────
 
@@ -66,8 +67,8 @@ interface TextStats {
   sentenceCount: number
   /** 段落数（按空行分隔） */
   paragraphCount: number
-  /** 格式化后的预计阅读时间 */
-  readingTime: string
+  /** 预计阅读时间（秒） */
+  readingSeconds: number
 }
 
 /**
@@ -100,18 +101,8 @@ function computeStats(text: string): TextStats {
     paragraphCount = paragraphs.length || 1
   }
 
-  // 预计阅读时间：按 200 字/分钟计算
-  let readingTime = '0 秒'
-  if (wordCount > 0) {
-    const totalSeconds = Math.ceil((wordCount / 200) * 60)
-    if (totalSeconds < 60) {
-      readingTime = `${totalSeconds} 秒`
-    } else {
-      const mins = Math.floor(totalSeconds / 60)
-      const secs = totalSeconds % 60
-      readingTime = secs > 0 ? `${mins} 分 ${secs} 秒` : `${mins} 分钟`
-    }
-  }
+  // 预计阅读时间：按 200 字/分钟计算，返回秒数，格式化交由组件完成
+  const readingSeconds = wordCount > 0 ? Math.ceil((wordCount / 200) * 60) : 0
 
   return {
     wordCount,
@@ -119,7 +110,7 @@ function computeStats(text: string): TextStats {
     charNoSpaceCount,
     sentenceCount,
     paragraphCount,
-    readingTime,
+    readingSeconds,
   }
 }
 
@@ -130,11 +121,24 @@ function computeStats(text: string): TextStats {
  * 上方提供大号输入文本框，下方以卡片网格实时展示六项统计指标。
  */
 export function WordCounterTool() {
+  const { t } = useI18n()
   /** 用户输入的原始文本 */
   const [text, setText] = useState('')
 
   /** 实时计算统计结果，仅在 text 变化时重新执行 */
   const stats = useMemo(() => computeStats(text), [text])
+
+  /** 把阅读秒数格式化为本地化文案 */
+  const readingLabel = (() => {
+    const rt = stats.readingSeconds
+    if (rt === 0) return t('tools.word-counter.read_sec').replace('{n}', '0')
+    if (rt < 60) return t('tools.word-counter.read_sec').replace('{n}', String(rt))
+    const mins = Math.floor(rt / 60)
+    const secs = rt % 60
+    return secs > 0
+      ? t('tools.word-counter.read_min_sec').replace('{m}', String(mins)).replace('{s}', String(secs))
+      : t('tools.word-counter.read_min').replace('{m}', String(mins))
+  })()
 
   /** 清空输入框 */
   const handleClear = () => {
@@ -149,14 +153,14 @@ export function WordCounterTool() {
         <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <AlignLeft className="h-3.5 w-3.5" />
-            <span>输入文本</span>
+            <span>{t('tools.word-counter.input_label')}</span>
           </div>
           <button
             onClick={handleClear}
             className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 px-3 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
           >
             <Trash2 className="h-3.5 w-3.5" />
-            清空
+            {t('common.clear')}
           </button>
         </div>
 
@@ -165,7 +169,7 @@ export function WordCounterTool() {
           value={text}
           onChange={e => setText(e.target.value)}
           className="w-full resize-none border-0 bg-transparent px-4 py-3 font-mono text-sm focus:outline-none placeholder:text-muted-foreground/60 min-h-[260px]"
-          placeholder="在此输入或粘贴文本，统计数据将实时更新…"
+          placeholder={t('tools.word-counter.input_placeholder')}
           spellCheck={false}
         />
       </div>
@@ -174,39 +178,39 @@ export function WordCounterTool() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <StatCard
           icon={<Type className="h-3.5 w-3.5" />}
-          label="字数"
+          label={t('tools.word-counter.stat_words')}
           value={stats.wordCount.toLocaleString()}
-          description="按空格分词"
+          description={t('tools.word-counter.desc_words')}
         />
         <StatCard
           icon={<Hash className="h-3.5 w-3.5" />}
-          label="字符数"
+          label={t('tools.word-counter.stat_chars')}
           value={stats.charCount.toLocaleString()}
-          description="含空格与换行"
+          description={t('tools.word-counter.desc_chars')}
         />
         <StatCard
           icon={<Space className="h-3.5 w-3.5" />}
-          label="字符数（无空格）"
+          label={t('tools.word-counter.stat_chars_nospace')}
           value={stats.charNoSpaceCount.toLocaleString()}
-          description="去除所有空白字符"
+          description={t('tools.word-counter.desc_nospace')}
         />
         <StatCard
           icon={<MessageSquare className="h-3.5 w-3.5" />}
-          label="句子数"
+          label={t('tools.word-counter.stat_sentences')}
           value={stats.sentenceCount.toLocaleString()}
-          description="按 . ! ? 。！？ 计"
+          description={t('tools.word-counter.desc_sentences')}
         />
         <StatCard
           icon={<FileText className="h-3.5 w-3.5" />}
-          label="段落数"
+          label={t('tools.word-counter.stat_paragraphs')}
           value={stats.paragraphCount.toLocaleString()}
-          description="按空行分隔"
+          description={t('tools.word-counter.desc_paragraphs')}
         />
         <StatCard
           icon={<Clock className="h-3.5 w-3.5" />}
-          label="预计阅读时间"
-          value={stats.readingTime}
-          description="约 200 字 / 分钟"
+          label={t('tools.word-counter.stat_readtime')}
+          value={readingLabel}
+          description={t('tools.word-counter.desc_readtime')}
         />
       </div>
     </div>

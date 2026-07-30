@@ -7,6 +7,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { Copy, Check, RefreshCw } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 /** 词库 */
 const WORDS = [
@@ -55,6 +56,8 @@ type Unit = 'paragraphs' | 'words' | 'sentences'
  * 下方展示生成的占位文本并支持复制。
  */
 export function LoremIpsumTool() {
+  const { t } = useI18n()
+
   /** 数量 */
   const [count, setCount] = useState(3)
   /** 生成单位 */
@@ -110,10 +113,10 @@ export function LoremIpsumTool() {
     }
   }, [text])
 
-  const unitOptions: { value: Unit; label: string }[] = [
-    { value: 'paragraphs', label: '段落' },
-    { value: 'words', label: '单词' },
-    { value: 'sentences', label: '句子' },
+  const unitOptions: { value: Unit; i18nKey: string }[] = [
+    { value: 'paragraphs', i18nKey: 'tools.lorem-ipsum.unit_paragraph' },
+    { value: 'words', i18nKey: 'tools.lorem-ipsum.unit_word' },
+    { value: 'sentences', i18nKey: 'tools.lorem-ipsum.unit_sentence' },
   ]
 
   // 重新生成（按钮）
@@ -123,7 +126,7 @@ export function LoremIpsumTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-sm font-medium text-foreground">Lorem Ipsum 生成器</span>
+        <span className="text-sm font-medium text-foreground">{t('tools.lorem-ipsum.generator_title')}</span>
         <div className="flex-1" />
         <button
           type="button"
@@ -131,14 +134,14 @@ export function LoremIpsumTool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
         >
           <RefreshCw className="h-4 w-4" />
-          重新生成
+          {t('common.regenerate')}
         </button>
       </div>
 
       {/* ── 选项区 ── */}
       <div className="flex flex-wrap items-end gap-4">
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted-foreground">数量</span>
+          <span className="text-xs text-muted-foreground">{t('tools.lorem-ipsum.count')}</span>
           <input
             type="number"
             min={1}
@@ -149,7 +152,7 @@ export function LoremIpsumTool() {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs text-muted-foreground">单位</span>
+          <span className="text-xs text-muted-foreground">{t('tools.lorem-ipsum.unit')}</span>
           <div className="flex rounded-xl border border-border/60 bg-card p-1">
             {unitOptions.map(o => (
               <button
@@ -160,7 +163,7 @@ export function LoremIpsumTool() {
                   unit === o.value ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                {o.label}
+                {t(o.i18nKey)}
               </button>
             ))}
           </div>
@@ -172,14 +175,14 @@ export function LoremIpsumTool() {
             onChange={() => setClassic(v => !v)}
             className="h-4 w-4 accent-primary cursor-pointer"
           />
-          以经典开头起始
+          {t('tools.lorem-ipsum.classic_opening')}
         </label>
       </div>
 
       {/* ── 结果区 ── */}
       <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
         <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
-          <span>占位文本</span>
+          <span>{t('tools.lorem-ipsum.placeholder_label')}</span>
           <button
             type="button"
             onClick={handleCopy}
@@ -187,13 +190,13 @@ export function LoremIpsumTool() {
             className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-            {copied ? '已复制' : '复制'}
+            {copied ? t('common.copied') : t('common.copy')}
           </button>
         </div>
         <textarea
           value={text}
           readOnly
-          placeholder="生成的占位文本将显示在此处…"
+          placeholder={t('tools.lorem-ipsum.output_placeholder')}
           spellCheck={false}
           className="w-full resize-none border-0 bg-transparent px-5 py-4 text-sm leading-7 text-foreground focus:outline-none min-h-[280px] cursor-default select-all"
         />

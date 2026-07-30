@@ -13,6 +13,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { Copy, Check, Search, AlertTriangle, Globe } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 interface IpInfo {
   ip: string
@@ -92,6 +93,7 @@ const PROVIDERS: Provider[] = [
 ]
 
 export function IpLookupTool() {
+  const { t } = useI18n()
   const [input, setInput] = useState('')
   const [info, setInfo] = useState<IpInfo | null>(null)
   const [loading, setLoading] = useState(false)
@@ -102,37 +104,39 @@ export function IpLookupTool() {
     setLoading(true)
     setError(null)
 
-    let lastReason = '网络请求失败'
+    let lastReason = t('tools.ip-lookup.err_network')
     for (const p of PROVIDERS) {
       const ctrl = new AbortController()
       const timer = setTimeout(() => ctrl.abort(), 8000)
       try {
         const res = await fetch(p.url(ip), { signal: ctrl.signal })
         if (!res.ok) {
-          lastReason = `服务返回 ${res.status}`
+          lastReason = t('tools.ip-lookup.err_status').replace('{status}', String(res.status))
           continue
         }
         const data = (await res.json()) as Record<string, unknown>
         const normalized = p.normalize(data)
         if (!normalized.ip) {
-          lastReason = '响应缺少 IP 字段'
+          lastReason = t('tools.ip-lookup.err_no_ip')
           continue
         }
         setInfo({ ...(normalized as IpInfo), source: p.name })
         setLoading(false)
         return
       } catch (e) {
-        lastReason = e instanceof DOMException && e.name === 'AbortError' ? '请求超时' : '网络请求失败'
+        lastReason = e instanceof DOMException && e.name === 'AbortError'
+          ? t('tools.ip-lookup.err_timeout')
+          : t('tools.ip-lookup.err_network')
         // 尝试下一个源
       } finally {
         clearTimeout(timer)
       }
     }
 
-    setError(`所有 IP 查询服务暂不可用（${lastReason}），请稍后重试`)
+    setError(t('tools.ip-lookup.error_all').replace('{reason}', lastReason))
     setInfo(null)
     setLoading(false)
-  }, [])
+  }, [t])
 
   // 进入页面时查询本机 IP
   useEffect(() => {
@@ -153,17 +157,21 @@ export function IpLookupTool() {
     }
   }, [info])
 
-  const rows: { label: string; value?: string }[] = info
+  const rows: { key: string; label: string; value?: string }[] = info
     ? [
-        { label: 'IP 地址', value: info.ip },
-        { label: '城市', value: info.city },
-        { label: '地区', value: info.region },
-        { label: '国家', value: info.country_name },
-        { label: '组织 / 运营商', value: info.org },
-        { label: '时区', value: info.timezone },
-        info.latitude !== undefined && info.longitude !== undefined
-          ? { label: '经纬度', value: `${info.latitude}, ${info.longitude}` }
-          : { label: '经纬度', value: undefined },
+        { key: 'ip', label: t('tools.ip-lookup.field_ip'), value: info.ip },
+        { key: 'city', label: t('tools.ip-lookup.field_city'), value: info.city },
+        { key: 'region', label: t('tools.ip-lookup.field_region'), value: info.region },
+        { key: 'country', label: t('tools.ip-lookup.field_country'), value: info.country_name },
+        { key: 'org', label: t('tools.ip-lookup.field_org'), value: info.org },
+        { key: 'timezone', label: t('tools.ip-lookup.field_timezone'), value: info.timezone },
+        {
+          key: 'coords',
+          label: t('tools.ip-lookup.field_coords'),
+          value: info.latitude !== undefined && info.longitude !== undefined
+            ? `${info.latitude}, ${info.longitude}`
+            : undefined,
+        },
       ]
     : []
 
@@ -171,14 +179,14 @@ export function IpLookupTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-sm font-medium text-foreground">IP 查询</span>
+        <span className="text-sm font-medium text-foreground">{t('tools.ip-lookup.title')}</span>
         <div className="flex-1" />
         <button
           type="button"
           onClick={() => lookup()}
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
         >
-          查询本机
+          {t('tools.ip-lookup.lookup_self')}
         </button>
       </div>
 
@@ -190,7 +198,7 @@ export function IpLookupTool() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            placeholder="输入 IP 地址查询（留空查本机）"
+            placeholder={t('tools.ip-lookup.input_placeholder')}
             spellCheck={false}
             className="w-full border-0 bg-transparent font-mono text-sm focus:outline-none placeholder:text-muted-foreground/60"
           />
@@ -201,7 +209,7 @@ export function IpLookupTool() {
           disabled={loading}
           className="inline-flex items-center gap-1.5 rounded-2xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90 active:scale-95 cursor-pointer disabled:opacity-50"
         >
-          {loading ? '查询中…' : '查询'}
+          {loading ? t('tools.ip-lookup.searching') : t('tools.ip-lookup.search')}
         </button>
       </div>
 
@@ -217,16 +225,16 @@ export function IpLookupTool() {
       {info && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {rows.map(r => (
-            <div key={r.label} className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-card px-5 py-4 shadow-sm">
+            <div key={r.key} className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-card px-5 py-4 shadow-sm">
               <span className="text-sm text-muted-foreground">{r.label}</span>
-              {r.label === 'IP 地址' ? (
+              {r.key === 'ip' ? (
                 <span className="flex items-center gap-2">
                   <span className="font-mono text-sm font-medium text-foreground">{r.value || '—'}</span>
                   <button
                     type="button"
                     onClick={handleCopy}
                     className="inline-flex items-center text-muted-foreground transition hover:text-foreground cursor-pointer"
-                    title="复制"
+                    title={t('common.copy')}
                   >
                     {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
                   </button>
@@ -237,7 +245,7 @@ export function IpLookupTool() {
             </div>
           ))}
           <div className="col-span-full text-xs text-muted-foreground/60">
-            数据来源：{info.source}
+            {t('tools.ip-lookup.data_source').replace('{source}', info.source ?? '')}
           </div>
         </div>
       )}
@@ -245,7 +253,7 @@ export function IpLookupTool() {
       {!info && !error && !loading && (
         <div className="flex flex-col items-center justify-center gap-2 py-10 text-muted-foreground/50">
           <Globe className="h-8 w-8" />
-          <span className="text-sm">正在查询本机 IP…</span>
+          <span className="text-sm">{t('tools.ip-lookup.querying_self')}</span>
         </div>
       )}
     </div>

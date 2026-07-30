@@ -9,6 +9,7 @@
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Sun, Moon, Monitor } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 const CYCLE: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system']
 
@@ -19,6 +20,7 @@ const ICONS = {
 }
 
 export function ThemeToggleInner() {
+  const { t } = useI18n()
   const { theme, setTheme } = useTheme()
 
   const current = (theme as 'light' | 'dark' | 'system') ?? 'system'
@@ -31,7 +33,7 @@ export function ThemeToggleInner() {
       size="icon"
       className="h-8 w-8"
       onClick={() => setTheme(next)}
-      aria-label={`Theme: ${current}`}
+      aria-label={t('common.theme_toggle').replace('{mode}', t('common.theme_' + current))}
     >
       <Icon className="h-4 w-4 transition-all" />
     </Button>

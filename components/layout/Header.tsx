@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * 顶部导航栏
  * 包含：品牌 Logo（渐变方块 + 名称）、主导航、主题切换、语言切换
@@ -6,6 +8,7 @@
 
 import Link from 'next/link'
 import { type Locale } from '@/lib/i18n'
+import { useI18n } from '@/components/layout/I18nProvider'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { ThemeToggle } from './ThemeToggle'
 
@@ -14,6 +17,7 @@ interface Props {
 }
 
 export function Header({ locale }: Props) {
+  const { t } = useI18n()
   const basePath = locale === 'en' ? '' : `/${locale}`
 
   return (
@@ -41,7 +45,7 @@ export function Header({ locale }: Props) {
             href={`${basePath}/`}
             className="px-3 py-1.5 rounded-md hover:bg-accent hover:text-foreground transition-colors"
           >
-            Tools
+            {t('nav.tools')}
           </Link>
         </nav>
 

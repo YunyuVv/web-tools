@@ -9,6 +9,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Copy, Check, Trash2, ArrowLeftRight, Sparkles } from 'lucide-react'
 import { SlidingSegmented } from '@/components/ui/SlidingSegmented'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 type Mode = 'encode' | 'decode'
 
@@ -31,6 +32,7 @@ function decodeEntities(text: string): string {
 }
 
 export function HtmlEntitiesTool() {
+  const { t } = useI18n()
   const [mode, setMode] = useState<Mode>('encode')
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
@@ -84,7 +86,7 @@ export function HtmlEntitiesTool() {
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
         <SlidingSegmented
-          ariaLabel="编码或解码模式"
+          ariaLabel={t('common.mode_aria')}
           value={mode}
           onChange={handleModeChange}
           options={[
@@ -99,7 +101,7 @@ export function HtmlEntitiesTool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
         >
           <Sparkles className="h-3.5 w-3.5" />
-          示例
+          {t('common.sample')}
         </button>
         <button
           type="button"
@@ -108,7 +110,7 @@ export function HtmlEntitiesTool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ArrowLeftRight className="h-4 w-4" />
-          交换
+          {t('common.swap')}
         </button>
         <button
           type="button"
@@ -116,7 +118,7 @@ export function HtmlEntitiesTool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-destructive/40 hover:text-destructive cursor-pointer"
         >
           <Trash2 className="h-4 w-4" />
-          清空
+          {t('common.clear')}
         </button>
       </div>
 
@@ -124,13 +126,13 @@ export function HtmlEntitiesTool() {
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
         <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
           <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-5 py-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5 font-medium">{mode === 'encode' ? '原始文本' : 'HTML 实体'}</span>
-            <span className="rounded-md bg-background/70 px-2 py-0.5 font-mono tabular-nums">{input.length} 字符</span>
+            <span className="flex items-center gap-1.5 font-medium">{mode === 'encode' ? t('tools.html-entities.input_raw') : t('tools.html-entities.input_entities')}</span>
+            <span className="rounded-md bg-background/70 px-2 py-0.5 font-mono tabular-nums">{input.length} {t('common.chars')}</span>
           </div>
           <textarea
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder={mode === 'encode' ? '在此输入要编码的文本…' : '在此粘贴 HTML 实体进行解码…'}
+            placeholder={mode === 'encode' ? t('tools.html-entities.encode_placeholder') : t('tools.html-entities.decode_placeholder')}
             spellCheck={false}
             className="w-full resize-none border-0 bg-transparent px-5 py-4 font-mono text-sm leading-7 focus:outline-none placeholder:text-muted-foreground/60 min-h-[340px]"
           />
@@ -138,7 +140,7 @@ export function HtmlEntitiesTool() {
 
         <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
           <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-5 py-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5 font-medium">{mode === 'encode' ? 'HTML 实体' : '解码结果'}</span>
+            <span className="flex items-center gap-1.5 font-medium">{mode === 'encode' ? t('tools.html-entities.output_entities') : t('tools.html-entities.output_decoded')}</span>
             <button
               type="button"
               onClick={handleCopy}
@@ -146,13 +148,13 @@ export function HtmlEntitiesTool() {
               className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-              {copied ? '已复制' : '复制'}
+              {copied ? t('common.copied') : t('common.copy')}
             </button>
           </div>
           <textarea
             value={output}
             readOnly
-            placeholder="转换结果将显示在此处…"
+            placeholder={t('tools.html-entities.output_placeholder')}
             spellCheck={false}
             className="w-full resize-none border-0 bg-transparent px-5 py-4 font-mono text-sm leading-7 focus:outline-none placeholder:text-muted-foreground/60 min-h-[340px] cursor-default select-all"
           />

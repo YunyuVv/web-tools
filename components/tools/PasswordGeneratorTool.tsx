@@ -8,6 +8,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { Copy, Check, RefreshCw } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 /** 各类可选字符集 */
 const LOWER = 'abcdefghijklmnopqrstuvwxyz'
@@ -42,6 +43,8 @@ function securePick(pool: string, n: number): string {
  * 支持一键复制与重新生成。
  */
 export function PasswordGeneratorTool() {
+  const { t } = useI18n()
+
   /** 密码长度 */
   const [length, setLength] = useState(16)
   /** 各字符集开关 */
@@ -88,14 +91,14 @@ export function PasswordGeneratorTool() {
 
   /** 强度分级 */
   const strength = !pool
-    ? { label: '请至少选择一种字符', pct: 0, bar: 'bg-muted' }
+    ? { label: t('tools.password-generator.strength_none'), pct: 0, bar: 'bg-muted' }
     : entropy < 40
-      ? { label: '弱', pct: 25, bar: 'bg-red-500' }
+      ? { label: t('tools.password-generator.strength_weak'), pct: 25, bar: 'bg-red-500' }
       : entropy < 60
-        ? { label: '中', pct: 50, bar: 'bg-amber-500' }
+        ? { label: t('tools.password-generator.strength_medium'), pct: 50, bar: 'bg-amber-500' }
         : entropy < 80
-          ? { label: '强', pct: 75, bar: 'bg-lime-500' }
-          : { label: '极强', pct: 100, bar: 'bg-green-500' }
+          ? { label: t('tools.password-generator.strength_strong'), pct: 75, bar: 'bg-lime-500' }
+          : { label: t('tools.password-generator.strength_very_strong'), pct: 100, bar: 'bg-green-500' }
 
   /** 切换字符集 */
   const toggle = (k: CharsetKey) => setOpts(prev => ({ ...prev, [k]: !prev[k] }))
@@ -113,17 +116,17 @@ export function PasswordGeneratorTool() {
   }, [password])
 
   const charsets: { key: CharsetKey; label: string; sample: string }[] = [
-    { key: 'lowercase', label: '小写字母', sample: 'a-z' },
-    { key: 'uppercase', label: '大写字母', sample: 'A-Z' },
-    { key: 'numbers', label: '数字', sample: '0-9' },
-    { key: 'symbols', label: '符号', sample: '!@#$%' },
+    { key: 'lowercase', label: t('tools.password-generator.charset_lower'), sample: 'a-z' },
+    { key: 'uppercase', label: t('tools.password-generator.charset_upper'), sample: 'A-Z' },
+    { key: 'numbers', label: t('tools.password-generator.charset_numbers'), sample: '0-9' },
+    { key: 'symbols', label: t('tools.password-generator.charset_symbols'), sample: '!@#$%' },
   ]
 
   return (
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-sm font-medium text-foreground">密码生成器</span>
+        <span className="text-sm font-medium text-foreground">{t('tools.password-generator.title')}</span>
         <div className="flex-1" />
         <button
           type="button"
@@ -131,42 +134,42 @@ export function PasswordGeneratorTool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
         >
           <RefreshCw className="h-4 w-4" />
-          重新生成
+          {t('common.regenerate')}
         </button>
       </div>
 
       {/* ── 密码展示 ── */}
       <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
         <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
-          <span>生成的密码</span>
+          <span>{t('tools.password-generator.output_label')}</span>
           <button
             type="button"
             onClick={handleCopy}
             disabled={!password}
-            title="复制密码"
+            title={t('tools.password-generator.copy_title')}
             className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-            {copied ? '已复制' : '复制'}
+            {copied ? t('common.copied') : t('common.copy')}
           </button>
         </div>
         <div className="px-5 py-5">
           <p className="break-all font-mono text-lg leading-8 text-foreground select-all">
-            {password || '— 请至少选择一种字符集 —'}
+            {password || t('tools.password-generator.empty_charset')}
           </p>
         </div>
       </div>
 
       {/* ── 强度条 ── */}
       <div className="flex items-center gap-3">
-        <span className="w-12 shrink-0 text-xs text-muted-foreground">强度</span>
+        <span className="w-12 shrink-0 text-xs text-muted-foreground">{t('tools.password-generator.strength')}</span>
         <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
           <div className={`h-full rounded-full transition-all duration-300 ${strength.bar}`} style={{ width: `${strength.pct}%` }} />
         </div>
         <span className="w-12 shrink-0 text-right text-xs font-medium text-foreground">{strength.label}</span>
       </div>
       <p className="text-xs text-muted-foreground/70">
-        估算熵值约 {entropy.toFixed(1)} bit{pool ? `（字符池 ${pool.length} 个）` : ''}
+        {t('tools.password-generator.entropy').replace('{bits}', entropy.toFixed(1)).replace('{len}', String(pool.length))}
       </p>
 
       {/* ── 选项区 ── */}
@@ -174,7 +177,7 @@ export function PasswordGeneratorTool() {
         {/* 长度 */}
         <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-medium text-foreground">长度</span>
+            <span className="text-sm font-medium text-foreground">{t('tools.password-generator.length')}</span>
             <span className="rounded-md bg-muted/40 px-2 py-0.5 font-mono text-sm tabular-nums text-foreground">{length}</span>
           </div>
           <input
@@ -193,7 +196,7 @@ export function PasswordGeneratorTool() {
 
         {/* 字符集 */}
         <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm">
-          <span className="mb-3 block text-sm font-medium text-foreground">字符集</span>
+          <span className="mb-3 block text-sm font-medium text-foreground">{t('tools.password-generator.charset')}</span>
           <div className="grid grid-cols-2 gap-2">
             {charsets.map(c => (
               <label
@@ -218,7 +221,7 @@ export function PasswordGeneratorTool() {
               onChange={() => setExcludeAmbiguous(v => !v)}
               className="h-4 w-4 accent-primary cursor-pointer"
             />
-            排除易混淆字符（1 l I 0 O）
+            {t('tools.password-generator.exclude_ambiguous')}
           </label>
         </div>
       </div>

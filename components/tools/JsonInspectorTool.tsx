@@ -20,6 +20,7 @@ import {
   type JsonTreeItem,
   type JsonFormattedLine,
 } from '@/lib/json-tools'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -79,11 +80,12 @@ export function JsonInspectorTool({
   noShell = false,
   onClearRef,
 }: Props) {
+  const { t } = useI18n()
   // ── 内部状态 ──
   const [editorText, setEditorText] = useState(value)
   const [layoutMode, setLayoutMode] = useState<'tree' | 'formatted'>(layoutModeProp)
   const [searchText, setSearchText] = useState(searchTextProp)
-  const [statusMessage, setStatusMessage] = useState('等待 JSON 输入')
+  const [statusMessage, setStatusMessage] = useState(t('tools.json-inspector.status_waiting'))
   const [isError, setIsError] = useState(false)
   const [nodes, setNodes] = useState<JsonInspectorNode[]>([])
   const [treeRows, setTreeRows] = useState<JsonTreeItem[]>([])
@@ -104,7 +106,7 @@ export function JsonInspectorTool({
       setFormattedLines([])
       setSelectedPath(null)
       setSelectedLineNumber(null)
-      setStatusMessage('暂无 JSON 数据')
+      setStatusMessage(t('tools.json-inspector.status_empty'))
       setIsError(false)
       setExpandedState({ '$': true })
       return
@@ -117,7 +119,7 @@ export function JsonInspectorTool({
       setNodes(newNodes)
       setTreeRows(newTreeRows)
       setFormattedLines(newFormattedLines)
-      setStatusMessage(`已解析 ${newNodes.length} 个节点`)
+      setStatusMessage(t('tools.json-inspector.status_parsed').replace('{count}', String(newNodes.length)))
       setIsError(false)
       setSelectedPath(prev => {
         const keepPath = prev && newNodes.some(n => n.path === prev) ? prev : (newNodes[0]?.path ?? null)
@@ -129,7 +131,7 @@ export function JsonInspectorTool({
       setFormattedLines([])
       setSelectedPath(null)
       setSelectedLineNumber(null)
-      setStatusMessage(err instanceof Error ? err.message : 'JSON 解析失败')
+      setStatusMessage(err instanceof Error ? err.message : t('tools.json-inspector.status_error'))
       setIsError(true)
     }
   }, [])
@@ -339,8 +341,8 @@ export function JsonInspectorTool({
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground',
                 ].join(' ')}
-                title="树视图"
-                aria-label="树视图"
+                title={t('tools.json-inspector.tree_view')}
+                aria-label={t('tools.json-inspector.tree_view')}
                 onClick={() => changeLayout('tree')}
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -354,8 +356,8 @@ export function JsonInspectorTool({
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground',
                 ].join(' ')}
-                title="JSON 格式"
-                aria-label="JSON 格式"
+                title={t('tools.json-inspector.formatted')}
+                aria-label={t('tools.json-inspector.formatted')}
                 onClick={() => changeLayout('formatted')}
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -371,7 +373,7 @@ export function JsonInspectorTool({
                 value={searchText}
                 onChange={handleSearchChange}
                 className="w-full border-0 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                placeholder="搜索节点..."
+                placeholder={t('tools.json-inspector.search_placeholder')}
               />
             </label>
           </div>
@@ -418,7 +420,7 @@ export function JsonInspectorTool({
                   onChange={handleEditorChange}
                   onScroll={syncEditorScroll}
                   className={`json-editor-textarea relative z-10 h-full min-h-[620px] w-full resize-none overflow-auto border-0 bg-transparent px-4 py-4 font-mono text-sm leading-[1.85] focus:outline-none md:px-5 text-transparent caret-slate-900 dark:caret-slate-100 placeholder:text-slate-400/90 dark:placeholder:text-slate-500/80`}
-                  placeholder='请输入合法 JSON，例如 {"name":"devtoolbox"}'
+                  placeholder={t('tools.json-inspector.input_placeholder')}
                   spellCheck={false}
                 />
               </div>
@@ -443,7 +445,7 @@ export function JsonInspectorTool({
                             <button
                               className="mt-0.5 h-5 w-5 shrink-0 rounded-full border border-border/60 grid place-items-center text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
                               onClick={e => { e.stopPropagation(); toggleExpand(row.path) }}
-                              aria-label={expandedState[row.path] ? '折叠' : '展开'}
+                              aria-label={expandedState[row.path] ? t('common.collapse') : t('common.expand')}
                             >
                               <span className="text-[10px] font-mono leading-none">
                                 {expandedState[row.path] || searchText.trim() ? '−' : '+'}
@@ -464,7 +466,7 @@ export function JsonInspectorTool({
                       </div>
                     ))}
                     {visibleTreeRows.length === 0 && (
-                      <div className="px-5 py-10 text-center text-sm text-muted-foreground">无结果</div>
+                      <div className="px-5 py-10 text-center text-sm text-muted-foreground">{t('tools.json-inspector.no_result')}</div>
                     )}
                   </div>
                 ) : (
@@ -488,7 +490,7 @@ export function JsonInspectorTool({
                       </button>
                     ))}
                     {filteredFormattedLines.length === 0 && (
-                      <div className="px-5 py-10 text-center text-sm text-slate-400/90 dark:text-slate-500">无结果</div>
+                      <div className="px-5 py-10 text-center text-sm text-slate-400/90 dark:text-slate-500">{t('tools.json-inspector.no_result')}</div>
                     )}
                   </div>
                 )}
@@ -537,7 +539,7 @@ export function JsonInspectorTool({
                     />
                     <a href={selectedDetail.url} target="_blank" rel="noopener noreferrer"
                       className="mt-2.5 inline-flex text-sm text-primary hover:opacity-80">
-                      打开
+                      {t('common.open')}
                     </a>
                   </div>
                 )}
@@ -556,7 +558,7 @@ export function JsonInspectorTool({
                     />
                     <a href={selectedDetail.url} target="_blank" rel="noopener noreferrer"
                       className="mt-2.5 inline-flex text-sm text-primary hover:opacity-80">
-                      打开
+                      {t('common.open')}
                     </a>
                   </div>
                 )}
@@ -568,7 +570,7 @@ export function JsonInspectorTool({
                     <audio src={selectedDetail.url} controls className="mt-2.5 w-full" />
                     <a href={selectedDetail.url} target="_blank" rel="noopener noreferrer"
                       className="mt-2.5 inline-flex text-sm text-primary hover:opacity-80">
-                      打开
+                      {t('common.open')}
                     </a>
                   </div>
                 )}
@@ -578,10 +580,10 @@ export function JsonInspectorTool({
                     <DetailLabel>Date</DetailLabel>
                     <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
                       {[
-                        { label: '本地时间', value: selectedDetail.local },
-                        { label: 'ISO 8601', value: selectedDetail.iso },
-                        { label: 'Unix 秒', value: String(selectedDetail.unix) },
-                        { label: 'Unix 毫秒', value: String(selectedDetail.unixMs) },
+                        { label: t('tools.json-inspector.date_local'), value: selectedDetail.local },
+                        { label: t('tools.json-inspector.date_iso'), value: selectedDetail.iso },
+                        { label: t('tools.json-inspector.date_unix_sec'), value: String(selectedDetail.unix) },
+                        { label: t('tools.json-inspector.date_unix_ms'), value: String(selectedDetail.unixMs) },
                       ].map(({ label, value }) => (
                         <div key={label} className="json-inspector-mini-card rounded-2xl border border-border/60 px-3.5 py-3">
                           <p className="text-xs text-muted-foreground">{label}</p>
@@ -616,7 +618,7 @@ export function JsonInspectorTool({
                     </p>
                     <a href={selectedDetail.url} target="_blank" rel="noopener noreferrer"
                       className="mt-2.5 inline-flex text-sm text-primary hover:opacity-80">
-                      打开
+                      {t('common.open')}
                     </a>
                   </div>
                 )}
@@ -629,14 +631,14 @@ export function JsonInspectorTool({
                     </p>
                     <a href={`mailto:${selectedDetail.email}`}
                       className="mt-2.5 inline-flex text-sm text-primary hover:opacity-80">
-                      写邮件
+                      {t('common.email')}
                     </a>
                   </div>
                 )}
 
                 {selectedDetail?.kind === 'base64' && (
                   <div className="border-b border-border/50 py-4">
-                    <DetailLabel>Base64 解码</DetailLabel>
+                    <DetailLabel>{t('tools.json-inspector.base64_decoded')}</DetailLabel>
                     <pre className="mt-2.5 overflow-auto whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-3 font-mono text-xs leading-[1.75] backdrop-blur-[10px] json-inspector-detail-code">
                       {selectedDetail.decoded}
                     </pre>
@@ -645,7 +647,7 @@ export function JsonInspectorTool({
 
                 {selectedDetail?.kind === 'plain' && (
                   <div className="border-b border-border/50 py-4">
-                    <DetailLabel>Value</DetailLabel>
+                    <DetailLabel>{t('tools.json-inspector.value')}</DetailLabel>
                     <pre className="mt-2.5 overflow-auto whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-3 font-mono text-xs leading-[1.75] backdrop-blur-[10px] json-inspector-detail-code">
                       {selectedDetail.text}
                     </pre>
@@ -662,7 +664,7 @@ export function JsonInspectorTool({
               </div>
             ) : (
               <div className="flex min-h-[620px] items-center justify-center px-6 text-center text-sm text-muted-foreground">
-                暂无选中
+                {t('tools.json-inspector.no_selection')}
               </div>
             )}
           </div>

@@ -6,6 +6,7 @@ import { ArrowRight, Search } from 'lucide-react'
 import type { Tool } from '@/lib/tools-registry'
 import { TOOLS, CATEGORY_CONFIG } from '@/lib/tools-registry'
 import { CategoryIcon } from './CategoryIcon'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 interface HomeSearchProps {
   locale: string
@@ -62,6 +63,7 @@ function SearchResultRow({
 }
 
 export function HomeSearch({ locale, basePath, tools, home, sidebar }: HomeSearchProps) {
+  const { t } = useI18n()
   const [query, setQuery] = useState('')
 
   const results = useMemo(() => {
@@ -83,13 +85,13 @@ export function HomeSearch({ locale, basePath, tools, home, sidebar }: HomeSearc
   const hasQuery = query.trim().length > 0
   const liveCount = results.filter(r => r.enabled).length
 
-  // i18n fallbacks
-  const placeholder = home?.search_placeholder ?? '搜索工具…'
-  const hint = home?.search_hint ?? '输入关键词查找工具'
-  const resultsCountTpl = home?.search_results_count ?? '{count} tools found'
-  const emptyTitle = home?.search_empty_title ?? '没有找到匹配的工具'
-  const emptyHint = home?.search_empty_hint ?? '试试其他关键词？'
-  const soonLabel = sidebar?.soon ?? 'SOON'
+  // i18n fallbacks（优先用页面字典传入的文案，缺失时回退到 useI18n 取键，避免硬编码）
+  const placeholder = home?.search_placeholder ?? t('home.search_placeholder')
+  const hint = home?.search_hint ?? t('home.search_hint')
+  const resultsCountTpl = home?.search_results_count ?? t('home.search_results_count')
+  const emptyTitle = home?.search_empty_title ?? t('home.search_empty_title')
+  const emptyHint = home?.search_empty_hint ?? t('home.search_empty_hint')
+  const soonLabel = sidebar?.soon ?? t('sidebar.soon')
 
   const resultsText = resultsCountTpl.replace('{count}', String(liveCount))
 

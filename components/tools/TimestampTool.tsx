@@ -8,6 +8,7 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Clock, Copy, Check, RefreshCw } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 // ─── 类型定义 ────────────────────────────────────────────────────────────────
 
@@ -50,7 +51,7 @@ function parseToMs(raw: string): number | null {
  * @param ms 目标时间毫秒戳
  * @returns 相对时间字符串
  */
-function formatRelative(ms: number): string {
+function formatRelative(ms: number, t: (key: string) => string): string {
   const diff = Date.now() - ms
   const absDiff = Math.abs(diff)
   const isFuture = diff < 0
@@ -62,16 +63,21 @@ function formatRelative(ms: number): string {
   const months  = Math.floor(days / 30)
   const years   = Math.floor(days / 365)
 
-  let label: string
-  if (seconds < 5)        label = '刚刚'
-  else if (seconds < 60)  label = `${seconds} 秒${isFuture ? '后' : '前'}`
-  else if (minutes < 60)  label = `${minutes} 分钟${isFuture ? '后' : '前'}`
-  else if (hours < 24)    label = `${hours} 小时${isFuture ? '后' : '前'}`
-  else if (days < 30)     label = `${days} 天${isFuture ? '后' : '前'}`
-  else if (months < 12)   label = `${months} 个月${isFuture ? '后' : '前'}`
-  else                    label = `${years} 年${isFuture ? '后' : '前'}`
+  if (seconds < 5) return t('tools.timestamp.rel_just')
 
-  return label
+  let n: number
+  let unitKey: string
+  if (seconds < 60)      { n = seconds; unitKey = 'tools.timestamp.unit_sec' }
+  else if (minutes < 60) { n = minutes; unitKey = 'tools.timestamp.unit_min' }
+  else if (hours < 24)   { n = hours;   unitKey = 'tools.timestamp.unit_hour' }
+  else if (days < 30)    { n = days;    unitKey = 'tools.timestamp.unit_day' }
+  else if (months < 12)  { n = months;  unitKey = 'tools.timestamp.unit_month' }
+  else                   { n = years;   unitKey = 'tools.timestamp.unit_year' }
+
+  const template = isFuture
+    ? t('tools.timestamp.rel_later')
+    : t('tools.timestamp.rel_ago')
+  return template.replace('{n}', String(n)).replace('{unit}', t(unitKey))
 }
 
 /**
@@ -114,6 +120,7 @@ interface FormatRowProps {
  * FormatRowItem — 展示单条格式化结果，右侧附带复制按钮。
  */
 function FormatRowItem({ row, isCopied, onCopy }: FormatRowProps) {
+  const { t } = useI18n()
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border/30 last:border-b-0 group hover:bg-muted/20 transition-colors">
       <div className="flex items-center gap-3 min-w-0">
@@ -130,8 +137,8 @@ function FormatRowItem({ row, isCopied, onCopy }: FormatRowProps) {
       {row.value !== null && (
         <button
           onClick={() => onCopy(row.value!, row.key)}
-          title="复制"
-          aria-label={`复制${row.label}`}
+          title={t('tools.timestamp.copy_aria').replace('{label}', row.label)}
+          aria-label={t('tools.timestamp.copy_aria').replace('{label}', row.label)}
           className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-border/60 px-2 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
         >
           {isCopied ? (
@@ -139,7 +146,7 @@ function FormatRowItem({ row, isCopied, onCopy }: FormatRowProps) {
           ) : (
             <Copy className="h-3 w-3" />
           )}
-          {isCopied ? '已复制' : '复制'}
+          {isCopied ? t('common.copied') : t('common.copy')}
         </button>
       )}
     </div>
@@ -162,6 +169,8 @@ export function TimestampTool() {
   /** 复制状态清除计时器 */
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const { t } = useI18n()
+
   /**
    * 解析当前输入，得到毫秒时间戳（解析失败为 null）
    */
@@ -173,23 +182,23 @@ export function TimestampTool() {
   const rows = useMemo<FormatRow[]>(() => {
     if (parsedMs === null) {
       return [
-        { key: 'local',   label: '本地时间',   value: null },
-        { key: 'utc',     label: 'UTC',        value: null },
-        { key: 'iso',     label: 'ISO 8601',   value: null },
-        { key: 'rel',     label: '相对时间',   value: null },
-        { key: 'sec',     label: 'Unix 秒',    value: null },
-        { key: 'ms',      label: 'Unix 毫秒',  value: null },
+        { key: 'local',   label: t('tools.timestamp.label_local'),   value: null },
+        { key: 'utc',     label: t('tools.timestamp.label_utc'),     value: null },
+        { key: 'iso',     label: t('tools.timestamp.label_iso'),     value: null },
+        { key: 'rel',     label: t('tools.timestamp.label_relative'), value: null },
+        { key: 'sec',     label: t('tools.timestamp.label_unix_sec'), value: null },
+        { key: 'ms',      label: t('tools.timestamp.label_unix_ms'),  value: null },
       ]
     }
     return [
-      { key: 'local',  label: '本地时间',  value: formatLocalTime(parsedMs) },
-      { key: 'utc',    label: 'UTC',       value: formatUtcTime(parsedMs) },
-      { key: 'iso',    label: 'ISO 8601',  value: new Date(parsedMs).toISOString() },
-      { key: 'rel',    label: '相对时间',  value: formatRelative(parsedMs) },
-      { key: 'sec',    label: 'Unix 秒',   value: String(Math.floor(parsedMs / 1000)) },
-      { key: 'ms',     label: 'Unix 毫秒', value: String(parsedMs) },
+      { key: 'local',  label: t('tools.timestamp.label_local'),   value: formatLocalTime(parsedMs) },
+      { key: 'utc',    label: t('tools.timestamp.label_utc'),     value: formatUtcTime(parsedMs) },
+      { key: 'iso',    label: t('tools.timestamp.label_iso'),     value: new Date(parsedMs).toISOString() },
+      { key: 'rel',    label: t('tools.timestamp.label_relative'), value: formatRelative(parsedMs, t) },
+      { key: 'sec',    label: t('tools.timestamp.label_unix_sec'), value: String(Math.floor(parsedMs / 1000)) },
+      { key: 'ms',     label: t('tools.timestamp.label_unix_ms'),  value: String(parsedMs) },
     ]
-  }, [parsedMs])
+  }, [parsedMs, t])
 
   /** 输入是否合法 */
   const isValid = parsedMs !== null
@@ -234,16 +243,16 @@ export function TimestampTool() {
         <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5" />
-            <span>输入时间戳或日期字符串</span>
+            <span>{t('tools.timestamp.input_desc')}</span>
           </div>
           {/* 现在按钮 */}
           <button
             onClick={handleNow}
-            title="填入当前时间戳"
+            title={t('tools.timestamp.now_title')}
             className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
           >
             <RefreshCw className="h-3 w-3" />
-            现在
+            {t('tools.timestamp.now')}
           </button>
         </div>
 
@@ -253,7 +262,7 @@ export function TimestampTool() {
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder="例如：1700000000、1700000000000、2024-01-01T00:00:00Z"
+            placeholder={t('tools.timestamp.input_placeholder')}
             className={[
               'w-full border-0 bg-transparent px-4 py-3.5 font-mono text-sm focus:outline-none placeholder:text-muted-foreground/50',
               hasError ? 'text-destructive' : 'text-foreground',
@@ -264,7 +273,7 @@ export function TimestampTool() {
           {/* 解析错误提示 */}
           {hasError && (
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-destructive/80">
-              无法识别的格式
+              {t('tools.timestamp.error_format')}
             </span>
           )}
         </div>
@@ -273,10 +282,10 @@ export function TimestampTool() {
         {isValid && (
           <div className="border-t border-border/30 bg-muted/20 px-4 py-1.5 text-xs text-muted-foreground/70 font-mono">
             {parsedMs! > 1e13
-              ? '⚠ 数值过大，已作为毫秒解析'
+              ? t('tools.timestamp.hint_toolarge')
               : input.trim().match(/^-?\d+$/)
-                ? (parseInt(input.trim(), 10) > 1e10 ? '已识别为 Unix 毫秒戳' : '已识别为 Unix 秒戳')
-                : '已识别为日期字符串'}
+                ? (parseInt(input.trim(), 10) > 1e10 ? t('tools.timestamp.hint_ms') : t('tools.timestamp.hint_sec'))
+                : t('tools.timestamp.hint_date')}
           </div>
         )}
       </div>
@@ -285,7 +294,7 @@ export function TimestampTool() {
       <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
         {/* 面板标题栏 */}
         <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
-          <span>转换结果</span>
+          <span>{t('tools.timestamp.result_label')}</span>
           {isValid && (
             <button
               onClick={() => handleCopy(String(parsedMs), 'all_ms')}
@@ -296,7 +305,7 @@ export function TimestampTool() {
               ) : (
                 <Copy className="h-3 w-3" />
               )}
-              {copiedKey === 'all_ms' ? '已复制毫秒戳' : '复制毫秒戳'}
+              {copiedKey === 'all_ms' ? t('tools.timestamp.copy_ms_done') : t('tools.timestamp.copy_ms')}
             </button>
           )}
         </div>
@@ -317,7 +326,7 @@ export function TimestampTool() {
         {!isValid && (
           <div className="flex flex-col items-center justify-center gap-2 py-10 text-muted-foreground/50">
             <Clock className="h-8 w-8" />
-            <span className="text-sm">输入时间戳后查看转换结果</span>
+            <span className="text-sm">{t('tools.timestamp.empty')}</span>
           </div>
         )}
       </div>

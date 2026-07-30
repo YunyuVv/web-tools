@@ -8,6 +8,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { Copy, Check, Plus, X } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 interface Stop {
   id: number
@@ -28,6 +29,8 @@ export function CssGradientTool() {
   ])
   const [copied, setCopied] = useState(false)
   const nextId = useMemo(() => Math.max(0, ...stops.map(s => s.id)) + 1, [stops])
+
+  const { t } = useI18n()
 
   /** 生成 CSS */
   const css = useMemo(() => {
@@ -63,7 +66,7 @@ export function CssGradientTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-sm font-medium text-foreground">CSS 渐变</span>
+        <span className="text-sm font-medium text-foreground">{t('tools.css-gradient.title')}</span>
         <div className="flex-1" />
         <button
           type="button"
@@ -71,29 +74,29 @@ export function CssGradientTool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
         >
           {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-          {copied ? '已复制' : '复制'}
+          {copied ? t('common.copied') : t('common.copy')}
         </button>
       </div>
 
       {/* ── 类型 + 角度 ── */}
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex rounded-xl border border-border/60 bg-card p-1">
-          {(['linear', 'radial'] as GradientType[]).map(t => (
+          {(['linear', 'radial'] as GradientType[]).map(gt => (
             <button
-              key={t}
+              key={gt}
               type="button"
-              onClick={() => setType(t)}
+              onClick={() => setType(gt)}
               className={`rounded-lg px-3 py-1.5 text-sm capitalize transition cursor-pointer ${
-                type === t ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'
+                type === gt ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {t === 'linear' ? '线性' : '径向'}
+              {gt === 'linear' ? t('tools.css-gradient.linear') : t('tools.css-gradient.radial')}
             </button>
           ))}
         </div>
         {type === 'linear' && (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">角度</span>
+            <span className="text-xs text-muted-foreground">{t('tools.css-gradient.angle')}</span>
             <input
               type="range"
               min={0}
@@ -110,7 +113,7 @@ export function CssGradientTool() {
           onClick={addStop}
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
         >
-          <Plus className="h-3.5 w-3.5" /> 添加色标
+          <Plus className="h-3.5 w-3.5" /> {t('tools.css-gradient.add_stop')}
         </button>
       </div>
 
@@ -123,7 +126,7 @@ export function CssGradientTool() {
               value={s.color}
               onChange={e => handleColor(s.id, e.target.value.toUpperCase())}
               className="h-9 w-9 cursor-pointer rounded-lg border border-border/60 bg-transparent p-0.5"
-              aria-label="色标颜色"
+              aria-label={t('tools.css-gradient.stop_color_aria')}
             />
             <input
               value={s.color}
@@ -145,7 +148,7 @@ export function CssGradientTool() {
               onClick={() => removeStop(s.id)}
               disabled={stops.length <= 2}
               className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-              title="删除色标"
+              title={t('tools.css-gradient.remove_stop_title')}
             >
               <X className="h-4 w-4" />
             </button>

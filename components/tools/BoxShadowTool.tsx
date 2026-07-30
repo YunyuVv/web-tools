@@ -7,6 +7,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { Copy, Check } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 export function BoxShadowTool() {
   const [x, setX] = useState(8)
@@ -17,6 +18,8 @@ export function BoxShadowTool() {
   const [alpha, setAlpha] = useState(20)
   const [inset, setInset] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  const { t } = useI18n()
 
   /** 实际颜色（带透明度） */
   const rgba = useMemo(() => {
@@ -71,7 +74,7 @@ export function BoxShadowTool() {
     <div className="flex flex-col gap-5">
       {/* ── 顶部工具栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-sm font-medium text-foreground">Box Shadow</span>
+        <span className="text-sm font-medium text-foreground">{t('tools.box-shadow.title')}</span>
         <div className="flex-1" />
         <button
           type="button"
@@ -79,27 +82,27 @@ export function BoxShadowTool() {
           className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground cursor-pointer"
         >
           {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-          {copied ? '已复制' : '复制'}
+          {copied ? t('common.copied') : t('common.copy')}
         </button>
       </div>
 
       {/* ── 参数 ── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card p-4 shadow-sm">
-          {slider('偏移 X', x, setX, -50, 50)}
-          {slider('偏移 Y', y, setY, -50, 50)}
-          {slider('模糊', blur, setBlur, 0, 100)}
-          {slider('扩散', spread, setSpread, -50, 50)}
+          {slider(t('tools.box-shadow.offset_x'), x, setX, -50, 50)}
+          {slider(t('tools.box-shadow.offset_y'), y, setY, -50, 50)}
+          {slider(t('tools.box-shadow.blur'), blur, setBlur, 0, 100)}
+          {slider(t('tools.box-shadow.spread'), spread, setSpread, -50, 50)}
         </div>
         <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <span className="w-16 shrink-0 text-xs text-muted-foreground">颜色</span>
+            <span className="w-16 shrink-0 text-xs text-muted-foreground">{t('tools.box-shadow.color')}</span>
             <input
               type="color"
               value={color}
               onChange={e => setColor(e.target.value.toUpperCase())}
               className="h-9 w-9 cursor-pointer rounded-lg border border-border/60 bg-transparent p-0.5"
-              aria-label="阴影颜色"
+              aria-label={t('tools.box-shadow.color_aria')}
             />
             <input
               value={color}
@@ -109,7 +112,7 @@ export function BoxShadowTool() {
             />
           </div>
           <div className="flex items-center gap-3">
-            <span className="w-16 shrink-0 text-xs text-muted-foreground">不透明度</span>
+            <span className="w-16 shrink-0 text-xs text-muted-foreground">{t('tools.box-shadow.opacity')}</span>
             <input
               type="range"
               min={0}
@@ -127,7 +130,7 @@ export function BoxShadowTool() {
               onChange={() => setInset(v => !v)}
               className="h-4 w-4 accent-primary cursor-pointer"
             />
-            内阴影（inset）
+            {t('tools.box-shadow.inset')}
           </label>
           <div className="mt-1 rounded-lg bg-muted/30 px-3 py-2 font-mono text-xs text-muted-foreground">
             {rgba}

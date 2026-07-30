@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { JsonFormatterTool, type FormatterStats } from './JsonFormatterTool'
 import { JsonInspectorTool } from './JsonInspectorTool'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 type JsonToolTab = 'formatter' | 'inspector'
 type FormatterLayoutMode = 'single' | 'split'
@@ -57,19 +58,11 @@ function ToolbarBtn({ active, title, onClick, children }: TabBtnProps) {
 
 // ─── 主组件 ─────────────────────────────────────────────────────────────────
 
-interface Messages {
-  common?: Record<string, string>
-  tools?: Record<string, Record<string, string>>
-}
-
-interface Props {
-  messages?: Messages
-}
-
 /**
  * 这个组件的作用：JSON 工具工作台外壳，持久化布局偏好并向两个子工作台分发事件。
  */
-export function JsonWorkbench({ messages }: Props) {
+export function JsonWorkbench() {
+  const { t } = useI18n()
   const [sharedJson, setSharedJson] = useState('')
   const [activeTab, setActiveTab] = useState<JsonToolTab>('formatter')
   const [formatterLayoutMode, setFormatterLayoutMode] = useState<FormatterLayoutMode>('single')
@@ -127,10 +120,10 @@ export function JsonWorkbench({ messages }: Props) {
       <div className="grid items-center gap-3 lg:grid-cols-[auto_1fr_auto] border-b border-border/60 pb-4">
         {/* 左：Tab 切换 */}
         <div className="flex items-center gap-1.5">
-          <ToolbarBtn active={activeTab === 'formatter'} title="JSON 格式化" onClick={() => setActiveTab('formatter')}>
+          <ToolbarBtn active={activeTab === 'formatter'} title={t('tools.json-formatter.title')} onClick={() => setActiveTab('formatter')}>
             <Code2 className="h-4 w-4" />
           </ToolbarBtn>
-          <ToolbarBtn active={activeTab === 'inspector'} title="JSON 展示" onClick={() => setActiveTab('inspector')}>
+          <ToolbarBtn active={activeTab === 'inspector'} title={t('tools.json-inspector.title')} onClick={() => setActiveTab('inspector')}>
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 0 1-1.125-1.125v-3.75ZM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 0 1-1.125-1.125v-8.25ZM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 0 1-1.125-1.125v-2.25Z" />
             </svg>
@@ -143,14 +136,14 @@ export function JsonWorkbench({ messages }: Props) {
             <>
               <ToolbarBtn
                 active={formatterLayoutMode === 'single'}
-                title="单栏模式"
+                title={t('tools.json-formatter.single')}
                 onClick={() => setFormatterLayoutMode('single')}
               >
                 <Square className="h-4 w-4" />
               </ToolbarBtn>
               <ToolbarBtn
                 active={formatterLayoutMode === 'split'}
-                title="双栏对照"
+                title={t('tools.json-formatter.split')}
                 onClick={() => setFormatterLayoutMode('split')}
               >
                 <Columns2 className="h-4 w-4" />
@@ -160,14 +153,14 @@ export function JsonWorkbench({ messages }: Props) {
             <>
               <ToolbarBtn
                 active={inspectorLayoutMode === 'tree'}
-                title="树视图"
+                title={t('tools.json-inspector.tree_view')}
                 onClick={() => setInspectorLayoutMode('tree')}
               >
                 <ListTree className="h-4 w-4" />
               </ToolbarBtn>
               <ToolbarBtn
                 active={inspectorLayoutMode === 'formatted'}
-                title="JSON 格式"
+                title={t('tools.json-inspector.formatted')}
                 onClick={() => setInspectorLayoutMode('formatted')}
               >
                 <ListOrdered className="h-4 w-4" />
@@ -181,7 +174,7 @@ export function JsonWorkbench({ messages }: Props) {
           {activeTab === 'inspector' && (
             <ToolbarBtn
               active={false}
-              title="清空并重新输入"
+              title={t('tools.json-inspector.clear_title')}
               onClick={() => inspectorClearRef.current?.()}
             >
               <Trash2 className="h-4 w-4" />
@@ -193,33 +186,33 @@ export function JsonWorkbench({ messages }: Props) {
             <span className="mr-1 hidden items-center gap-1.5 pl-3 text-xs text-muted-foreground border-l border-border/50 sm:inline-flex">
               <Layers className="h-3 w-3" />
               <span className="font-mono">{formatterStats.nodes}</span>
-              <span>节点</span>
+              <span>{t('tools.json-formatter.nodes')}</span>
               <span className="text-border/50">·</span>
               <span className="font-mono">{formatterStats.depth}</span>
-              <span>层</span>
+              <span>{t('tools.json-formatter.levels')}</span>
               <span className="text-border/50">·</span>
               <span className="font-mono">{formatterStats.size}</span>
-              <span>字符</span>
+              <span>{t('tools.json-formatter.chars')}</span>
             </span>
           )}
 
           {activeTab === 'formatter' && (
             <>
-              <ToolbarBtn active={false} title="加载示例" onClick={() => formatterActionRef.current?.insertSample()}>
+              <ToolbarBtn active={false} title={t('tools.json-formatter.status_sample')} onClick={() => formatterActionRef.current?.insertSample()}>
                 <FileCode2 className="h-4 w-4" />
               </ToolbarBtn>
-              <ToolbarBtn active={false} title="格式化" onClick={() => formatterActionRef.current?.formatJson()}>
+              <ToolbarBtn active={false} title={t('common.format')} onClick={() => formatterActionRef.current?.formatJson()}>
                 <AlignLeft className="h-4 w-4" />
               </ToolbarBtn>
-              <ToolbarBtn active={false} title="压缩" onClick={() => formatterActionRef.current?.minifyJson()}>
+              <ToolbarBtn active={false} title={t('common.minify')} onClick={() => formatterActionRef.current?.minifyJson()}>
                 <Minimize2 className="h-4 w-4" />
               </ToolbarBtn>
-              <ToolbarBtn active={false} title="校验" onClick={() => formatterActionRef.current?.validateJson()}>
+              <ToolbarBtn active={false} title={t('common.validate')} onClick={() => formatterActionRef.current?.validateJson()}>
                 <ShieldCheck className="h-4 w-4" />
               </ToolbarBtn>
               <ToolbarBtn
                 active={false}
-                title={formatterLayoutMode === 'single' ? '复制内容' : '复制输出'}
+                title={formatterLayoutMode === 'single' ? t('tools.json-formatter.copy_input') : t('tools.json-formatter.copy_output')}
                 onClick={() => formatterActionRef.current?.copyContent()}
               >
                 <Copy className="h-4 w-4" />
@@ -234,7 +227,7 @@ export function JsonWorkbench({ messages }: Props) {
                 value={inspectorSearchText}
                 onChange={e => setInspectorSearchText(e.target.value)}
                 className="w-full border-0 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                placeholder="Search"
+                placeholder={t('tools.json-inspector.search_placeholder')}
               />
             </label>
           )}
@@ -245,7 +238,6 @@ export function JsonWorkbench({ messages }: Props) {
       <div>
         {activeTab === 'formatter' ? (
           <JsonFormatterTool
-            messages={messages as any}
             sharedValue={sharedJson}
             onSharedValueChange={setSharedJson}
             layoutMode={formatterLayoutMode}

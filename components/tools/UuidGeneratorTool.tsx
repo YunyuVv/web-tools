@@ -9,6 +9,7 @@
 
 import { useState, useCallback } from 'react'
 import { Copy, RefreshCw, CheckCheck, Clock, Trash2 } from 'lucide-react'
+import { useI18n } from '@/components/layout/I18nProvider'
 
 /** 批量生成的数量选项 */
 const BATCH_OPTIONS = [1, 5, 10, 20] as const
@@ -27,6 +28,7 @@ function CopyButton({
   text: string
   className?: string
 }) {
+  const { t } = useI18n()
   const [copied, setCopied] = useState(false)
 
   /** 复制文本到剪贴板，并短暂切换为已复制状态 */
@@ -44,8 +46,8 @@ function CopyButton({
   return (
     <button
       onClick={handleCopy}
-      title={copied ? '已复制' : '复制'}
-      aria-label={copied ? '已复制' : '复制'}
+      title={copied ? t('common.copied') : t('common.copy')}
+      aria-label={copied ? t('common.copied') : t('common.copy')}
       className={className}
     >
       {copied ? (
@@ -62,6 +64,8 @@ function CopyButton({
  * 包含：当前 UUID 展示区、操作按钮区、批量数量选择、历史列表。
  */
 export function UuidGeneratorTool() {
+  const { t } = useI18n()
+
   /** 当前展示的 UUID */
   const [current, setCurrent] = useState<string>(() => crypto.randomUUID())
 
@@ -96,7 +100,7 @@ export function UuidGeneratorTool() {
       <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
         {/* 卡片头部 */}
         <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
-          <span>当前 UUID</span>
+          <span>{t('tools.uuid-generator.current_label')}</span>
           <span className="opacity-60">v4 · crypto.randomUUID()</span>
         </div>
 
@@ -115,7 +119,7 @@ export function UuidGeneratorTool() {
             className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 active:scale-95 cursor-pointer"
           >
             <RefreshCw size={14} />
-            生成
+            {t('common.generate')}
           </button>
 
           {/* 复制当前 UUID 按钮 */}
@@ -129,7 +133,7 @@ export function UuidGeneratorTool() {
 
           {/* 批量数量选择 */}
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">批量生成</span>
+            <span className="text-xs text-muted-foreground">{t('tools.uuid-generator.batch')}</span>
             <div className="flex gap-1">
               {BATCH_OPTIONS.map(n => (
                 <button
@@ -146,7 +150,7 @@ export function UuidGeneratorTool() {
                 </button>
               ))}
             </div>
-            <span className="text-xs text-muted-foreground">条</span>
+            <span className="text-xs text-muted-foreground">{t('tools.uuid-generator.count_unit')}</span>
           </div>
         </div>
       </div>
@@ -157,7 +161,7 @@ export function UuidGeneratorTool() {
         <div className="flex items-center justify-between border-b border-border/40 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Clock size={12} />
-            <span>历史记录</span>
+            <span>{t('tools.uuid-generator.history')}</span>
             {history.length > 0 && (
               <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium">
                 {history.length}
@@ -168,10 +172,10 @@ export function UuidGeneratorTool() {
             <button
               onClick={handleClearHistory}
               className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-muted-foreground transition hover:text-destructive cursor-pointer"
-              title="清空历史"
+              title={t('tools.uuid-generator.clear_history_title')}
             >
               <Trash2 size={11} />
-              清空
+              {t('common.clear')}
             </button>
           )}
         </div>
@@ -180,7 +184,7 @@ export function UuidGeneratorTool() {
         {history.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-12 text-muted-foreground/60">
             <Clock size={28} strokeWidth={1.2} />
-            <span className="text-sm">暂无历史记录，点击"生成"开始</span>
+            <span className="text-sm">{t('tools.uuid-generator.history_empty')}</span>
           </div>
         ) : (
           <ul className="divide-y divide-border/30">

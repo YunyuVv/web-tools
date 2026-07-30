@@ -389,6 +389,26 @@
     padding-left: 292px; /* 等同 lg:pl-[292px]（展开态） */
   }
 }
+
+/* 首页 Hero 内容层水平偏移：与侧栏状态联动，且由 CSS 属性驱动（非 React 内联样式），
+   故服务端预渲染与客户端首帧 DOM 完全一致，无 hydration mismatch。
+   - 默认（无属性/展开）= 偏移半个展开侧栏宽，居中于「侧栏右侧剩余区域」
+   - 收起态 = 偏移半个收起侧栏宽，接近全局视口居中
+   切换时由 transition 平滑过渡。 */
+.hero-content {
+  left: 134px; /* (268 展开宽) / 2 */
+  transition: left 240ms cubic-bezier(0.2, 0.9, 0.24, 1);
+}
+[data-sidebar="collapsed"] .hero-content {
+  left: 36px; /* (72 收起宽) / 2 */
+}
+@media (max-width: 1023px) {
+  /* 移动端无侧栏占位，Hero 直接全局居中 */
+  .hero-content,
+  [data-sidebar="collapsed"] .hero-content {
+    left: 0;
+  }
+}
 .dark .sidebar-shell {
   /* 暗色下中性深色投影保持层次（无青绿发光） */
   box-shadow: 0 16px 40px rgb(0 0 0 / 0.45);
