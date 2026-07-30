@@ -1,18 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { PREFIXED_LOCALES, DEFAULT_LOCALE } from "@/lib/i18n";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistSans = GeistSans;
+const geistMono = GeistMono;
 
 export const metadata: Metadata = {
   title: "DevToolBox - Free Online Developer Tools",
@@ -81,6 +75,25 @@ export default function RootLayout({
           id="sidebar-state"
           dangerouslySetInnerHTML={{ __html: sidebarStateScript }}
         />
+        {/* Cloudflare Web Analytics：免费、无 Cookie、无流量上限。
+            spa:true 关键 —— 本站是 Next.js App Router，用户在工具页之间跳转是
+            客户端路由（不整页刷新），默认 beacon 抓不到这类站内跳转；spa:true
+            让 CF 自动捕获前端路由变化，统计才完整。
+            裸 <script> 置于 <head>，导出构建下保留为绘制前同步执行（已验证，
+            不会被序列化为 self.__next_s.push 延迟到注水）。
+            token 通过环境变量 NEXT_PUBLIC_CF_BEACON_TOKEN 注入；未配置时
+            整个脚本不渲染（不加载空 token beacon，避免报错）。需重新构建生效。 */}
+        {process.env.NEXT_PUBLIC_CF_BEACON_TOKEN ? (
+          <script
+            id="cf-web-analytics"
+            defer
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon={JSON.stringify({
+              token: process.env.NEXT_PUBLIC_CF_BEACON_TOKEN,
+              spa: true,
+            })}
+          />
+        ) : null}
       </head>
       <body className="min-h-full flex flex-col antialiased bg-background text-foreground">
         <ThemeProvider>

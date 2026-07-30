@@ -10,6 +10,7 @@ import { PREFIXED_LOCALES, getMessages, type Locale } from '@/lib/i18n'
 import { TOOLS } from '@/lib/tools-registry'
 import { ToolPageShell } from '@/components/layout/ToolPageShell'
 import { ToolContent } from '@/components/tools/ToolContent'
+import { ToolJsonLd } from '@/components/seo/ToolJsonLd'
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>
@@ -43,6 +44,12 @@ export default async function ToolPage({ params }: Props) {
 
   return (
     <ToolPageShell>
+      <ToolJsonLd
+        locale={locale}
+        slug={slug}
+        title={`${tm.title ?? slug} - DevToolBox`}
+        description={tm.seo_description ?? tm.description ?? ''}
+      />
       <ToolContent slug={slug} />
     </ToolPageShell>
   )

@@ -12,6 +12,7 @@ export type ToolCategory =
   | 'color'
   | 'text'
   | 'network'
+  | 'image'
 
 export interface Tool {
   slug: string
@@ -41,6 +42,7 @@ export const CATEGORY_CONFIG: Record<
   color:    { label: 'Color',       icon: 'Palette',            colorVar: '#f97316', bgClass: 'bg-orange-500/10',  textClass: 'text-[oklch(0.69_0.14_45)]',   iconGradient: 'linear-gradient(135deg,#f97316,#ea580c)' },
   text:     { label: 'Text',        icon: 'Type',               colorVar: '#22c55e', bgClass: 'bg-green-500/10',   textClass: 'text-[oklch(0.67_0.14_145)]',  iconGradient: 'linear-gradient(135deg,#22c55e,#16a34a)' },
   network:  { label: 'Network',     icon: 'Globe',              colorVar: '#0ea5e9', bgClass: 'bg-sky-500/10',     textClass: 'text-[oklch(0.64_0.13_225)]',  iconGradient: 'linear-gradient(135deg,#0ea5e9,#2563eb)' },
+  image:    { label: 'Image',       icon: 'Image',              colorVar: '#f43f5e', bgClass: 'bg-rose-500/10',    textClass: 'text-[oklch(0.60_0.16_12)]',   iconGradient: 'linear-gradient(135deg,#f43f5e,#e11d48)' },
 }
 
 /** 向后兼容的纯标签映射 */
@@ -54,6 +56,7 @@ export const TOOLS: Tool[] = [
   { slug: 'json-to-csv',        category: 'json',     i18nKey: 'json-to-csv',        enabled: true,  icon: 'Table2'       },
   { slug: 'base64',             category: 'encoding', i18nKey: 'base64',             enabled: true,  icon: 'FileText'     },
   { slug: 'url-encode',         category: 'encoding', i18nKey: 'url-encode',         enabled: true,  icon: 'Link'         },
+  { slug: 'args-format',        category: 'encoding', i18nKey: 'args-format',        enabled: true,  icon: 'ListFilter'   },
   { slug: 'html-entities',      category: 'encoding', i18nKey: 'html-entities',      enabled: true,  icon: 'Code2'        },
   { slug: 'hash-generator',     category: 'crypto',   i18nKey: 'hash-generator',     enabled: true,  icon: 'Hash'         },
   { slug: 'uuid-generator',     category: 'crypto',   i18nKey: 'uuid-generator',     enabled: true,  icon: 'Fingerprint'  },
@@ -70,6 +73,7 @@ export const TOOLS: Tool[] = [
   { slug: 'markdown-preview',   category: 'text',     i18nKey: 'markdown-preview',   enabled: true, icon: 'FileText'     },
   { slug: 'ip-lookup',          category: 'network',  i18nKey: 'ip-lookup',          enabled: true, icon: 'Globe'        },
   { slug: 'user-agent',         category: 'network',  i18nKey: 'user-agent',         enabled: true, icon: 'Monitor'      },
+  { slug: 'avatar',             category: 'image',    i18nKey: 'avatar',             enabled: true, icon: 'Image'        },
 ]
 
 /** 获取所有已上线的工具（用于静态路由生成） */

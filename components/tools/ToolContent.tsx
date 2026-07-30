@@ -17,6 +17,7 @@ import { JsonInspectorTool } from './JsonInspectorTool'
 import { JsonToCsvTool } from './JsonToCsvTool'
 import { Base64Tool } from './Base64Tool'
 import { UrlEncodeTool } from './UrlEncodeTool'
+import { ArgsFormatTool } from './ArgsFormatTool'
 import { HtmlEntitiesTool } from './HtmlEntitiesTool'
 import { HashGeneratorTool } from './HashGeneratorTool'
 import { UuidGeneratorTool } from './UuidGeneratorTool'
@@ -33,6 +34,7 @@ import { WordCounterTool } from './WordCounterTool'
 import { MarkdownPreviewTool } from './MarkdownPreviewTool'
 import { IpLookupTool } from './IpLookupTool'
 import { UserAgentTool } from './UserAgentTool'
+import { AvatarTool } from './AvatarTool'
 
 const TOOL_COMPONENTS: Record<string, ComponentType> = {
   'json-formatter': JsonFormatterTool,
@@ -40,6 +42,7 @@ const TOOL_COMPONENTS: Record<string, ComponentType> = {
   'json-to-csv': JsonToCsvTool,
   'base64': Base64Tool,
   'url-encode': UrlEncodeTool,
+  'args-format': ArgsFormatTool,
   'html-entities': HtmlEntitiesTool,
   'hash-generator': HashGeneratorTool,
   'uuid-generator': UuidGeneratorTool,
@@ -56,6 +59,7 @@ const TOOL_COMPONENTS: Record<string, ComponentType> = {
   'markdown-preview': MarkdownPreviewTool,
   'ip-lookup': IpLookupTool,
   'user-agent': UserAgentTool,
+  'avatar': AvatarTool,
 }
 
 export function ToolContent({ slug }: { slug: string }) {

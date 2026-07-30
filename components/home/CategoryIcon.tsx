@@ -11,7 +11,7 @@ import {
   Hash, Fingerprint, Lock, Search, Clock, CalendarDays,
   Paintbrush, Square, Pipette, SlidersHorizontal,
   AlignLeft, AlignJustify, Globe, Monitor,
-  Binary, Palette, Type,
+  Binary, Palette, Type, Image,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -21,7 +21,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string; style?:
   Hash, Fingerprint, Lock, Search, Clock, CalendarDays,
   Paintbrush, Square, Pipette, SlidersHorizontal,
   AlignLeft, AlignJustify, Globe, Monitor,
-  Binary, Palette, Type,
+  Binary, Palette, Type, Image,
 }
 
 interface Props {
