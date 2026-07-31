@@ -182,26 +182,37 @@ function CompareSlider({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onWheel={onWheel}
-      className="group relative h-full w-full cursor-grab touch-none select-none overflow-hidden bg-neutral-900 active:cursor-grabbing"
+      className="group relative h-full w-full cursor-grab touch-none select-none overflow-hidden active:cursor-grabbing"
     >
-      {/* 平移 / 缩放 / 旋转层：原图与压缩图一起变换，保持像素对齐 */}
-      <div
-        className="absolute inset-0"
-        style={{ transform: `translate(${offset.x}px, ${offset.y}px) rotate(${rotation}deg) scale(${scale})`, transformOrigin: 'center center' }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={compressed} alt={compressedLabel} draggable={false} className="block h-full w-full object-contain" />
-        <div className="pointer-events-none absolute inset-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={original}
-            alt={originalLabel}
-            draggable={false}
-            className="absolute inset-0 h-full w-full object-contain"
-            style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }}
-          />
-        </div>
-      </div>
+        {/* 平移 / 缩放 / 旋转：原图与压缩图用相同 transform 保持像素对齐。
+            关键点：clip-path 作用在「不随 pan 移动」的外层 wrapper 上（基于容器坐标裁切），
+            内层 translate 层才随图片平移移动。这样竖线精确固定在容器 split 位置，
+            图片平移后——竖线左侧窗口始终渲染原图、右侧窗口始终渲染压缩图；
+            图片移动过去多少，对应一侧就展示对应图多少（Squoosh 式窗口对比，而非按比例裁图）。 */}
+        {(() => {
+          const tf = `translate(${offset.x}px, ${offset.y}px) rotate(${rotation}deg) scale(${scale})`
+          return (
+            <>
+              {/* 底层：压缩图（整张完整显示，始终在竖线右侧可见） */}
+              <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute inset-0 origin-center" style={{ transform: tf }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={compressed} alt={compressedLabel} draggable={false} className="absolute inset-0 h-full w-full object-contain" />
+                </div>
+              </div>
+              {/* 顶层：原图，外层 wrapper 按容器 split 裁掉右侧（只露左侧），内层随图片平移 */}
+              <div
+                className="pointer-events-none absolute inset-0 overflow-hidden"
+                style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }}
+              >
+                <div className="absolute inset-0 origin-center" style={{ transform: tf }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={original} alt={originalLabel} draggable={false} className="absolute inset-0 h-full w-full object-contain" />
+                </div>
+              </div>
+            </>
+          )
+        })()}
 
       {/* 中缝对比滑块（Squoosh 风格：渐变发光线 + 立体手柄 + 拖拽反馈） */}
       <div
@@ -233,16 +244,16 @@ function CompareSlider({
       </div>
 
       {/* 角标 */}
-      <span className="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-black/55 px-2 py-0.5 text-xs font-medium text-white">
+      <span className="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-background/60 px-2 py-0.5 text-xs font-medium text-foreground shadow-sm backdrop-blur-sm">
         {originalLabel}
       </span>
-      <span className="pointer-events-none absolute right-3 top-3 z-10 rounded-md bg-black/55 px-2 py-0.5 text-xs font-medium text-white">
+      <span className="pointer-events-none absolute right-3 top-3 z-10 rounded-md bg-background/60 px-2 py-0.5 text-xs font-medium text-foreground shadow-sm backdrop-blur-sm">
         {compressedLabel}
       </span>
 
       {/* 底部中央操作栏：缩放 / 旋转 / 复位（pointerdown 阻止冒泡，避免触发容器平移） */}
       <div
-        className="absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/10 bg-neutral-900/80 p-1 shadow-lg backdrop-blur"
+        className="absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1 rounded-full border border-border/60 bg-background/80 p-1 shadow-lg backdrop-blur"
         onPointerDown={(e) => e.stopPropagation()}
       >
         <button
@@ -659,10 +670,13 @@ export function ImageCompressTool() {
         /* 全屏对比编辑器：整个视口即画布（直接挂在 relative 根，无 backdrop/transform 祖先，
            fixed 才真正相对视口）；背景点阵全屏；图片可拖拽平移，中间滑块对比；
            左右浮层分别显示原图/压缩信息。*/
-        <div className="fixed inset-0 z-[60] flex flex-col overflow-hidden bg-neutral-950">
-          {/* 编辑器背景：纯净深色（无点阵），让图片成为唯一焦点 */}
+        <div className="fixed inset-0 z-[60] flex flex-col overflow-hidden">
+          {/* 编辑器背景：DotField 点阵（与上传页一致的全屏观感） */}
+          <div className="pointer-events-none absolute inset-0 -z-10 opacity-60">
+            <DotField dotSpacing={30} color="rgba(244,63,94,0.45)" glow="rgba(244,63,94,0.16)" />
+          </div>
           {/* 顶栏（半透明浮层）：标识 + 换图 / 格式 / 质量 / 下载 */}
-          <div className="relative z-30 flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-neutral-900/80 px-4 py-3 backdrop-blur">
+          <div className="relative z-30 flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/30">
                 <ImageIcon className="h-5 w-5" />
@@ -750,7 +764,7 @@ export function ImageCompressTool() {
           {/* 舞台（铺满顶栏之下）+ 左右信息浮层 */}
           <div className="relative z-10 min-h-0 flex-1">
             {/* 始终渲染图片区域：未压缩时显示原图预览，压缩完成后显示对比滑块 */}
-            <div className="relative h-full w-full overflow-hidden bg-neutral-900">
+            <div className="relative h-full w-full overflow-hidden">
               {result ? (
                 <CompareSlider
                   original={objectUrl ?? ''}
@@ -774,7 +788,7 @@ export function ImageCompressTool() {
                   避免重压时画面撕裂；pointer-events-none 不挡拖拽平移 */}
               {busy && (
                 <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center pt-4">
-                  <div className="flex items-center gap-2 rounded-full bg-neutral-900/80 px-3 py-1.5 text-xs font-medium text-white/70 shadow-lg ring-1 ring-white/10 backdrop-blur">
+                  <div className="flex items-center gap-2 rounded-full bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-lg ring-1 ring-border/60 backdrop-blur">
                     <Loader2 className="h-4 w-4 animate-spin text-rose-500" />
                     <span>{t('tools.image-compress.compressing', 'Compressing…')}</span>
                     {stage && <span className="text-muted-foreground/70">· {stage}</span>}
@@ -784,7 +798,7 @@ export function ImageCompressTool() {
             </div>
 
             {/* 左侧浮层：原图信息 */}
-            <div className="pointer-events-none absolute left-4 top-1/2 z-20 w-44 -translate-y-1/2 rounded-2xl border border-white/10 bg-neutral-900/80 p-4 backdrop-blur">
+            <div className="pointer-events-none absolute left-4 top-1/2 z-20 w-44 -translate-y-1/2 rounded-2xl border border-border/60 bg-background/80 p-4 backdrop-blur">
               <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('tools.image-compress.original', 'Original')}</p>
               <dl className="space-y-2 text-sm">
                 <div className="flex items-center justify-between gap-2">
@@ -799,7 +813,7 @@ export function ImageCompressTool() {
             </div>
 
             {/* 右侧浮层：压缩信息 */}
-            <div className="pointer-events-none absolute right-4 top-1/2 z-20 w-44 -translate-y-1/2 rounded-2xl border border-white/10 bg-neutral-900/80 p-4 backdrop-blur">
+            <div className="pointer-events-none absolute right-4 top-1/2 z-20 w-44 -translate-y-1/2 rounded-2xl border border-border/60 bg-background/80 p-4 backdrop-blur">
               <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('tools.image-compress.compressed', 'Compressed')}</p>
               <dl className="space-y-2 text-sm">
                 <div className="flex items-center justify-between gap-2">
@@ -820,7 +834,7 @@ export function ImageCompressTool() {
             </div>
 
             {/* 底部提示（上移，避免与 CompareSlider 底部操作栏重叠） */}
-            <p className="pointer-events-none absolute bottom-20 left-1/2 z-20 -translate-x-1/2 rounded-full bg-neutral-900/80 px-3 py-1 text-xs text-white/60 backdrop-blur">
+            <p className="pointer-events-none absolute bottom-20 left-1/2 z-20 -translate-x-1/2 rounded-full bg-background/80 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
               {t('tools.image-compress.fullscreen_hint', 'Scroll to zoom · drag to pan · drag the middle slider to compare')}
             </p>
 
