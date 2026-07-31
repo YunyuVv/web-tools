@@ -1,6 +1,6 @@
 'use client'
 
-import { type CSSProperties, type ElementType } from 'react'
+import { createElement, type CSSProperties, type ElementType } from 'react'
 
 interface ShinyTextProps {
   text: string
@@ -38,13 +38,14 @@ export function ShinyText({
     ...(shineColor ? { '--shiny-shine': shineColor } : {}),
   } as CSSProperties
 
-  return (
-    <Tag
-      className={`shiny-text${disabled ? ' is-disabled' : ''} ${className}`}
-      style={style}
-      aria-label={text}
-    >
-      {text}
-    </Tag>
+  // 用 createElement 包裹动态标签，规避新版 @types/react 对 ElementType 的 children 推断为 never 的类型错误
+  return createElement(
+    Tag,
+    {
+      className: `shiny-text${disabled ? ' is-disabled' : ''} ${className}`,
+      style,
+      'aria-label': text,
+    },
+    text,
   )
 }

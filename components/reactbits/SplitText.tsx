@@ -6,7 +6,7 @@
  * 进入视口时触发，只播放一次
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { createElement, useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 
 interface Props {
@@ -47,28 +47,27 @@ export function SplitText({
   // 强制转型为 ElementType，避免 TypeScript 将 Tag 推断为 SVG 元素类型时产生 ref 不兼容错误
   const TagComp = Tag as React.ElementType
 
-  return (
-    <TagComp
-      ref={ref}
-      className={cn('inline', className)}
-      aria-label={text}
+  const content = units.map((unit, i) => (
+    <span
+      key={i}
+      aria-hidden
+      style={{
+        display: 'inline-block',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(0.6em)',
+        transition: `opacity ${duration}ms ease, transform ${duration}ms ease`,
+        transitionDelay: `${i * delay}ms`,
+      }}
     >
-      {units.map((unit, i) => (
-        <span
-          key={i}
-          aria-hidden
-          style={{
-            display: 'inline-block',
-            opacity: visible ? 1 : 0,
-            transform: visible ? 'translateY(0)' : 'translateY(0.6em)',
-            transition: `opacity ${duration}ms ease, transform ${duration}ms ease`,
-            transitionDelay: `${i * delay}ms`,
-          }}
-        >
-          {unit === ' ' ? ' ' : unit}
-          {splitType === 'words' && i < units.length - 1 ? ' ' : ''}
-        </span>
-      ))}
-    </TagComp>
+      {unit === ' ' ? ' ' : unit}
+      {splitType === 'words' && i < units.length - 1 ? ' ' : ''}
+    </span>
+  ))
+
+  // 用 createElement 包裹动态标签，规避新版 @types/react 对 ElementType 的 children 推断为 never 的类型错误
+  return createElement(
+    TagComp,
+    { ref, className: cn('inline', className), 'aria-label': text },
+    content,
   )
 }

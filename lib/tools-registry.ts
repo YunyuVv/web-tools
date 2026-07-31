@@ -74,6 +74,7 @@ export const TOOLS: Tool[] = [
   { slug: 'ip-lookup',          category: 'network',  i18nKey: 'ip-lookup',          enabled: true, icon: 'Globe'        },
   { slug: 'user-agent',         category: 'network',  i18nKey: 'user-agent',         enabled: true, icon: 'Monitor'      },
   { slug: 'avatar',             category: 'image',    i18nKey: 'avatar',             enabled: true, icon: 'Image'        },
+  { slug: 'image-compress',     category: 'image',    i18nKey: 'image-compress',     enabled: true, icon: 'FileArchive'  },
 ]
 
 /** 获取所有已上线的工具（用于静态路由生成） */

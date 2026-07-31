@@ -35,6 +35,7 @@ import { MarkdownPreviewTool } from './MarkdownPreviewTool'
 import { IpLookupTool } from './IpLookupTool'
 import { UserAgentTool } from './UserAgentTool'
 import { AvatarTool } from './AvatarTool'
+import { ImageCompressTool } from './ImageCompressTool'
 
 const TOOL_COMPONENTS: Record<string, ComponentType> = {
   'json-formatter': JsonFormatterTool,
@@ -60,6 +61,7 @@ const TOOL_COMPONENTS: Record<string, ComponentType> = {
   'ip-lookup': IpLookupTool,
   'user-agent': UserAgentTool,
   'avatar': AvatarTool,
+  'image-compress': ImageCompressTool,
 }
 
 export function ToolContent({ slug }: { slug: string }) {

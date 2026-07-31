@@ -7,7 +7,7 @@
  * 采用 textarea + pre 叠加技术实现可编辑区域的实时语法高亮。
  */
 
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo, createElement } from 'react'
 import {
   AlignLeft, Minimize2, ShieldCheck, Copy, FileCode2,
   Columns2, Square, Layers,
@@ -71,7 +71,7 @@ function ActionBtn({
       aria-label={title ?? label}
       className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium border border-border/60 text-muted-foreground bg-background/50 hover:border-primary/50 hover:text-foreground hover:bg-muted/50 transition-all duration-150 cursor-pointer"
     >
-      <Icon className="h-3.5 w-3.5 shrink-0" />
+      {createElement(Icon, { className: 'h-3.5 w-3.5 shrink-0' })}
       {label}
     </button>
   )

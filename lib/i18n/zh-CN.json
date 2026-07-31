@@ -52,7 +52,17 @@
     "search_hint": "输入关键词查找 JSON、Base64、URL 编码、时间戳等工具",
     "search_results_count": "找到 {count} 个工具",
     "search_empty_title": "没有找到匹配的工具",
-    "search_empty_hint": "换个关键词试试？"
+    "search_empty_hint": "换个关键词试试？",
+    "mascot": {
+      "name": "工具仔",
+      "aria": "可拖拽旋转的 3D 吉祥物 工具仔",
+      "title": "3D 吉祥物游乐场",
+      "subtitle": "拖动旋转，松手它会自己慢慢转；点一下让它挥手。",
+      "hint": "拖动旋转 · 点击挥手",
+      "reduced_motion_note": "已开启「减少动效」——自动旋转关闭，但仍可拖拽。",
+      "theme_note": "材质会自动跟随浅色 / 深色主题。",
+      "no_webgl": "你的浏览器不支持 WebGL，无法显示 3D 吉祥物。"
+    }
   },
   "tools": {
     "json-formatter": {
@@ -456,6 +466,36 @@
       "empty_title": "尚未选择图片",
       "empty_desc": "选择图片或从剪贴板粘贴以开始裁剪",
       "no_image": "请先加载图片"
+    },
+    "image-compress": {
+      "title": "图片压缩",
+      "subtitle": "在浏览器里压缩图片，无需上传，不经服务器。",
+      "badge": "WebAssembly 驱动 · 100% 本地处理",
+      "drop_title": "拖拽图片到此处",
+      "drop_desc": "或点击选择 · 用 Ctrl/Cmd+V 粘贴",
+      "choose": "选择图片",
+      "original": "原图",
+      "compressed": "压缩后",
+      "waiting": "选择格式与质量",
+      "compressing": "压缩中…",
+      "saved": "已节省 {n}%",
+      "quality": "质量",
+      "level": "压缩级别",
+      "lossless": "无损",
+      "change": "更换",
+      "download": "下载",
+      "error_not_image": "请选择图片文件",
+      "stage_decoding": "准备中",
+      "compare": "画质对比",
+      "compare_hint": "拖动滑块对比",
+      "settings": "设置",
+      "results": "结果",
+      "format_label": "格式",
+      "original_size": "原图大小",
+      "output_size": "输出大小",
+      "saved_label": "已节省",
+      "dimensions": "尺寸",
+      "fullscreen_hint": "滚轮缩放 · 拖拽平移 · 拖动中缝对比"
     }
   },
   "categories": {

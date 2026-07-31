@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useEffect, useRef, useState, type ElementType } from 'react'
+import { Fragment, createElement, useEffect, useRef, useState, type ElementType } from 'react'
 
 interface DecryptedTextProps {
   text: string
@@ -91,18 +91,25 @@ export function DecryptedText({
     }
   }
 
-  return (
-    <Tag className={className} aria-label={text} onMouseEnter={handleEnter}>
+  const content = (
+    <>
       {chars.map((c, i) => {
         const isEncrypted = c !== '' && c !== text[i]
         return (
           <Fragment key={i}>
             <span className={isEncrypted ? encryptedClassName : undefined}>
-              {c === '' ? ' ' : c}
+              {c === '' ? ' ' : c}
             </span>
           </Fragment>
         )
       })}
-    </Tag>
+    </>
+  )
+
+  // 用 createElement 包裹动态标签，规避新版 @types/react 对 ElementType 的 children 推断为 never 的类型错误
+  return createElement(
+    Tag,
+    { className, 'aria-label': text, onMouseEnter: handleEnter },
+    content,
   )
 }
