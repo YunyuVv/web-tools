@@ -58,6 +58,7 @@ export const TOOLS: Tool[] = [
   { slug: 'url-encode',         category: 'encoding', i18nKey: 'url-encode',         enabled: true,  icon: 'Link'         },
   { slug: 'args-format',        category: 'encoding', i18nKey: 'args-format',        enabled: true,  icon: 'ListFilter'   },
   { slug: 'html-entities',      category: 'encoding', i18nKey: 'html-entities',      enabled: true,  icon: 'Code2'        },
+  { slug: 'md5',               category: 'crypto',   i18nKey: 'md5',               enabled: true,  icon: 'Hash'         },
   { slug: 'hash-generator',     category: 'crypto',   i18nKey: 'hash-generator',     enabled: true,  icon: 'Hash'         },
   { slug: 'uuid-generator',     category: 'crypto',   i18nKey: 'uuid-generator',     enabled: true,  icon: 'Fingerprint'  },
   { slug: 'password-generator', category: 'crypto',   i18nKey: 'password-generator', enabled: true, icon: 'Lock'         },

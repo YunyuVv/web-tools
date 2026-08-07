@@ -62,6 +62,16 @@
       "reduced_motion_note": "Reduced motion is on — auto-spin disabled, you can still drag.",
       "theme_note": "Its material follows the light / dark theme automatically.",
       "no_webgl": "Your browser doesn't support WebGL, so the 3D mascot can't be displayed."
+    },
+    "rigged": {
+      "title": "Rigged Character Demo",
+      "subtitle": "A skeleton-rigged humanoid with skeletal animation. Switch clips to see idle / wave / walk.",
+      "hint": "Drag to rotate · Switch clips below",
+      "anim_idle": "Idle",
+      "anim_wave": "Wave",
+      "anim_walk": "Walk",
+      "note": "Concept validation for the game-like character pipeline (rig → animation clips → web).",
+      "aria": "A rigged 3D character playing skeletal animations"
     }
   },
   "tools": {
@@ -159,9 +169,23 @@
       "output_decoded": "Decoded result",
       "output_placeholder": "Result will appear here…"
     },
+    "md5": {
+      "title": "MD5 Hash",
+      "description": "Compute the MD5 hash of text, with case toggle",
+      "seo_description": "Free online MD5 hash generator. Instantly compute MD5 hash values from any text, with uppercase/lowercase toggle and one-click copy.",
+      "input_label": "Input text",
+      "input_placeholder": "Type or paste text here, MD5 hash computes automatically…",
+      "waiting": "Waiting for input…",
+      "to_uppercase": "Switch to uppercase",
+      "to_lowercase": "Switch to lowercase",
+      "case_upper": "UPPER",
+      "case_lower": "lower",
+      "copy_title": "Copy MD5 hash",
+      "copy_empty": "Nothing to copy"
+    },
     "hash-generator": {
       "title": "Hash Generator",
-      "description": "Generate MD5, SHA1, SHA256 hashes",
+      "description": "Generate SHA1, SHA256, SHA512 hashes",
       "input_label": "Input text",
       "input_placeholder": "Type or paste text here, hashes compute automatically…",
       "computing": "Computing…",

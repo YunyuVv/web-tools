@@ -62,6 +62,16 @@
       "reduced_motion_note": "已開啟「減少動效」——自動旋轉關閉，但仍可拖曳。",
       "theme_note": "材質會自動跟隨淺色 / 深色主題。",
       "no_webgl": "你的瀏覽器不支援 WebGL，無法顯示 3D 吉祥物。"
+    },
+    "rigged": {
+      "title": "可操作角色驗證",
+      "subtitle": "一個帶骨架蒙皮的人形角色，切換動畫即可看到 待機 / 揮手 / 行走。",
+      "hint": "拖動旋轉 · 點擊下方切換動作",
+      "anim_idle": "待機",
+      "anim_wave": "揮手",
+      "anim_walk": "行走",
+      "note": "遊戲化角色管線（綁定骨架 → 動畫剪輯 → 網頁播放）的概念驗證。",
+      "aria": "播放骨骼動畫的可操作 3D 角色"
     }
   },
   "tools": {
@@ -159,9 +169,23 @@
       "output_decoded": "解碼結果",
       "output_placeholder": "轉換結果將顯示於此…"
     },
+    "md5": {
+      "title": "MD5 加密",
+      "description": "計算文字的 MD5 雜湊值，支援大小寫切換",
+      "seo_description": "免費線上 MD5 加密工具。輸入文字即可即時計算 MD5 雜湊值，支援大小寫切換與一鍵複製。",
+      "input_label": "輸入文字",
+      "input_placeholder": "在此輸入或貼上文字，將自動計算 MD5 值…",
+      "waiting": "等待輸入…",
+      "to_uppercase": "切換為大寫",
+      "to_lowercase": "切換為小寫",
+      "case_upper": "大寫",
+      "case_lower": "小寫",
+      "copy_title": "複製 MD5 雜湊值",
+      "copy_empty": "暫無內容可複製"
+    },
     "hash-generator": {
       "title": "雜湊產生器",
-      "description": "產生 MD5、SHA1、SHA256 雜湊值",
+      "description": "產生 SHA1、SHA256、SHA512 雜湊值",
       "input_label": "輸入文字",
       "input_placeholder": "在此輸入或貼上文字，將自動計算各雜湊值…",
       "computing": "計算中…",

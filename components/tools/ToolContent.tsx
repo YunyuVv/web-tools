@@ -19,6 +19,7 @@ import { Base64Tool } from './Base64Tool'
 import { UrlEncodeTool } from './UrlEncodeTool'
 import { ArgsFormatTool } from './ArgsFormatTool'
 import { HtmlEntitiesTool } from './HtmlEntitiesTool'
+import { Md5Tool } from './Md5Tool'
 import { HashGeneratorTool } from './HashGeneratorTool'
 import { UuidGeneratorTool } from './UuidGeneratorTool'
 import { PasswordGeneratorTool } from './PasswordGeneratorTool'
@@ -45,6 +46,7 @@ const TOOL_COMPONENTS: Record<string, ComponentType> = {
   'url-encode': UrlEncodeTool,
   'args-format': ArgsFormatTool,
   'html-entities': HtmlEntitiesTool,
+  'md5': Md5Tool,
   'hash-generator': HashGeneratorTool,
   'uuid-generator': UuidGeneratorTool,
   'password-generator': PasswordGeneratorTool,

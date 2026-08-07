@@ -62,6 +62,16 @@
       "reduced_motion_note": "已开启「减少动效」——自动旋转关闭，但仍可拖拽。",
       "theme_note": "材质会自动跟随浅色 / 深色主题。",
       "no_webgl": "你的浏览器不支持 WebGL，无法显示 3D 吉祥物。"
+    },
+    "rigged": {
+      "title": "可操作角色验证",
+      "subtitle": "一个带骨架蒙皮的人形角色，切换动画即可看到 待机 / 挥手 / 行走。",
+      "hint": "拖动旋转 · 点击下方切换动作",
+      "anim_idle": "待机",
+      "anim_wave": "挥手",
+      "anim_walk": "行走",
+      "note": "游戏化角色管线（绑定骨架 → 动画剪辑 → 网页播放）的概念验证。",
+      "aria": "播放骨骼动画的可操作 3D 角色"
     }
   },
   "tools": {
@@ -159,9 +169,23 @@
       "output_decoded": "解码结果",
       "output_placeholder": "转换结果将显示在此处…"
     },
+    "md5": {
+      "title": "MD5 加密",
+      "description": "计算文本的 MD5 哈希值，支持大小写切换",
+      "seo_description": "免费在线 MD5 加密工具。输入文本即可实时计算 MD5 哈希值，支持大小写切换与一键复制。",
+      "input_label": "输入文本",
+      "input_placeholder": "在此输入或粘贴文本，将自动计算 MD5 值…",
+      "waiting": "等待输入…",
+      "to_uppercase": "切换为大写",
+      "to_lowercase": "切换为小写",
+      "case_upper": "大写",
+      "case_lower": "小写",
+      "copy_title": "复制 MD5 哈希值",
+      "copy_empty": "暂无内容可复制"
+    },
     "hash-generator": {
       "title": "哈希生成器",
-      "description": "生成 MD5、SHA1、SHA256 哈希值",
+      "description": "生成 SHA1、SHA256、SHA512 哈希值",
       "input_label": "输入文本",
       "input_placeholder": "在此输入或粘贴文本，将自动计算各哈希值…",
       "computing": "计算中…",
