@@ -52,27 +52,7 @@
     "search_hint": "Type to search JSON, Base64, URL encoder, timestamp & more",
     "search_results_count": "{count} tools found",
     "search_empty_title": "No matching tools found",
-    "search_empty_hint": "Try a different keyword?",
-    "mascot": {
-      "name": "Tooly",
-      "aria": "Tooly, the draggable 3D mascot",
-      "title": "3D Mascot Playground",
-      "subtitle": "Drag to rotate, release to let it spin on its own. Tap it to make it wave.",
-      "hint": "Drag to spin · Tap to wave",
-      "reduced_motion_note": "Reduced motion is on — auto-spin disabled, you can still drag.",
-      "theme_note": "Its material follows the light / dark theme automatically.",
-      "no_webgl": "Your browser doesn't support WebGL, so the 3D mascot can't be displayed."
-    },
-    "rigged": {
-      "title": "Rigged Character Demo",
-      "subtitle": "A skeleton-rigged humanoid with skeletal animation. Switch clips to see idle / wave / walk.",
-      "hint": "Drag to rotate · Switch clips below",
-      "anim_idle": "Idle",
-      "anim_wave": "Wave",
-      "anim_walk": "Walk",
-      "note": "Concept validation for the game-like character pipeline (rig → animation clips → web).",
-      "aria": "A rigged 3D character playing skeletal animations"
-    }
+    "search_empty_hint": "Try a different keyword?"
   },
   "tools": {
     "json-formatter": {

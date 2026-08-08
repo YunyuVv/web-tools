@@ -52,27 +52,7 @@
     "search_hint": "輸入關鍵字查找 JSON、Base64、URL 編碼、時間戳等工具",
     "search_results_count": "找到 {count} 個工具",
     "search_empty_title": "沒有找到符合的工具",
-    "search_empty_hint": "換個關鍵字試試？",
-    "mascot": {
-      "name": "工具仔",
-      "aria": "可拖曳旋轉的 3D 吉祥物 工具仔",
-      "title": "3D 吉祥物遊樂場",
-      "subtitle": "拖動旋轉，鬆手它會自己慢慢轉；點一下讓它揮手。",
-      "hint": "拖動旋轉 · 點擊揮手",
-      "reduced_motion_note": "已開啟「減少動效」——自動旋轉關閉，但仍可拖曳。",
-      "theme_note": "材質會自動跟隨淺色 / 深色主題。",
-      "no_webgl": "你的瀏覽器不支援 WebGL，無法顯示 3D 吉祥物。"
-    },
-    "rigged": {
-      "title": "可操作角色驗證",
-      "subtitle": "一個帶骨架蒙皮的人形角色，切換動畫即可看到 待機 / 揮手 / 行走。",
-      "hint": "拖動旋轉 · 點擊下方切換動作",
-      "anim_idle": "待機",
-      "anim_wave": "揮手",
-      "anim_walk": "行走",
-      "note": "遊戲化角色管線（綁定骨架 → 動畫剪輯 → 網頁播放）的概念驗證。",
-      "aria": "播放骨骼動畫的可操作 3D 角色"
-    }
+    "search_empty_hint": "換個關鍵字試試？"
   },
   "tools": {
     "json-formatter": {
